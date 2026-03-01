@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.24.0"
+    "version": "1.25.0"
   },
   "plugins": [
     {
@@ -86,10 +86,10 @@
       ]
     },
     {
-      "name": "frontend-optimization",
-      "source": "./plugins/frontend-optimization",
-      "description": "React performance optimization, UI polishing, and UX design for frontend applications",
-      "version": "1.8.0",
+      "name": "frontend",
+      "source": "./plugins/frontend",
+      "description": "React performance optimization, UI polishing, UX design, and modern CSS for frontend applications",
+      "version": "1.9.0",
       "author": {
         "name": "Alfio"
       },
@@ -100,7 +100,9 @@
         "ui",
         "ux",
         "frontend",
-        "optimization"
+        "optimization",
+        "css",
+        "modern-css"
       ],
       "category": "frontend",
       "strict": false,
@@ -109,6 +111,9 @@
         "./agents/ui-polisher.md",
         "./agents/ui-ux-designer.md",
         "./agents/ui-layout-designer.md"
+      ],
+      "skills": [
+        "./skills/modern-css"
       ]
     },
     {

@@ -14,7 +14,7 @@ plugins/
     commands/               # slash-command .md files
 ```
 
-19 plugins: humanize, deep-dive-analysis, tauri-development, frontend-optimization, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, frontend-design, digital-marketing, comprehensive-review.
+19 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, frontend-design, digital-marketing, comprehensive-review.
 
 ## Plugin anatomy
 
@@ -80,6 +80,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `ai-tooling` (brainstorming) | `obra/superpowers` — `skills/brainstorming/SKILL.md` | `plugins/ai-tooling/skills/brainstorming/SKILL.md` |
 | `ai-tooling` (writing-plans) | `obra/superpowers` — `skills/writing-plans/SKILL.md` | `plugins/ai-tooling/skills/writing-plans/SKILL.md` |
 | `ai-tooling` (executing-plans) | `obra/superpowers` — `skills/executing-plans/SKILL.md` | `plugins/ai-tooling/skills/executing-plans/SKILL.md` |
+| `frontend` (modern-css) | `paulirish/dotfiles` — `agents/paulirish-skills/skills/modern-css/SKILL.md` | `plugins/frontend/skills/modern-css/SKILL.md`, `plugins/frontend/skills/modern-css/references/argyle-cacadia-2025-deck.md` |
 
 ### How to sync a plugin
 
@@ -90,6 +91,10 @@ gh api repos/anthropics/claude-code/contents/plugins/frontend-design/skills/fron
 
 # Fetch latest SKILL.md from upstream (obra/superpowers example)
 gh api repos/obra/superpowers/contents/skills/brainstorming/SKILL.md \
+  --jq '.content' | base64 -d
+
+# Fetch latest SKILL.md from upstream (paulirish/dotfiles example)
+gh api repos/paulirish/dotfiles/contents/agents/paulirish-skills/skills/modern-css/SKILL.md \
   --jq '.content' | base64 -d
 ```
 
