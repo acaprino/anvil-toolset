@@ -23,7 +23,7 @@ plugins/
 - `description`: when/how to use the agent
 - `model`: LLM model (default: `opus`)
 - `tools` (optional): comma-separated tool list (e.g. `Read, Write, Edit, Bash, Glob, Grep`); omit to allow all tools
-- `color`: UI accent color
+- `color`: UI accent color — **only these values are supported**: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`
 - Body: terse keyword-list style system prompt; simple agents ~60-200 lines, complex agents up to ~800 lines
 
 **Skills** — Directory with `SKILL.md` (frontmatter: `name`, `description`) and optional supplementary subdirs: `references/` (docs), `scripts/`, `templates/`, `assets/`.
