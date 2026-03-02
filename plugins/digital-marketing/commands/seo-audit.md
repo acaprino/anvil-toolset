@@ -1,162 +1,237 @@
+---
+description: "Comprehensive technical SEO audit with Playwright-powered analysis, scoring, prioritized fixes, and a persistent markdown report"
+argument-hint: "<url or local path> [--focus <categories>] [--competitor <url>] [--local] [--strict-mode]"
+---
+
 # SEO Audit
 
-Use the `seo-specialist` agent to perform a comprehensive technical SEO audit for:
+## CRITICAL RULES
 
-$ARGUMENTS
+1. **Execute phases in order.** Discovery → Audit → Score → (Approval) → Fix → Report.
+2. **Write output files.** Each phase writes to `.seo-audit/` for persistence.
+3. **Stop at checkpoint.** Get user approval before applying any fixes (Phase 4).
+4. **Use Playwright for live sites.** Browser tools for DOM, console, network, responsive testing.
+5. **Never enter plan mode.** Execute immediately.
 
-## Workflow
+## Pre-flight
 
-Execute this audit as a structured, multi-phase process. Use Playwright browser tools for live page analysis (DOM inspection, console errors, network requests, responsive testing, screenshots). Fall back to WebFetch/curl for simpler checks. Use WebSearch for competitive benchmarking and best-practice validation.
+Create `.seo-audit/` directory. If it exists with a previous audit, ask to archive or overwrite.
 
-### Phase 1: Discovery
+Use the `seo-specialist` agent for all analysis.
+
+## Phase 1: Discovery
 
 Gather baseline information before auditing.
 
-1. **Fetch target** — navigate to the URL with Playwright, capture initial snapshot
-2. **Robots.txt** — fetch `/robots.txt`, check rules, disallow patterns, crawl-delay
-3. **Sitemap** — fetch `/sitemap.xml` (and sitemap index), count URLs, check lastmod dates
-4. **Tech detection** — identify CMS/framework from response headers, meta generators, DOM patterns (WordPress, Next.js, Shopify, etc.)
-5. **Site structure** — map primary navigation, count pages in sitemap, identify page types (home, product, blog, category, landing)
+1. **Fetch target** — navigate to URL with Playwright, or read local files
+2. **Robots.txt** — fetch `/robots.txt`, check rules, crawl-delay
+3. **Sitemap** — fetch `/sitemap.xml`, count URLs, check lastmod dates
+4. **Tech detection** — identify CMS/framework from headers, meta generators, DOM patterns
+5. **Site structure** — map primary navigation, identify page types
+
+**Output file:** `.seo-audit/01-discovery.md`
 
 Present discovery summary and confirm scope before proceeding.
 
-### Phase 2: Technical Audit
+---
 
-Run every check below. Use Playwright `browser_snapshot` to extract DOM, `browser_evaluate` for JS-based checks, `browser_network_requests` for resource analysis, `browser_console_messages` for errors, `browser_resize` for responsive testing.
+## Phase 2: Technical Audit
 
-**Core SEO**
-- Meta title: present, unique, 50-60 chars, keyword in first half
-- Meta description: present, 120-160 chars, includes CTA or value prop
-- Canonical URL: present, self-referencing or correct target
-- Open Graph: og:title, og:description, og:image (1200x630), og:type, og:url, og:site_name
-- Twitter Cards: twitter:card, twitter:title, twitter:description, twitter:image (1200x675)
+Run every check below. Use Playwright `browser_snapshot` for DOM, `browser_evaluate` for JS checks, `browser_network_requests` for resources, `browser_console_messages` for errors, `browser_resize` for responsive testing.
 
-**Headings**
-- Exactly 1 H1 per page
-- Heading hierarchy: no skips (H1→H2→H3, not H1→H3)
-- Primary keyword in H1
-- Subheadings descriptive, not generic
+**Core SEO** — Meta title (50-60 chars), meta description (120-160 chars), canonical URL, Open Graph tags, Twitter Cards
 
-**Links**
-- Internal link structure: important pages reachable within 3 clicks
-- Broken links: check status codes with curl/fetch (sample top 20)
-- Redirect chains: detect 301→301→200 chains (max 1 redirect)
-- Orphan pages: pages in sitemap but not linked from navigation
-- External links: nofollow where appropriate, open in new tab
+**Headings** — Exactly 1 H1, proper hierarchy, keywords in H1
 
-**Images**
-- Alt text: present and descriptive (not "image1.jpg")
-- Filename: descriptive, hyphenated (not DSC_0001.jpg)
-- Lazy loading: loading="lazy" on below-fold images
-- Format: WebP/AVIF preferred over JPEG/PNG
-- Dimensions: width/height attributes to prevent layout shift
+**Links** — Internal link depth, broken links (sample top 20), redirect chains, orphan pages
 
-**Performance**
-- Page load: total transfer size, number of requests (via network_requests)
-- Core Web Vitals hints: large DOM size, render-blocking resources, unoptimized images
-- Caching: Cache-Control headers on static assets
-- Compression: gzip/brotli on HTML/CSS/JS
-- Resource sizes: flag files > 500KB
+**Images** — Alt text, descriptive filenames, lazy loading, WebP/AVIF, dimensions
 
-**Security**
-- HTTPS: enforced, no mixed content (check console warnings)
-- Security headers: Content-Security-Policy, Strict-Transport-Security, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- Mixed content: HTTP resources on HTTPS pages
+**Performance** — Transfer size, request count, Core Web Vitals hints, caching, compression
 
-**Structured Data**
-- JSON-LD present: extract and validate type (Organization, Product, Article, BreadcrumbList, FAQ, etc.)
-- Required properties: check against schema.org requirements for detected type
-- Rich Results eligibility: does the markup qualify for search features?
+**Security** — HTTPS enforced, security headers (CSP, HSTS, X-Frame-Options), no mixed content
 
-**Mobile**
-- Viewport meta tag: present, width=device-width
-- Responsive: test at 375px (mobile), 768px (tablet), 1280px (desktop) using browser_resize
-- Touch targets: buttons/links at least 44x44px
-- Font size: base >= 16px, readable without zoom
-- No horizontal scroll at mobile widths
+**Structured Data** — JSON-LD present, valid schema, Rich Results eligibility
 
-**Crawlability**
-- robots.txt: not blocking important pages
-- Sitemap: valid XML, all URLs return 200, lastmod accurate
-- noindex/nofollow: only on intended pages
-- Pagination: rel="next"/rel="prev" or proper handling
-- JavaScript rendering: critical content in initial HTML (not JS-only)
+**Mobile** — Viewport meta, responsive (375px/768px/1280px), touch targets 44px+, no horizontal scroll
 
-**Content Quality**
-- Word count: flag thin content (< 300 words on important pages)
-- Duplicate titles/descriptions across pages
-- Keyword stuffing: unnatural density (> 3%)
-- Content freshness: lastmod dates, copyright year
+**Crawlability** — robots.txt not blocking important pages, valid sitemap, noindex only on intended pages
 
-**URL Structure**
-- Clean slugs: lowercase, hyphens, no special characters
-- Length: under 75 characters
-- Keywords in URL path
-- Consistent structure (no mixing /page and /page.html)
+**Content Quality** — Word count (flag <300), duplicate titles/descriptions, keyword density
 
-**Accessibility**
-- ARIA landmarks: main, nav, banner, contentinfo
-- Alt text on all images (overlaps with Images section)
-- Color contrast: check key text against background
-- Skip navigation link
-- Form labels associated with inputs
-- Focus indicators visible
+**URL Structure** — Clean slugs, under 75 chars, keywords in path
 
-**E-E-A-T Signals**
-- Author information: bylines, author pages
-- About page: exists, substantive
-- Contact page: exists, real contact info
-- Trust signals: privacy policy, terms of service, secure checkout badges
-- Citations and sources in content
+**Accessibility** — ARIA landmarks, alt text, color contrast, skip nav, form labels, focus indicators
 
-**Local SEO** (if applicable)
-- NAP consistency: name, address, phone match across pages
-- LocalBusiness schema markup
-- Google Business Profile link
-- Geo meta tags
+**E-E-A-T Signals** — Author info, about page, contact page, trust signals, citations
 
-**Internationalization** (if applicable)
-- hreflang tags: present, valid language codes, reciprocal
-- lang attribute on html element
-- Content translation quality
+**Local SEO** (if applicable) — NAP consistency, LocalBusiness schema, geo tags
 
-### Phase 3: Score & Prioritize
+**Internationalization** (if applicable) — hreflang tags, lang attribute
 
-Calculate and present results.
+**Output file:** `.seo-audit/02-technical-audit.md`
+
+---
+
+## Phase 3: Score & Prioritize
+
+Calculate scores from Phase 2 findings.
 
 1. **Health score**: 0-100 with letter grade (A: 90+, B: 80+, C: 70+, D: 60+, F: <60)
-2. **Category breakdown**: score each section (Core SEO, Headings, Links, Images, Performance, Security, Schema, Mobile, Crawlability, Content, URLs, Accessibility, E-E-A-T)
-3. **Issue severity**: classify each finding as:
+2. **Category breakdown**: score each section
+3. **Issue severity**:
    - **Error** (red): broken functionality, missing critical elements, security issues
    - **Warning** (yellow): suboptimal but functional, missed opportunities
-   - **Notice** (blue): nice-to-have improvements, best practices
-4. **Prioritized fix list**: rank by impact × effort, group into quick wins / medium effort / major projects
+   - **Notice** (blue): nice-to-have, best practices
+4. **Prioritized fix list**: rank by impact x effort, group into quick wins / medium effort / major projects
 
-Present the scorecard and fix list. **Wait for user approval** before proceeding to fixes.
+**Output file:** `.seo-audit/03-scorecard.md`
 
-### Phase 4: Fix & Iterate
+```markdown
+# SEO Scorecard
+
+## Overall: [X]/100 — Grade [A-F]
+
+| Category | Score | Errors | Warnings | Notices |
+|----------|-------|--------|----------|---------|
+| Core SEO | X/100 | X | X | X |
+| Headings | X/100 | X | X | X |
+| Links | X/100 | X | X | X |
+| Images | X/100 | X | X | X |
+| Performance | X/100 | X | X | X |
+| Security | X/100 | X | X | X |
+| Structured Data | X/100 | X | X | X |
+| Mobile | X/100 | X | X | X |
+| Crawlability | X/100 | X | X | X |
+| Content | X/100 | X | X | X |
+| URLs | X/100 | X | X | X |
+| Accessibility | X/100 | X | X | X |
+| E-E-A-T | X/100 | X | X | X |
+
+## Quick Wins
+[High impact, low effort fixes]
+
+## Medium Effort
+[Moderate impact improvements]
+
+## Major Projects
+[Significant changes requiring design/content decisions]
+```
+
+---
+
+## PHASE CHECKPOINT -- User Approval Required
+
+Present the scorecard and ask:
+
+```
+SEO Audit scored: [X]/100 (Grade [letter])
+
+Errors: [count] | Warnings: [count] | Notices: [count]
+Quick wins available: [count]
+
+Please review:
+- .seo-audit/02-technical-audit.md
+- .seo-audit/03-scorecard.md
+
+1. Fix quick wins — apply high-impact, low-effort fixes
+2. Fix all — apply all fixable issues
+3. Choose specific fixes — I'll tell you which ones
+4. Report only — skip fixes, generate final report
+```
+
+Do NOT proceed to Phase 4 until the user approves. If `--strict-mode` and Errors exist, recommend fixing all errors.
+
+---
+
+## Phase 4: Fix & Iterate
 
 Apply approved fixes only.
 
 1. **Batch fixes**: group related changes, apply in logical order
-2. **Re-audit**: re-check changed pages/elements after fixes
-3. **Before/after**: show what changed and the impact on scores
-4. **Loop**: repeat until target score reached or only human-judgment items remain (e.g., content rewriting, design changes)
+2. **Re-audit changed elements**: verify fixes resolved the issues
+3. **Log changes**: before/after for each fix
 
-### Phase 5: Report
+**Output file:** `.seo-audit/04-fixes.md`
 
-Generate final audit report.
+```markdown
+# Fixes Applied
 
-1. **Summary table**: category scores before and after, overall grade improvement
-2. **Issues fixed**: what was changed, where, and why
-3. **Remaining items**: issues requiring manual intervention (content rewrites, design decisions, server config)
-4. **Monitoring**: recommendations for ongoing SEO health (tools, frequency, key metrics to track)
-5. **Next steps**: prioritized roadmap for continued improvement
+## Fix 1: [description]
+- Category: [category]
+- Before: [state]
+- After: [state]
+- Impact: [score change]
+
+## Fix 2: ...
+```
+
+---
+
+## Phase 5: Final Report
+
+Read all `.seo-audit/*.md` files and generate the consolidated report.
+
+**Output file:** `.seo-audit/05-report.md`
+
+```markdown
+# SEO Audit Report
+
+## Target: [URL or path]
+## Date: [timestamp]
+
+## Executive Summary
+[2-3 sentences on overall SEO health]
+
+## Score Summary
+| | Before | After | Change |
+|---|--------|-------|--------|
+| Overall | X/100 | Y/100 | +Z |
+| Grade | [letter] | [letter] | |
+
+## Category Scores
+[Table from Phase 3, updated with post-fix scores]
+
+## Issues Fixed
+[Summary from Phase 4]
+
+## Remaining Issues
+[Items requiring manual intervention: content rewrites, design decisions, server config]
+
+## Recommendations
+1. [Prioritized next steps]
+2. [Monitoring recommendations: tools, frequency, key metrics]
+
+## Audit Metadata
+- Tool: Playwright + seo-specialist agent
+- Categories audited: [count]
+- Total checks: [count]
+- Fixes applied: [count]
+```
+
+---
+
+## Completion
+
+```
+SEO audit complete for: $ARGUMENTS
+
+Output Files:
+- Discovery: .seo-audit/01-discovery.md
+- Technical Audit: .seo-audit/02-technical-audit.md
+- Scorecard: .seo-audit/03-scorecard.md
+- Fixes: .seo-audit/04-fixes.md
+- Report: .seo-audit/05-report.md
+
+Score: [X]/100 (Grade [letter]) → [Y]/100 (Grade [letter])
+Fixes applied: [count]
+Remaining issues: [count]
+```
 
 ## Quick Examples
 
-- `/seo-audit https://example.com` — Full technical SEO audit of a live website
-- `/seo-audit https://example.com/products` — Audit a specific section
-- `/seo-audit src/pages --local` — Audit local HTML/template files for SEO best practices
-- `/seo-audit https://example.com --focus security,performance` — Focused audit on specific categories
-- `/seo-audit https://example.com --competitor https://rival.com` — Comparative audit against a competitor
+- `/seo-audit https://example.com` — Full technical SEO audit
+- `/seo-audit https://example.com/products` — Audit specific section
+- `/seo-audit src/pages --local` — Audit local HTML/template files
+- `/seo-audit https://example.com --focus security,performance` — Focused audit
+- `/seo-audit https://example.com --competitor https://rival.com` — Comparative audit

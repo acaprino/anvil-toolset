@@ -1,45 +1,99 @@
 ---
-description: "Review the code changes made in the current Claude Code session by analyzing git diff and running focused architecture, security, and pattern analysis — no documentation review"
-argument-hint: "[--security-focus] [--strict-mode]"
+description: "Review code changes — uncommitted changes, staged changes, or recent commits — using focused architecture, security, and pattern analysis agents in parallel"
+argument-hint: "[--last-commits N] [--security-focus] [--strict-mode]"
 ---
 
 # Review Recent Changes
 
-You are a focused code reviewer. Your job is to review the **code changes made in the current session** — files Claude just modified, created, or deleted. This is NOT a full project review. You look only at what changed, not at documentation.
+You are a focused code reviewer. Your job is to review **code changes** — uncommitted edits, staged files, or recent commits. This is NOT a full project review. You look only at what changed, not at documentation.
 
 ## CRITICAL RULES
 
-1. **Read git diff first.** Always start from `git diff HEAD` (or `git diff` for unstaged + `git diff --cached` for staged). This is the ground truth of what changed.
+1. **Detect change source automatically.** Check for uncommitted changes first. If none, fall back to recent commits. Always confirm the scope with the user before running agents.
 2. **Skip documentation files.** Ignore `.md`, `.txt`, `.rst`, `README*`, `CHANGELOG*`, `LICENSE*`. Focus only on code.
 3. **Run agents in parallel.** Fire all review agents in a single response using multiple Task tool calls.
 4. **Never enter plan mode.** Execute immediately.
 5. **Output a single concise report.** No intermediate files needed — deliver findings directly in the conversation.
+6. **Read surrounding context.** For each changed file, read the full file (not just the diff) so agents understand the code in context.
 
-## Step 1: Identify Changed Code Files
+## Step 1: Detect Changes
 
-Run these commands to get the changed files:
-
-```bash
-git diff HEAD --name-only
-git diff --name-only          # unstaged
-git diff --cached --name-only # staged
-```
-
-Filter out non-code files (`.md`, `.txt`, `.json` config-only, images, etc.).
-
-If git shows no changes, check the conversation context for files that were explicitly edited in this session and use those.
-
-List the code files you will review. If there are no code changes (only docs), say so and stop.
-
-## Step 2: Get the Diff Content
+Run these commands to identify what to review:
 
 ```bash
-git diff HEAD -- <code files only>
+git diff --name-only          # unstaged changes
+git diff --cached --name-only # staged changes
 ```
 
-If the diff is very large (>500 lines), focus on the most changed files — prioritize new files and heavily modified ones.
+### Decision tree
 
-## Step 3: Run Parallel Review Agents
+**Case A — Uncommitted changes exist** (unstaged and/or staged):
+
+Use `git diff` (unstaged) and `git diff --cached` (staged) as the review target. The diff source is "uncommitted changes".
+
+**Case B — No uncommitted changes, `--last-commits N` flag provided:**
+
+Use `git diff HEAD~N..HEAD` as the review target. The diff source is "last N commits".
+
+**Case C — No uncommitted changes, no flag:**
+
+Check recent commits:
+
+```bash
+git log --oneline -5
+```
+
+Default to reviewing the last commit (`HEAD~1..HEAD`). The diff source is "last commit".
+
+### Filter code files
+
+From the detected changes, filter out non-code files:
+- Exclude: `.md`, `.txt`, `.rst`, `.json` (config-only), `.yaml`/`.yml` (config-only), images, lock files
+- Include: source code files (`.py`, `.js`, `.ts`, `.tsx`, `.jsx`, `.rs`, `.go`, `.java`, `.rb`, `.css`, `.scss`, `.html`, etc.)
+
+If no code files remain (only docs/config), say so and stop.
+
+## Step 2: Confirm Scope with User
+
+**Always** present what you found and ask for confirmation before running agents:
+
+```
+Found [change source]:
+
+Code files to review:
+- [file1] (+X/-Y lines)
+- [file2] (+X/-Y lines)
+- ...
+
+Total: [N] code files, [M] lines changed
+
+1. Review these changes
+2. Review last N commits instead — specify how many
+3. Review specific files only — I'll tell you which
+4. Cancel
+```
+
+Use AskUserQuestion with these options. Do NOT proceed until the user confirms.
+
+## Step 3: Gather Context
+
+For each changed code file:
+
+1. **Read the full file** (not just the diff) to understand the surrounding context
+2. **Get the diff** for that file to know exactly what changed
+
+This allows agents to evaluate changes against the existing codebase patterns, not in isolation.
+
+```bash
+git diff [source] -- <code files only>
+```
+
+If the total diff is very large (>500 lines), prioritize:
+1. New files (highest priority — no prior review)
+2. Files with the most changes
+3. Files touching security-sensitive areas (auth, input handling, crypto)
+
+## Step 4: Run Parallel Review Agents
 
 Run all three agents **in parallel** in a single response:
 
@@ -50,22 +104,30 @@ Task:
   subagent_type: "architect-review"
   description: "Architecture and code quality review of recent changes"
   prompt: |
-    Review the following code changes made in the current Claude Code session.
-    Focus ONLY on code quality and architectural concerns. Skip documentation.
+    Review the following code changes for architectural soundness and code quality.
+    You have both the diff AND the full file contents for context.
+    Skip documentation files. Focus only on code.
+
+    ## Change Source
+    [uncommitted changes / last N commits / specific commit range]
 
     ## Changed Files
-    [list of changed code files]
+    [list of changed code files with line counts]
 
-    ## Diff
+    ## Full File Contents
+    [paste full contents of each changed file — this is context, not the review target]
+
+    ## Diff (this is what you're reviewing)
     [paste the git diff output]
 
     ## Instructions
-    Analyze for:
-    1. **Design concerns**: Are the changes architecturally sound? Any inappropriate coupling or broken abstractions?
+    Analyze the CHANGED code (diff) in context of the full files for:
+    1. **Design concerns**: Are the changes architecturally sound? Inappropriate coupling or broken abstractions?
     2. **Code quality**: Naming, function length, complexity, duplication
-    3. **Error handling**: Missing or incorrect error handling
-    4. **Consistency**: Do the changes follow the patterns already in the codebase?
+    3. **Error handling**: Missing or incorrect error handling in new/modified code
+    4. **Consistency**: Do the changes follow the patterns already in the codebase? Check the full file for established patterns.
     5. **Over-engineering or under-engineering**: Is the solution appropriately scoped?
+    6. **Integration**: Do the changes integrate well with the existing code? Any broken contracts?
 
     For each finding: severity (Critical/High/Medium/Low), file + line, and a concrete fix recommendation.
     Also note what was done well.
@@ -80,23 +142,31 @@ Task:
   subagent_type: "security-auditor"
   description: "Security review of recent changes"
   prompt: |
-    Review the following code changes made in the current Claude Code session for security issues.
+    Review the following code changes for security vulnerabilities.
+    You have both the diff AND the full file contents for context.
     Skip documentation files. Focus only on code.
+
+    ## Change Source
+    [uncommitted changes / last N commits / specific commit range]
 
     ## Changed Files
     [list of changed code files]
 
-    ## Diff
+    ## Full File Contents
+    [paste full contents of each changed file — this is context]
+
+    ## Diff (this is what you're reviewing)
     [paste the git diff output]
 
     ## Instructions
-    Check for:
-    1. **Injection risks**: SQL, command, LDAP, XPath injection in new or modified code
+    Check the CHANGED code (diff) in context of the full files for:
+    1. **Injection risks**: SQL, command, LDAP, XPath, XSS injection in new or modified code
     2. **Input validation**: Missing or insufficient validation of user-controlled input
-    3. **Authentication/authorization**: Flawed logic, missing checks, privilege issues
-    4. **Secrets exposure**: Hardcoded credentials, tokens, keys in changed code
-    5. **Insecure defaults**: Debug mode, verbose errors, permissive settings introduced
+    3. **Authentication/authorization**: Flawed logic, missing checks, privilege escalation
+    4. **Secrets exposure**: Hardcoded credentials, tokens, keys, API secrets
+    5. **Insecure defaults**: Debug mode, verbose errors, permissive CORS, missing security headers
     6. **Dependency risks**: New packages added — are they trustworthy and up to date?
+    7. **Data exposure**: Sensitive data in logs, error messages, or API responses
 
     For each finding: severity, CWE if applicable, file + line, attack scenario, concrete fix.
     If no security issues found, say so clearly.
@@ -112,20 +182,36 @@ Task:
   description: "Pattern consistency and quality scoring of recent changes"
   prompt: |
     Analyze the following code changes for pattern consistency and assign a quality score.
+    You have both the diff AND the full file contents for context.
+
+    ## Change Source
+    [uncommitted changes / last N commits / specific commit range]
 
     ## Changed Files
     [list of changed code files]
 
-    ## Diff
+    ## Full File Contents
+    [paste full contents of each changed file — use these to identify dominant patterns]
+
+    ## Diff (this is what you're reviewing)
     [paste the git diff output]
 
     ## Instructions
 
     ### Pattern Consistency
-    For each changed file, identify:
-    - The dominant patterns already present (error handling style, async patterns, naming conventions, etc.)
-    - Any deviations introduced by these changes
-    - Anti-patterns introduced: swallowed exceptions, tight coupling, mutable globals, TODO in critical paths, etc.
+    For each changed file, use the FULL file to identify dominant patterns, then check if the DIFF follows them:
+    - Error handling style (try/catch, Result types, error checks)
+    - Async patterns (async/await vs callbacks vs promises)
+    - Naming conventions (camelCase, snake_case, naming semantics)
+    - Import conventions (grouping, ordering)
+    - Null/optional handling (defensive checks, optional chaining)
+    - Resource management (using, defer, finally, context managers)
+
+    Key question: "Is there an established pattern in this file that the new code should follow but doesn't?"
+
+    ### Anti-patterns introduced
+    Flag: swallowed exceptions, tight coupling, mutable globals, TODO in critical paths,
+    hardcoded magic numbers, duplicated logic, missing type safety.
 
     ### Mental Models (apply all six)
     - **Security Engineer**: Is all input treated as malicious?
@@ -149,15 +235,15 @@ Task:
     Include 2-3 sentence rationale per score.
 ```
 
-## Step 4: Consolidated Summary
+## Step 5: Consolidated Summary
 
 After all three agents complete, synthesize their findings into a final summary directly in the conversation:
 
 ```
-## Review Summary — Recent Changes
+## Review Summary — [Change Source]
 
 ### Changed Files
-[list]
+[list with line counts]
 
 ### Overall Score: X/10
 
@@ -176,10 +262,12 @@ After all three agents complete, synthesize their findings into a final summary 
 3. [third priority]
 ```
 
+If `--security-focus` is passed, give extra weight to security findings and recommend fixing all security issues before proceeding.
+
 If `--strict-mode` is passed and there are Critical findings, append:
 
 ```
-⚠️  STRICT MODE: Critical issues found. Recommend fixing before committing.
+STRICT MODE: Critical issues found. Recommend fixing before committing.
 ```
 
 Keep the entire output concise. This is a quick review, not a full audit report.

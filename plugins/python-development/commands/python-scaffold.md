@@ -1,54 +1,82 @@
+---
+description: "Scaffold production-ready Python projects with modern tooling — FastAPI, Django, Library, CLI, or Generic — using uv, pytest, ruff"
+argument-hint: "<project-name> [--type fastapi|django|library|cli|generic]"
+---
+
 # Python Project Scaffolding
 
-You are a Python project architecture expert specializing in scaffolding production-ready Python applications. Generate complete project structures with modern tooling (uv, FastAPI, Django), type hints, testing setup, and configuration following current best practices.
+You are a Python project architecture expert. Generate complete project structures with modern tooling (uv, FastAPI, Django), type hints, testing setup, and configuration.
 
-## Context
+## CRITICAL RULES
 
-The user needs automated Python project scaffolding that creates consistent, type-safe applications with proper structure, dependency management, testing, and tooling. Focus on modern Python patterns and scalable architecture.
+1. **Confirm before writing files.** Present the project plan and get user approval before creating anything.
+2. **Use uv for everything.** Package management, virtual environments, running scripts.
+3. **Never enter plan mode.** Execute immediately.
 
-## Requirements
+## Step 1: Determine Project Type
 
-$ARGUMENTS
+From `$ARGUMENTS`, identify:
+- **Project name** (required)
+- **Project type** from `--type` flag or infer from description:
+  - `fastapi`: REST APIs, microservices, async applications
+  - `django`: Full-stack web applications, admin panels
+  - `library`: Reusable packages, utilities
+  - `cli`: Command-line tools
+  - `generic`: Standard Python applications
 
-## Instructions
+If type is unclear, ask:
 
-### 1. Analyze Project Type
+```
+Project: [name]
 
-Determine the project type from user requirements:
-- **FastAPI**: REST APIs, microservices, async applications
-- **Django**: Full-stack web applications, admin panels, ORM-heavy projects
-- **Library**: Reusable packages, utilities, tools
-- **CLI**: Command-line tools, automation scripts
-- **Generic**: Standard Python applications
-
-### 2. Initialize Project with uv
-
-```bash
-# Create new project with uv
-uv init <project-name>
-cd <project-name>
-
-# Initialize git repository
-git init
-echo ".venv/" >> .gitignore
-echo "*.pyc" >> .gitignore
-echo "__pycache__/" >> .gitignore
-echo ".pytest_cache/" >> .gitignore
-echo ".ruff_cache/" >> .gitignore
-
-# Create virtual environment
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+What type of project?
+1. FastAPI — REST APIs, microservices, async
+2. Django — Full-stack web, admin panels
+3. Library — Reusable package
+4. CLI — Command-line tool
+5. Generic — Standard Python application
 ```
 
-### 3. Generate FastAPI Project Structure
+## Step 2: Present Plan & Confirm
+
+Show the complete project structure before creating files:
+
+```
+Project: [name]
+Type: [type]
+Python: >=3.11
+
+Directory structure:
+[complete tree]
+
+Key dependencies:
+[list]
+
+Tooling:
+- Package manager: uv
+- Linter: ruff
+- Tests: pytest
+- Type checking: mypy (library/cli only)
+
+1. Create this project
+2. Adjust — change structure or dependencies
+3. Cancel
+```
+
+Do NOT create any files until the user confirms.
+
+## Step 3: Scaffold
+
+After approval, create the project:
+
+### FastAPI Project
 
 ```
 fastapi-project/
 ├── pyproject.toml
-├── README.md
 ├── .gitignore
 ├── .env.example
+├── Makefile
 ├── src/
 │   └── project_name/
 │       ├── __init__.py
@@ -57,13 +85,13 @@ fastapi-project/
 │       ├── api/
 │       │   ├── __init__.py
 │       │   ├── deps.py
-│       │   ├── v1/
-│       │   │   ├── __init__.py
-│       │   │   ├── endpoints/
-│       │   │   │   ├── __init__.py
-│       │   │   │   ├── users.py
-│       │   │   │   └── health.py
-│       │   │   └── router.py
+│       │   └── v1/
+│       │       ├── __init__.py
+│       │       ├── endpoints/
+│       │       │   ├── __init__.py
+│       │       │   ├── users.py
+│       │       │   └── health.py
+│       │       └── router.py
 │       ├── core/
 │       │   ├── __init__.py
 │       │   ├── security.py
@@ -85,109 +113,21 @@ fastapi-project/
         └── test_users.py
 ```
 
-**pyproject.toml**:
-```toml
-[project]
-name = "project-name"
-version = "0.1.0"
-description = "FastAPI project description"
-requires-python = ">=3.11"
-dependencies = [
-    "fastapi>=0.110.0",
-    "uvicorn[standard]>=0.27.0",
-    "pydantic>=2.6.0",
-    "pydantic-settings>=2.1.0",
-    "sqlalchemy>=2.0.0",
-    "alembic>=1.13.0",
-]
+Dependencies: `fastapi`, `uvicorn[standard]`, `pydantic`, `pydantic-settings`, `sqlalchemy`, `alembic`
+Dev: `pytest`, `pytest-asyncio`, `httpx`, `ruff`
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
-    "httpx>=0.26.0",
-    "ruff>=0.2.0",
-]
+### Django Project
 
-[tool.ruff]
-line-length = 100
-target-version = "py311"
+Initialize with `django-admin startproject config .`, then `python manage.py startapp core`.
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
+Dependencies: `django`, `django-environ`, `psycopg[binary]`, `gunicorn`
+Dev: `django-debug-toolbar`, `pytest-django`, `ruff`
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-asyncio_mode = "auto"
-```
-
-**src/project_name/main.py**:
-```python
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-
-from .api.v1.router import api_router
-from .config import settings
-
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    openapi_url=f"{settings.API_V1_PREFIX}/openapi.json",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(api_router, prefix=settings.API_V1_PREFIX)
-
-@app.get("/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "healthy"}
-```
-
-### 4. Generate Django Project Structure
-
-```bash
-# Install Django with uv
-uv add django django-environ django-debug-toolbar
-
-# Create Django project
-django-admin startproject config .
-python manage.py startapp core
-```
-
-**pyproject.toml for Django**:
-```toml
-[project]
-name = "django-project"
-version = "0.1.0"
-requires-python = ">=3.11"
-dependencies = [
-    "django>=5.0.0",
-    "django-environ>=0.11.0",
-    "psycopg[binary]>=3.1.0",
-    "gunicorn>=21.2.0",
-]
-
-[project.optional-dependencies]
-dev = [
-    "django-debug-toolbar>=4.3.0",
-    "pytest-django>=4.8.0",
-    "ruff>=0.2.0",
-]
-```
-
-### 5. Generate Python Library Structure
+### Library Project
 
 ```
 library-name/
-├── pyproject.toml
-├── README.md
+├── pyproject.toml (hatchling build backend)
 ├── LICENSE
 ├── src/
 │   └── library_name/
@@ -199,118 +139,34 @@ library-name/
     └── test_core.py
 ```
 
-**pyproject.toml for Library**:
-```toml
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+### CLI Project
 
-[project]
-name = "library-name"
-version = "0.1.0"
-description = "Library description"
-readme = "README.md"
-requires-python = ">=3.11"
-license = {text = "MIT"}
-authors = [
-    {name = "Your Name", email = "email@example.com"}
-]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-]
-dependencies = []
+Same as Library but with `[project.scripts]` entry and `typer` + `rich` dependencies.
 
-[project.optional-dependencies]
-dev = ["pytest>=8.0.0", "ruff>=0.2.0", "mypy>=1.8.0"]
+### Generic Project
 
-[tool.hatch.build.targets.wheel]
-packages = ["src/library_name"]
+Minimal: `pyproject.toml`, `src/project_name/__init__.py`, `tests/`, `Makefile`.
+
+## Step 4: Verify
+
+After scaffolding, run verification:
+
+```bash
+cd [project-name]
+uv sync
+uv run pytest -v
 ```
 
-### 6. Generate CLI Tool Structure
-
-```python
-# pyproject.toml
-[project.scripts]
-cli-name = "project_name.cli:main"
-
-[project]
-dependencies = [
-    "typer>=0.9.0",
-    "rich>=13.7.0",
-]
+Present results:
 ```
+Project [name] scaffolded successfully.
 
-**src/project_name/cli.py**:
-```python
-import typer
-from rich.console import Console
+Files created: [count]
+Dependencies installed: [count]
+Tests: [pass/fail]
 
-app = typer.Typer()
-console = Console()
-
-@app.command()
-def hello(name: str = typer.Option(..., "--name", "-n", help="Your name")):
-    """Greet someone"""
-    console.print(f"[bold green]Hello {name}![/bold green]")
-
-def main():
-    app()
+Next steps:
+1. cd [project-name]
+2. uv sync
+3. [type-specific start command]
 ```
-
-### 7. Configure Development Tools
-
-**.env.example**:
-```env
-# Application
-PROJECT_NAME="Project Name"
-VERSION="0.1.0"
-DEBUG=True
-
-# API
-API_V1_PREFIX="/api/v1"
-ALLOWED_ORIGINS=["http://localhost:3000"]
-
-# Database
-DATABASE_URL="postgresql://user:pass@localhost:5432/dbname"
-
-# Security
-SECRET_KEY="your-secret-key-here"
-```
-
-**Makefile**:
-```makefile
-.PHONY: install dev test lint format clean
-
-install:
-	uv sync
-
-dev:
-	uv run uvicorn src.project_name.main:app --reload
-
-test:
-	uv run pytest -v
-
-lint:
-	uv run ruff check .
-
-format:
-	uv run ruff format .
-
-clean:
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
-	rm -rf .pytest_cache .ruff_cache
-```
-
-## Output Format
-
-1. **Project Structure**: Complete directory tree with all necessary files
-2. **Configuration**: pyproject.toml with dependencies and tool settings
-3. **Entry Point**: Main application file (main.py, cli.py, etc.)
-4. **Tests**: Test structure with pytest configuration
-5. **Documentation**: README with setup and usage instructions
-6. **Development Tools**: Makefile, .env.example, .gitignore
-
-Focus on creating production-ready Python projects with modern tooling, type safety, and comprehensive testing setup.

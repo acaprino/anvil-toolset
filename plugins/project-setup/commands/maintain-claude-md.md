@@ -6,6 +6,13 @@ subagent: project-setup:claude-md-auditor
 
 # Maintain CLAUDE.md File
 
+## CRITICAL RULES
+
+1. **Verify against codebase.** Every claim in CLAUDE.md must be checked against actual files, commands, and dependencies.
+2. **Show findings before changing.** Present the audit report and get approval before modifying anything.
+3. **Never delete user preferences** unless the user explicitly approves. Preferences (coding style, workflow choices) are intentional.
+4. **Never enter plan mode.** Execute immediately.
+
 This command launches an interactive session to audit and optionally improve your `CLAUDE.md` file. It verifies accuracy, detects obsolete information, and guides you through prioritized improvements.
 
 ## What This Does

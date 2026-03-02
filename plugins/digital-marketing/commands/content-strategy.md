@@ -1,222 +1,291 @@
-# Content Strategy
+---
+description: "Marketing material and conversion optimization audit — UX patterns, CTAs, social media, copy quality, product presentation, and visual media with parallel analysis and persistent report"
+argument-hint: "<url or local path> [--focus <areas>] [--competitor <url>] [--social] [--strict-mode]"
+---
 
-Use the `content-marketer` agent to perform a marketing material and conversion optimization audit for:
+# Content Strategy Audit
 
-$ARGUMENTS
+## CRITICAL RULES
 
-## Workflow
+1. **Execute phases in order.** Scope → Parallel Audit → Synthesis → Approval → Apply → Report.
+2. **Write output files.** Each phase writes to `.content-strategy/` for persistence.
+3. **Run audit agents in parallel.** Phase 2 fires multiple agents simultaneously.
+4. **Stop at checkpoint.** Get user approval before applying any changes.
+5. **Use Playwright for live sites.** Browser tools for DOM, screenshots, responsive testing.
+6. **Never enter plan mode.** Execute immediately.
 
-Execute as a structured, multi-phase process. Analyze the target (URL or local files) for UX patterns, CTAs, copy quality, product presentation, social media readiness, and conversion optimization. Use Playwright browser tools for live page analysis when working with URLs.
+## Pre-flight
 
-### Phase 1: Audit Scope
+Create `.content-strategy/` directory. If it exists, ask to archive or overwrite.
 
-Establish what you're working with before diving in.
+Use the `content-marketer` agent for analysis.
+
+## Phase 1: Audit Scope
 
 1. **Read target** — navigate to URL (Playwright) or read local files
-2. **Identify page types** — classify each page: landing page, product page, blog post, about page, contact, pricing, checkout, category, FAQ
-3. **Understand the business** — extract value proposition, target audience, product/service offering, competitive positioning from existing content
-4. **Baseline metrics** — note current state: page count, content volume, CTA count, form count, social links
+2. **Identify page types** — landing, product, blog, about, pricing, checkout, FAQ
+3. **Understand the business** — extract value proposition, target audience, offering
+4. **Baseline metrics** — page count, CTA count, form count, social links
 
-Present scope summary and confirm focus areas before proceeding.
+**Output file:** `.content-strategy/01-scope.md`
 
-### Phase 2: UX & Conversion Audit
+Present scope summary and confirm focus areas.
 
-Evaluate every element that affects user behavior and conversion.
+---
 
-**Page Layout**
-- Visual hierarchy: clear focal points, F-pattern or Z-pattern compliance
-- Above-the-fold: value prop + primary CTA visible without scrolling
-- Whitespace: adequate breathing room, not cramped
-- Content sections: logical flow from problem → solution → proof → action
-- Page length: appropriate for page type (long-form landing vs. concise product)
+## Phase 2: Parallel Audit (3 agents)
 
-**Calls-to-Action**
-- Presence: every page has a clear next step
-- Clarity: button text uses action verbs ("Start free trial", not "Submit")
-- Contrast: CTAs visually distinct from surrounding elements
-- Placement: above fold, after value props, after social proof, at page bottom
-- Urgency/scarcity: appropriate use (not manipulative)
-- Primary vs. secondary: clear hierarchy, one primary CTA per section
-- Mobile CTAs: thumb-reachable, full-width on small screens
+Run all three audit agents **in parallel** in a single response:
 
-**Social Proof**
-- Testimonials: present, attributed (name, role, company), specific results
-- Reviews/ratings: star ratings, review count, from credible sources
-- Trust badges: security seals, certifications, payment icons, money-back guarantee
-- Client logos: recognizable brands, "as seen in" media mentions
-- Case studies: linked or summarized with metrics
-- Numbers: user count, years in business, satisfaction rate
+### Agent A: UX & Conversion Analysis
 
-**Product Presentation**
-- Gallery: 5+ images minimum (front, side, detail, in-use, scale reference)
-- Image quality: high-res, consistent lighting/style, zoom capability
-- Video: product demo, explainer, or testimonial video present
-- Alt text: descriptive for accessibility and SEO
-- 360-view: available for physical products (nice-to-have)
+```
+Task:
+  subagent_type: "content-marketer"
+  description: "UX and conversion optimization audit"
+  prompt: |
+    Audit the UX patterns and conversion elements of this website/page.
 
-**Pricing**
-- Clarity: prices visible, no hidden fees, transparent billing
-- Comparison table: feature matrix for multiple plans
-- Anchoring: recommended plan highlighted, value framing
-- Free trial/demo: CTA prominently placed near pricing
-- FAQ near pricing: addresses common objections and billing questions
-- Money-back guarantee: visible near purchase CTA
+    ## Scope
+    [Insert contents of .content-strategy/01-scope.md]
 
-**Forms**
-- Field count: minimize friction (name + email for lead gen, not 10 fields)
-- Labels: clear, visible, not placeholder-only
-- Error handling: inline validation, specific error messages
-- Progress indicators: for multi-step forms
-- Autofill support: proper input types and autocomplete attributes
-- Mobile-friendly: appropriate keyboard types, large touch targets
+    ## Page Contents
+    [Insert key page content or Playwright snapshot]
 
-**Navigation**
-- Clear hierarchy: logical menu structure, max 7 top-level items
-- Breadcrumbs: present on deep pages
-- Search: available, functional, returns relevant results
-- Mobile menu: hamburger with clear labels, not just icons
-- Sticky header: accessible navigation on long pages
-- Footer: sitemap links, contact info, legal links
+    ## Instructions
+    Evaluate:
+    1. **Page Layout**: Visual hierarchy, above-the-fold content, whitespace, content flow
+    2. **CTAs**: Presence, clarity, contrast, placement, urgency, primary/secondary hierarchy
+    3. **Social Proof**: Testimonials, reviews, trust badges, client logos, case studies, numbers
+    4. **Pricing**: Clarity, comparison table, anchoring, free trial CTA, FAQ, guarantee
+    5. **Forms**: Field count, labels, error handling, progress indicators, mobile-friendly
+    6. **Navigation**: Hierarchy, breadcrumbs, search, mobile menu, sticky header, footer
 
-### Phase 2b: Social Media Audit
+    For each finding: severity (Critical/Important/Nice-to-have), element, issue, specific fix.
+    Note what's working well.
 
-Evaluate social presence and share-readiness.
+    Return structured findings.
+```
 
-**OG/Twitter Tags**
-- og:title, og:description, og:image (1200x630), og:type, og:url, og:site_name
-- twitter:card, twitter:title, twitter:description, twitter:image (1200x675)
-- Validate share previews: how pages render when shared on Facebook, Twitter/X, LinkedIn, WhatsApp
+### Agent B: Content & Copy Analysis
 
-**Social Profiles**
-- Linked from website: header/footer social icons
-- Consistent branding: same name, logo, bio across platforms
-- Active presence: recent posts (not abandoned accounts)
+```
+Task:
+  subagent_type: "content-marketer"
+  description: "Content and copy quality audit"
+  prompt: |
+    Audit the written content and copy of this website/page.
 
-**Share Buttons**
-- Placement: visible but not intrusive, on shareable content
-- Platforms: relevant to audience (not every platform)
-- Mobile-friendly: functional on touch devices
-- Share counts: displayed if numbers are impressive
+    ## Scope
+    [Insert contents of .content-strategy/01-scope.md]
 
-**Social Content Strategy**
-- Content mix: 80/20 value/promotion ratio
-- Posting frequency: consistent schedule appropriate to platform
-- Engagement: responding to comments, community building
-- Platform-specific: content adapted to each platform's format and audience
+    ## Page Contents
+    [Insert key page text content]
 
-**Platform-Specific** (assess which are relevant)
-- Instagram: visual consistency, hashtag strategy, bio link optimization, Stories/Reels
-- LinkedIn: thought leadership, company page completeness, employee advocacy
-- Twitter/X: thread strategy, engagement tactics, brand voice
-- Facebook: community building, events, groups, ad integration
+    ## Instructions
+    Evaluate:
+    1. **Headlines**: Clarity (5-second test), benefit-driven, keyword presence, emotional triggers
+    2. **Body Copy**: Scannable, benefit-focused, objection handling, specificity, reading level
+    3. **Tone & Voice**: Consistency, audience-appropriate, brand alignment, authenticity
+    4. **SEO Copy**: Keyword density, internal links, meta descriptions, featured snippet targeting
+    5. **Microcopy**: Button labels, form hints, error messages, empty states, confirmations
+    6. **Product Descriptions**: Feature→benefit framing, specifications, comparisons, use cases
 
-**Social Commerce** (if applicable)
-- Shoppable posts: product tagging on social platforms
-- Direct checkout links: minimal friction from social to purchase
-- User-generated content: reviews, photos, unboxing shared on social
+    For each finding: severity, location, issue, specific rewrite suggestion.
+    Note what's working well.
 
-### Phase 3: Content & Copy Audit
+    Return structured findings.
+```
 
-Evaluate all written content for clarity, persuasion, and SEO.
+### Agent C: Social Media & Visual Audit
 
-**Headlines**
-- Clarity: reader understands the offer in 5 seconds
-- Benefit-driven: focuses on outcome, not features
-- Keyword presence: natural, not stuffed
-- Emotional triggers: curiosity, urgency, exclusivity (appropriate use)
-- Hierarchy: H1 → H2 → H3 support scanning
+```
+Task:
+  subagent_type: "content-marketer"
+  description: "Social media and visual media audit"
+  prompt: |
+    Audit the social media presence and visual assets of this website/page.
 
-**Body Copy**
-- Scannable: short paragraphs (3-4 lines), bullets, subheadings every 2-3 paragraphs
-- Benefit-focused: features translated to user benefits
-- Objection handling: addresses "why not?" and "what if?"
-- Specificity: numbers, timeframes, concrete examples (not vague claims)
-- Reading level: appropriate for target audience (aim for grade 8-10 for general)
+    ## Scope
+    [Insert contents of .content-strategy/01-scope.md]
 
-**Tone & Voice**
-- Consistency: same voice across all pages
-- Audience-appropriate: matches target demographic expectations
-- Brand alignment: reflects brand personality (professional, friendly, bold, etc.)
-- Authenticity: not generic or AI-sounding boilerplate
+    ## Page Contents
+    [Insert page content and OG/meta tag data]
 
-**SEO Copy**
-- Keyword density: natural (1-2%), not stuffed
-- Internal links: contextual links to related content
-- Meta descriptions: compelling, include CTA, within character limits
-- Featured snippet targeting: answer boxes, lists, tables for question-based queries
-- Content length: appropriate for search intent (pillar pages 2000+, product pages 300+)
+    ## Instructions
+    Evaluate:
+    1. **OG/Twitter Tags**: Presence, quality, share preview appearance
+    2. **Social Profiles**: Linked from site, consistent branding, active presence
+    3. **Share Buttons**: Placement, platform selection, mobile-friendly
+    4. **Images**: Quality, relevance, consistency, alt text, performance
+    5. **Product Gallery**: Count, angles, zoom, lifestyle shots, consistency
+    6. **Video**: Hero video, demos, testimonials, thumbnails, loading behavior
+    7. **Icons & Illustrations**: Consistent style, meaningful, accessible
 
-**Microcopy**
-- Button labels: specific ("Download the guide" vs. "Click here")
-- Form hints: helpful placeholder text and field descriptions
-- Error messages: friendly, specific, actionable
-- Empty states: helpful guidance when no content/results
-- Loading states: informative progress indicators
-- Confirmation messages: clear next steps after form submission
+    For each finding: severity, element, issue, specific fix.
+    Note what's working well.
 
-**Product Descriptions**
-- Feature → benefit framing: what it does → why it matters to the user
-- Specifications: complete, organized, scannable
-- Comparison: how it differs from alternatives
-- Use cases: specific scenarios where the product excels
+    Return structured findings.
+```
 
-### Phase 4: Visual & Media Audit
+Consolidate all agent findings into **`.content-strategy/02-audit.md`**:
 
-Evaluate imagery and media assets.
+```markdown
+# Phase 2: Content Strategy Audit
 
-**Images**
-- Quality: high-resolution, professional, not pixelated or stretched
-- Relevance: support the content, not generic stock photos
-- Consistency: unified style, color palette, treatment across the site
-- Alt text: descriptive, keyword-relevant
-- Performance: optimized file sizes, WebP/AVIF format, lazy loading
+## UX & Conversion Findings
+[From Agent A, organized by severity]
 
-**Product Gallery**
-- Count: 5+ images per product (front, side, detail, lifestyle/in-use, scale)
-- Angles: variety of perspectives showing key features
-- Zoom: click-to-zoom or hover-zoom functionality
-- Lifestyle shots: product in context, showing real-world usage
-- Consistency: uniform background, lighting, and style across catalog
+## Content & Copy Findings
+[From Agent B, organized by severity]
 
-**Video**
-- Hero video: brand/product overview on key landing pages
-- Product demos: showing the product in action
-- Testimonials: customer stories on video
-- Thumbnail quality: compelling, not auto-generated frames
-- Loading: doesn't block page render, plays on interaction
+## Social & Visual Findings
+[From Agent C, organized by severity]
 
-**Icons & Illustrations**
-- Consistent style: same weight, style, and color system
-- Meaningful: convey information, not purely decorative
-- Accessible: not relying solely on icons for meaning (paired with labels)
+## What's Working Well
+[Positives from all agents]
+```
 
-### Phase 5: Plan & Confirm
+---
 
-Synthesize findings into an actionable plan.
+## Phase 3: Synthesize & Prioritize
 
-1. **Findings summary**: grouped by category, severity (critical / important / nice-to-have)
-2. **Specific improvements**: before/after examples for key changes
-3. **Quick wins**: changes with high impact and low effort
-4. **Major recommendations**: bigger changes requiring design/content decisions
-5. **Estimated impact**: which changes are likely to improve conversion the most
+Read `.content-strategy/02-audit.md` and create actionable plan.
 
-**Wait for user approval** on which improvements to implement.
+**Output file:** `.content-strategy/03-plan.md`
 
-### Phase 6: Apply & Report
+```markdown
+# Content Strategy Plan
 
-Implement approved changes and document results.
+## Findings Summary
+| Category | Critical | Important | Nice-to-have |
+|----------|----------|-----------|--------------|
+| UX & Conversion | X | X | X |
+| Content & Copy | X | X | X |
+| Social & Visual | X | X | X |
+| **Total** | **X** | **X** | **X** |
 
-1. **Apply changes**: implement in logical batches (copy first, then structure, then media)
-2. **Before/after comparison**: show what changed on each page
-3. **Summary report**: changes made, expected impact, conversion optimization rationale
-4. **Remaining recommendations**: items requiring manual intervention (photography, video production, design work)
-5. **Ongoing strategy**: content calendar suggestions, A/B testing opportunities, metrics to track
+## Quick Wins (high impact, low effort)
+[Numbered list with specific before/after examples]
+
+## Medium Effort
+[Changes requiring moderate work]
+
+## Major Recommendations
+[Bigger changes requiring design/content decisions]
+
+## Estimated Conversion Impact
+[Which changes are most likely to improve conversion, ordered by expected impact]
+```
+
+---
+
+## PHASE CHECKPOINT -- User Approval Required
+
+```
+Content strategy audit complete.
+
+Findings: [X critical, Y important, Z nice-to-have]
+Quick wins available: [count]
+
+Please review:
+- .content-strategy/02-audit.md
+- .content-strategy/03-plan.md
+
+1. Apply quick wins — implement high-impact, low-effort changes
+2. Apply all fixable items — implement everything that doesn't need design decisions
+3. Choose specific improvements — I'll tell you which ones
+4. Report only — skip implementation, generate final report
+```
+
+Do NOT proceed until the user approves.
+
+---
+
+## Phase 4: Apply Changes
+
+Implement approved changes in logical order:
+1. Copy improvements first (headlines, CTAs, microcopy)
+2. Structure changes (layout, navigation, form optimization)
+3. Media optimization (images, OG tags, social)
+
+Log changes to **`.content-strategy/04-changes.md`**:
+
+```markdown
+# Changes Applied
+
+## Change 1: [description]
+- Category: [UX/Content/Social]
+- Before: [state]
+- After: [state]
+- Expected impact: [description]
+```
+
+---
+
+## Phase 5: Final Report
+
+Read all `.content-strategy/*.md` files and generate consolidated report.
+
+**Output file:** `.content-strategy/05-report.md`
+
+```markdown
+# Content Strategy Audit Report
+
+## Target: [URL or path]
+## Date: [timestamp]
+
+## Executive Summary
+[2-3 sentences on marketing effectiveness]
+
+## Findings by Category
+| Category | Critical | Important | Nice-to-have | Fixed |
+|----------|----------|-----------|--------------|-------|
+| UX & Conversion | X | X | X | X |
+| Content & Copy | X | X | X | X |
+| Social & Visual | X | X | X | X |
+
+## Changes Applied
+[Summary with before/after highlights]
+
+## Remaining Recommendations
+[Items requiring manual intervention: photography, video, design work, A/B testing]
+
+## Ongoing Strategy
+- Content calendar suggestions
+- A/B testing opportunities
+- Metrics to track
+- Review frequency
+
+## Audit Metadata
+- Agents used: 3 (UX, Content, Social)
+- Total findings: [count]
+- Fixes applied: [count]
+```
+
+---
+
+## Completion
+
+```
+Content strategy audit complete for: $ARGUMENTS
+
+Output Files:
+- Scope: .content-strategy/01-scope.md
+- Audit: .content-strategy/02-audit.md
+- Plan: .content-strategy/03-plan.md
+- Changes: .content-strategy/04-changes.md
+- Report: .content-strategy/05-report.md
+
+Findings: [X critical, Y important, Z nice-to-have]
+Changes applied: [count]
+```
 
 ## Quick Examples
 
-- `/content-strategy https://example.com` — Full marketing material audit of a live website
-- `/content-strategy https://example.com/pricing` — Audit pricing page for conversion optimization
-- `/content-strategy src/pages/landing.html` — Audit local landing page files
-- `/content-strategy https://example.com --focus cta,social-proof` — Focused audit on CTAs and social proof
-- `/content-strategy https://example.com --competitor https://rival.com` — Compare marketing effectiveness against a competitor
-- `/content-strategy https://example.com --social` — Focus on social media presence and share optimization
+- `/content-strategy https://example.com` — Full marketing audit
+- `/content-strategy https://example.com/pricing` — Pricing page conversion optimization
+- `/content-strategy src/pages/landing.html` — Audit local landing page
+- `/content-strategy https://example.com --focus cta,social-proof` — Focused audit
+- `/content-strategy https://example.com --social` — Social media presence focus
+- `/content-strategy https://example.com --competitor https://rival.com` — Comparative audit

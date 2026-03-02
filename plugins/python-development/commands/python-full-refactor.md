@@ -1,134 +1,76 @@
+---
+description: "Metrics-driven Python refactoring — analyze complexity, plan improvements, execute with test validation, and produce before/after comparison report"
+argument-hint: "<target file or directory> [--strict-mode]"
+---
+
 # Python Full Refactoring
 
-You are a code refactoring expert applying the comprehensive 4-phase systematic refactoring workflow from the `python-refactor` skill. This is the heavy-duty command for structural refactoring with complexity metrics, migration checklists, OOP transformation, and regression prevention safety protocols.
+## CRITICAL RULES
 
-## Context
+1. **Execute phases in order.** Analysis → Planning → Approval → Execution → Validation.
+2. **Write output files.** Each phase writes to `.python-refactor/` for persistence and context.
+3. **Stop at checkpoint.** Get user approval of the refactoring plan BEFORE making any code changes.
+4. **Run tests after every change.** Never proceed if tests fail.
+5. **Never enter plan mode.** Execute immediately.
+6. **One pattern at a time.** Don't combine multiple refactorings in a single edit.
 
-The user wants a thorough, metrics-driven refactoring of Python code. Apply the full 4-phase workflow: Analysis → Planning → Execution → Validation. For lighter-touch readability improvements, use `/humanize-python-code` instead.
+## Pre-flight
 
-## Target
+### 1. Check for existing session
 
-$ARGUMENTS
+Check if `.python-refactor/state.json` exists:
+- If in progress: offer to resume or start fresh
+- If complete: offer to archive and start fresh
 
-## Instructions
+### 2. Initialize state
 
-### Phase 1: Analysis
+Create `.python-refactor/` directory and `state.json`:
+
+```json
+{
+  "target": "$ARGUMENTS",
+  "status": "in_progress",
+  "flags": {
+    "strict_mode": false
+  },
+  "current_phase": 1,
+  "completed_phases": [],
+  "files_created": [],
+  "started_at": "ISO_TIMESTAMP"
+}
+```
+
+## Phase 1: Analysis
 
 1. **Read the target code** to understand current structure
-2. **Run complexity metrics** using the skill's scripts:
+2. **Run complexity metrics** (if available):
    ```bash
-   uv run python plugins/python-development/skills/python-refactor/scripts/measure_complexity.py <target>
-   uv run python plugins/python-development/skills/python-refactor/scripts/analyze_with_flake8.py <target>
+   uv run python plugins/python-development/skills/python-refactor/scripts/measure_complexity.py $ARGUMENTS 2>/dev/null
+   uv run python plugins/python-development/skills/python-refactor/scripts/analyze_with_flake8.py $ARGUMENTS 2>/dev/null
    ```
-3. **Identify issues** against these thresholds:
+   If scripts aren't available, analyze manually by reading the code.
+
+3. **Identify issues** against thresholds:
    - Cyclomatic complexity: >10 per function (high priority)
    - Cognitive complexity: >15 per function (high priority)
    - Function length: >30 lines (medium priority)
    - Nesting depth: >3 levels (medium priority)
 
-4. **Document baseline metrics** in analysis report
-
-### Phase 2: Planning
-
-1. **Prioritize issues** by impact:
-   - High: Complex nesting, god functions, magic numbers, cryptic names
-   - Medium: Code duplication, god classes, primitive obsession
-   - Low: Inconsistent naming, redundant comments
-
-2. **Select refactoring patterns** from `references/patterns.md`:
-   - Guard clauses for nested conditionals
-   - Extract method for long functions
-   - Replace magic numbers with named constants
-   - Rename for clarity
-
-3. **Assess risk** for each change:
-   - Low: Renaming, adding docstrings
-   - Medium: Extract method, simplify conditionals
-   - High: Restructure classes, change signatures
-
-4. **Create ordered plan** with atomic steps
-
-### Phase 3: Execution
-
-Apply changes incrementally following the plan:
-
-1. **One pattern at a time** - Don't combine multiple refactorings
-2. **Run tests after each change** - Validate behavior preserved
-3. **Commit atomic changes** - Each refactoring is one commit
-4. **Document rationale** - Explain why each change improves readability
-
-#### Key Patterns
-
-**Guard Clauses:**
-```python
-# Before
-def process(data):
-    if data is not None:
-        if data.is_valid():
-            # main logic
-            pass
-
-# After
-def process(data):
-    if data is None:
-        return
-    if not data.is_valid():
-        return
-    # main logic
-```
-
-**Extract Method:**
-```python
-# Before
-def process():
-    # 50 lines of mixed concerns
-    pass
-
-# After
-def process():
-    data = _fetch_data()
-    validated = _validate(data)
-    return _transform(validated)
-```
-
-**Named Constants:**
-```python
-# Before
-if retries > 3:
-    timeout = 30
-
-# After
-MAX_RETRIES = 3
-DEFAULT_TIMEOUT_SECONDS = 30
-if retries > MAX_RETRIES:
-    timeout = DEFAULT_TIMEOUT_SECONDS
-```
-
-### Phase 4: Validation
-
-1. **Run all tests** - Zero failures required
-2. **Compare metrics** using:
+4. **Establish test baseline**:
    ```bash
-   uv run python plugins/python-development/skills/python-refactor/scripts/compare_metrics.py <before> <after>
+   pytest [test files] -v 2>/dev/null || python -m pytest -v 2>/dev/null
    ```
-3. **Check performance** - No regression >10%:
-   ```bash
-   uv run python plugins/python-development/skills/python-refactor/scripts/benchmark_changes.py <before> <after> <test_file>
-   ```
-4. **Verify flake8 improvements**:
-   ```bash
-   uv run python plugins/python-development/skills/python-refactor/scripts/compare_flake8_reports.py <before_report> <after_report>
-   ```
+   Record which tests exist and their pass/fail status.
 
-## Output Format
+**Output file:** `.python-refactor/01-analysis.md`
 
-### Analysis Report
 ```markdown
-## Pre-Refactoring Analysis
+# Phase 1: Analysis
 
-### Target: <file/directory>
+## Target
+[file/directory path]
 
-### Current Metrics
+## Current Metrics
 | Metric | Value | Threshold | Status |
 |--------|-------|-----------|--------|
 | Cyclomatic Complexity (avg) | X | <10 | PASS/FAIL |
@@ -136,45 +78,169 @@ if retries > MAX_RETRIES:
 | Max Function Length | X lines | <30 | PASS/FAIL |
 | Max Nesting Depth | X | <=3 | PASS/FAIL |
 
-### Issues Found
-1. [HIGH] <issue description> - <location>
-2. [MEDIUM] <issue description> - <location>
+## Issues Found
+[Ordered by severity: HIGH, MEDIUM, LOW]
 
-### Refactoring Plan
-1. <pattern> on <target> - Risk: <low/medium/high>
-2. ...
+## Test Baseline
+- Tests found: [count]
+- Passing: [count]
+- Failing: [count]
 ```
 
-### Summary Report
+## Phase 2: Planning
+
+Read `.python-refactor/01-analysis.md` for context.
+
+1. **Prioritize issues** by impact
+2. **Select refactoring patterns** for each issue:
+   - Guard clauses for nested conditionals
+   - Extract method for long functions
+   - Replace magic numbers with named constants
+   - Rename for clarity
+   - Decompose god functions
+3. **Assess risk** for each change (Low / Medium / High)
+4. **Create ordered plan** with atomic steps
+
+**Output file:** `.python-refactor/02-plan.md`
+
 ```markdown
-## Refactoring Summary
+# Phase 2: Refactoring Plan
 
-### Changes Applied
-1. <pattern applied> - <rationale>
+## Refactoring Steps (ordered)
 
-### Metrics Comparison
+### Step 1: [pattern] on [target]
+- Risk: [Low/Medium/High]
+- File: [path:line]
+- What: [description of change]
+- Why: [rationale]
+
+### Step 2: ...
+[Continue for all planned changes]
+
+## Estimated Impact
+- Complexity reduction: ~X%
+- Functions affected: [count]
+- Risk level: [overall Low/Medium/High]
+```
+
+---
+
+## PHASE CHECKPOINT -- User Approval Required
+
+```
+Analysis and planning complete.
+
+Issues found: [count] ([X high, Y medium, Z low])
+Refactoring steps planned: [count]
+Overall risk: [Low/Medium/High]
+Test baseline: [X] tests passing
+
+Please review:
+- .python-refactor/01-analysis.md
+- .python-refactor/02-plan.md
+
+1. Execute the plan — apply all refactorings with test validation
+2. Execute partial — I'll tell you which steps to apply
+3. Revise plan — adjust before executing
+4. Cancel — stop here with the analysis only
+```
+
+If `--strict-mode` is set and there are High risk changes, recommend option 2 (partial execution).
+
+Do NOT proceed to Phase 3 until the user approves.
+
+---
+
+## Phase 3: Execution
+
+Read `.python-refactor/02-plan.md` for the approved plan.
+
+For each refactoring step:
+
+1. Apply the single refactoring pattern
+2. Run tests immediately:
+   ```bash
+   pytest [test files] -v
+   ```
+3. If tests pass: commit the change and continue
+4. If tests fail: REVERT the change, report the failure, ask the user how to proceed
+
+Log each step to `.python-refactor/03-execution.md`:
+
+```markdown
+# Phase 3: Execution Log
+
+## Step 1: [pattern]
+- Status: [completed/failed/reverted]
+- File: [path]
+- Tests: [all passing / X failures]
+- Commit: [hash]
+
+## Step 2: ...
+```
+
+## Phase 4: Validation
+
+After all steps executed:
+
+1. **Run full test suite** — zero failures required
+2. **Compare metrics** (if scripts available):
+   ```bash
+   uv run python plugins/python-development/skills/python-refactor/scripts/compare_metrics.py [before] [after] 2>/dev/null
+   ```
+3. **Manual comparison** — re-read the code and compare complexity
+
+**Output file:** `.python-refactor/04-validation.md`
+
+```markdown
+# Phase 4: Validation
+
+## Metrics Comparison
 | Metric | Before | After | Change |
 |--------|--------|-------|--------|
-| Cyclomatic Complexity | X | Y | -Z% |
+| Cyclomatic Complexity (avg) | X | Y | -Z% |
+| Cognitive Complexity (max) | X | Y | -Z% |
+| Max Function Length | X | Y | -Z lines |
+| Max Nesting Depth | X | Y | -Z |
 
-### Validation
-- [ ] All tests pass
-- [ ] No performance regression
-- [ ] Flake8 issues reduced
+## Test Results
+- Tests run: [count]
+- Passing: [count]
+- Failing: [count]
+
+## Refactoring Summary
+- Steps executed: [X/Y]
+- Steps reverted: [count]
+- Files changed: [count]
+- Commits: [count]
+```
+
+---
+
+## Completion
+
+```
+Python refactoring complete for: $ARGUMENTS
+
+Output Files:
+- Analysis: .python-refactor/01-analysis.md
+- Plan: .python-refactor/02-plan.md
+- Execution Log: .python-refactor/03-execution.md
+- Validation: .python-refactor/04-validation.md
+
+Summary:
+- Refactorings applied: [X/Y]
+- Tests: [all passing / X failures]
+- Complexity reduction: ~[Z]%
+
+Next steps:
+1. Review changes with /review-changes
+2. Run the full test suite to confirm
+3. Commit remaining changes if needed
 ```
 
 ## Related Skills
 
-For deeper analysis, invoke these same-package skills:
-- `python-testing-patterns` - For comprehensive test setup before refactoring
-- `python-performance-optimization` - For deep profiling if performance-critical
-- `async-python-patterns` - For async code refactoring patterns
-
-## References
-
-See `plugins/python-development/skills/python-refactor/references/` for:
-- `patterns.md` - All refactoring patterns with examples
-- `anti-patterns.md` - Common issues to fix
-- `cognitive_complexity_guide.md` - Complexity calculation rules
-- `REGRESSION_PREVENTION.md` - Checklist to avoid regressions
-- `examples/script_to_oop_transformation.md` - Complete OOP transformation example
+- `python-testing-patterns` — Set up tests before refactoring
+- `python-performance-optimization` — Profile if performance-critical
+- `async-python-patterns` — For async code refactoring
