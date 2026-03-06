@@ -132,6 +132,7 @@ Task:
     4. **Consistency**: Do the changes follow the patterns already in the codebase? Check the full file for established patterns.
     5. **Over-engineering or under-engineering**: Is the solution appropriately scoped?
     6. **Integration**: Do the changes integrate well with the existing code? Any broken contracts?
+    7. **Flow correctness**: Trace modified flows end-to-end. Does every step connect? Could this change break callers, importers, or downstream consumers of modified functions/state/events?
 
     For each finding: severity (Critical/High/Medium/Low), file + line, and a concrete fix recommendation.
     Do not soften findings. Findings are your priority.
