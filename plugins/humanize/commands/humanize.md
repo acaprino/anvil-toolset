@@ -1,5 +1,5 @@
 ---
-description: "Rewrite source code to be more readable and human-friendly — improves naming, removes AI boilerplate, adds clarity comments — without changing behavior"
+description: "Rewrite source code to be more readable and human-friendly — improves naming, removes AI boilerplate, simplifies structure, adds clarity comments — without changing behavior"
 argument-hint: "<file or directory> [--dry-run] [--strict]"
 ---
 
@@ -47,7 +47,7 @@ For each file, analyze and propose:
 - Variable/function renames (vague → domain-meaningful)
 - Boilerplate comments to remove (paraphrase comments, empty docstrings)
 - Why-comments to add (non-obvious business logic)
-- Minor structural improvements (guard clauses, early returns)
+- Structural simplifications (flatten nesting, remove redundant abstractions, consolidate logic)
 
 Present the preview:
 
@@ -58,6 +58,7 @@ Humanization preview for: [target]
 - Rename `data` → `user_profile` (line 23)
 - Rename `proc` → `process_payment` (line 45)
 - Remove boilerplate docstring (line 12-15)
+- Flatten nested if/else chain (line 30-50)
 - Add comment explaining retry logic (line 67)
 
 [file2]:
@@ -82,7 +83,7 @@ Task:
   description: "Humanize [target] for readability"
   prompt: |
     Improve the readability and human-friendliness of this code.
-    Do NOT change behavior — only improve naming, comments, and clarity.
+    Do NOT change behavior — only improve naming, comments, structure, and clarity.
 
     ## Files to Humanize
     [list of files]
@@ -95,14 +96,18 @@ Task:
     1. Rename vague variables and parameters to domain-meaningful names
     2. Remove paraphrase comments and empty boilerplate docstrings
     3. Add brief why-comments for non-obvious business logic
-    4. Use guard clauses / early returns where it improves readability
+    4. Simplify structure: flatten nesting with early returns, remove redundant
+       wrappers, consolidate scattered logic, replace nested ternaries with
+       switch/if-else, choose clarity over brevity
 
     Do NOT:
     - Change any behavior or logic
-    - Reorder code or extract functions (unless --strict)
+    - Reorder top-level code or extract functions (unless --strict)
     - Remove error handling, validations, or imports
     - Modify test files (except renaming symbols renamed in source)
     - Add type annotations to unchanged code
+    - Over-simplify: keep abstractions that aid testing/extension
+    - Combine too many concerns into one function
 ```
 
 ## Step 5: Validate & Report
@@ -125,7 +130,7 @@ Changes made:
 - Renames: [count]
 - Comments removed: [count]
 - Comments added: [count]
-- Guard clauses: [count]
+- Structural simplifications: [count]
 
 Tests: [all passing / X failures — reverted problematic changes]
 
@@ -139,12 +144,14 @@ If `--strict` flag is set, also flag any remaining readability concerns that wer
 - Renames vague variables and parameters to domain-meaningful names
 - Removes paraphrase comments and empty boilerplate docstrings
 - Adds brief why-comments for non-obvious business logic
+- Simplifies structure: flattens nesting, removes redundant abstractions, consolidates logic
 
 ## What It Does NOT Do
 
-- Does not reorder code, extract functions, or change control flow (unless `--strict`)
+- Does not reorder top-level code, extract functions, or change APIs (unless `--strict`)
 - Does not remove error handling, validations, or imports
 - Does not modify test files (unless renaming symbols renamed in source)
+- Does not over-simplify: keeps abstractions that aid testing or extension
 
 For deeper restructuring, use `/python-full-refactor` for metrics-driven refactoring.
 
