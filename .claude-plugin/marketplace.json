@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.49.0"
+    "version": "1.50.0"
   },
   "plugins": [
     {
@@ -158,7 +158,7 @@
       "name": "python-development",
       "source": "./plugins/python-development",
       "description": "Modern Python development ecosystem with Django, FastAPI, testing, packaging, and code refactoring tools",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "author": {
         "name": "Alfio"
       },
@@ -169,7 +169,9 @@
         "fastapi",
         "testing",
         "packaging",
-        "async"
+        "async",
+        "dead-code",
+        "vulture"
       ],
       "category": "development",
       "strict": false,
@@ -185,7 +187,8 @@
         "./skills/async-python-patterns",
         "./skills/python-packaging",
         "./skills/uv-package-manager",
-        "./skills/python-comments"
+        "./skills/python-comments",
+        "./skills/python-dead-code"
       ],
       "commands": [
         "./commands/python-scaffold.md",
@@ -221,7 +224,7 @@
       "name": "utilities",
       "source": "./plugins/utilities",
       "description": "General utility skills for file organization, cleanup, dead code detection, and system maintenance",
-      "version": "1.2.0",
+      "version": "1.3.0",
       "author": {
         "name": "ComposioHQ"
       },
@@ -504,7 +507,7 @@
       "name": "comprehensive-review",
       "source": "./plugins/comprehensive-review",
       "description": "Multi-agent code review orchestration with architecture, security, pattern analysis, and best practices across 5 phases",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "author": {
         "name": "Alfio"
       },

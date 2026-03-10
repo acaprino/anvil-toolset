@@ -368,7 +368,7 @@ Update `state.json`: set `current_step` to 4, `current_phase` to 4, add steps 3A
 
 Read all previous `.full-review/*.md` files for full context.
 
-Run both agents in parallel using multiple Task tool calls in a single response.
+Run all three agents in parallel using multiple Task tool calls in a single response.
 
 ### Step 4A: Framework & Language Best Practices
 
@@ -434,7 +434,42 @@ Task:
     Write your findings as a structured markdown document.
 ```
 
-After both complete, consolidate into `.full-review/04-best-practices.md`:
+### Step 4C: Dead Code Analysis
+
+```
+Task:
+  subagent_type: "general-purpose"
+  description: "Dead code analysis for $ARGUMENTS"
+  prompt: |
+    You are a dead code detection specialist. Analyze the target code for unused symbols.
+
+    ## Review Scope
+    [Insert contents of .full-review/00-scope.md]
+
+    ## Instructions
+    1. **Auto-detect language**: Check for package.json (TS/JS) or pyproject.toml / *.py (Python)
+    2. **For TypeScript/JavaScript**: Run Knip analysis -- unused files, dependencies, exports, types
+    3. **For Python**: Run vulture (--min-confidence 80) + ruff (F401, F841, F811) -- unused imports, variables, functions, classes, unreachable code
+    4. **For mixed projects**: Analyze both
+
+    Account for framework conventions before flagging:
+    - Django: views in urls.py, signal handlers, admin classes, management commands
+    - FastAPI/Flask: route handlers, dependency injection, event handlers
+    - React/Next.js: page components, API routes, middleware
+    - pytest: fixtures, conftest, parametrize, plugin hooks
+    - General: __all__ exports, dunder methods, getattr/importlib dynamic access, decorators
+
+    For each finding, provide:
+    - Severity (High / Medium / Low)
+    - File and line location
+    - Category (unused import, unused function, unused variable, unused export, unreachable code)
+    - Confidence (0-100) -- how certain this is truly dead code
+    - Recommended action
+
+    Write your findings as a structured markdown document.
+```
+
+After all three complete, consolidate into `.full-review/04-best-practices.md`:
 
 ```markdown
 # Phase 4: Best Practices & Standards
@@ -446,9 +481,13 @@ After both complete, consolidate into `.full-review/04-best-practices.md`:
 ## CI/CD & DevOps Findings
 
 [Summary from 4B, organized by severity]
+
+## Dead Code Findings
+
+[Summary from 4C, organized by severity]
 ```
 
-Update `state.json`: set `current_step` to 5, `current_phase` to 5, add steps 4A and 4B to `completed_steps`.
+Update `state.json`: set `current_step` to 5, `current_phase` to 5, add steps 4A, 4B, and 4C to `completed_steps`.
 
 ---
 
@@ -640,6 +679,7 @@ Read all `.full-review/*.md` files (01 through 05). Generate the final consolida
 - **Documentation**: [count] findings ([breakdown by severity])
 - **Best Practices**: [count] findings ([breakdown by severity])
 - **CI/CD & DevOps**: [count] findings ([breakdown by severity])
+- **Dead Code**: [count] findings ([breakdown by severity])
 
 ## Recommended Action Plan
 

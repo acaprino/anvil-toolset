@@ -209,6 +209,47 @@ Task:
     Default overall to 5/10. Justify any score above 7 with specific evidence.
 ```
 
+### Agent D: Dead Code Detection
+
+```
+Task:
+  subagent_type: "general-purpose"
+  description: "Dead code detection for code-review command"
+  prompt: |
+    Analyze the following code changes for dead code introduced or exposed by the diff.
+    You have both the diff AND the full file contents for context.
+
+    ## Changed Files
+    [list of changed code files with line counts]
+
+    ## Full File Contents
+    [paste full contents of each changed file]
+
+    ## Diff
+    [paste the git diff output]
+
+    ## Instructions
+    Check ONLY for dead code introduced or exposed by the reviewed changes:
+    1. Unused imports -- new imports added by the diff that are never referenced
+    2. Unused functions/variables -- new definitions that are never called or read
+    3. Unreachable code -- code after return/raise/break added by the diff
+    4. Unused exports -- new exports that no consumer imports
+    5. Orphaned code -- existing code that became dead because the diff removed its only caller
+
+    Do NOT flag:
+    - Pre-existing dead code unrelated to the diff
+    - Framework conventions (Django views, pytest fixtures, signal handlers, route decorators)
+    - Symbols exported via __all__, used via getattr, or referenced dynamically
+    - Dunder methods (__init__, __str__, etc.)
+
+    For each finding provide:
+    - Severity (High / Medium / Low)
+    - File + line
+    - Confidence score (0-100) -- how certain this is truly dead code
+    - What is unused and why
+    - Recommended action (remove, verify dynamic usage, add to __all__)
+```
+
 ## Step 4: Consolidated Review
 
 After all agents complete, synthesize findings into a structured review:
@@ -231,6 +272,10 @@ After all agents complete, synthesize findings into a structured review:
 ### Medium & Low Findings
 | # | Severity | File:Line | Finding | Confidence | Fix |
 |---|----------|-----------|---------|------------|-----|
+
+### Dead Code Findings
+| # | Severity | File:Line | Finding | Confidence | Action |
+|---|----------|-----------|---------|------------|--------|
 
 ### CLAUDE.md Compliance
 - [list any violations, or "All changes comply with project conventions"]
@@ -276,7 +321,7 @@ gh pr comment {number} --body "$(cat <<'EOF'
 [top 3 recommended actions]
 
 ---
-*Reviewed by: architect-review, security-auditor, pattern-quality-scorer*
+*Reviewed by: architect-review, security-auditor, pattern-quality-scorer, dead-code-detector*
 EOF
 )"
 ```
