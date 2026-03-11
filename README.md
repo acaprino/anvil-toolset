@@ -91,7 +91,7 @@ claude plugin list
 | [**deep-dive-analysis**](#deep-dive-analysis-plugin) | Understand any codebase in minutes with 7-phase systematic analysis | - | 1 | 1 |
 | [**code-review**](#code-review-plugin) | Catch bugs before they ship -- 3 agents review architecture, security, and patterns in parallel | 3 | - | 3 |
 | [**tauri-development**](#tauri-development-plugin) | Build cross-platform desktop and mobile apps with Tauri 2 and Rust | 2 | 1 | - |
-| [**frontend**](#frontend-plugin) | Optimize React performance, polish UI, design layouts, and master modern CSS | 5 | 2 | 1 |
+| [**frontend**](#frontend-plugin) | Optimize React performance, polish UI, design layouts, and master modern CSS | 5 | 3 | 1 |
 | [**frontend-design**](#frontend-design-plugin) | Design distinctive interfaces from scratch, avoiding generic AI aesthetics | - | 1 | - |
 | [**ai-tooling**](#ai-tooling-plugin) | Brainstorm, plan, and execute with structured AI-assisted workflows | 1 | 3 | 1 |
 | [**stripe**](#stripe-plugin) | Integrate Stripe payments without reading 500 pages of docs | - | 2 | - |
@@ -872,7 +872,14 @@ Expert guidance for Tauri 2 mobile app development (Android/iOS).
 
 ## Frontend Plugin
 
-> Five specialized agents for every layer of frontend work -- React performance, UI polish, UX design, layout composition, and modern CSS. Use `frontend` for hands-on optimization; use [`frontend-design`](#frontend-design-plugin) for designing new interfaces from scratch.
+> Five specialized agents and three skills for every layer of frontend work -- from strategic planning to React performance optimization. Use `frontend` for hands-on optimization; use [`frontend-design`](#frontend-design-plugin) for designing new interfaces from scratch.
+>
+> **Which tool do I use?**
+> | Need | Tool | What it does |
+> |------|------|------|
+> | "What should we build?" | `/frontend:premium-web-consultant` | Strategy and planning -- website brief, sitemap, design direction, content strategy. No code. |
+> | "Build it from scratch" | `/frontend:ui-studio` | Orchestrates all frontend agents from a product brief to shipped UI. |
+> | "Improve what exists" | `/frontend-redesign` | Audits and redesigns existing frontend code -- UX, layout, performance, polish. |
 
 ### Agents
 
@@ -977,6 +984,36 @@ Comprehensive CSS reference covering modern CSS features, architecture methodolo
 | **Use for** | Container Queries, View Transitions, Masonry, Scroll-driven animations, legacy CSS refactoring |
 
 **Source:** Ported from [paulirish/dotfiles](https://github.com/paulirish/dotfiles).
+
+---
+
+#### `premium-web-consultant`
+
+Premium web design consultant for the strategy phase before any code is written. Conducts structured client discovery (business goals, audience, competitors, tone), produces professional deliverables, and orchestrates specialist agents (seo-specialist, ui-ux-designer, ui-layout-designer, css-master, content-marketer) at defined handoff points.
+
+| | |
+|---|---|
+| **Invoke** | `/frontend:premium-web-consultant` |
+| **Use for** | Planning a new website or redesign -- website brief, sitemap, design direction, content strategy |
+
+**Deliverables:** Website brief, sitemap, design direction, content strategy, implementation roadmap. Hand off to `ui-studio` when ready to build.
+
+> **When to use this vs other tools:** Use `premium-web-consultant` when you need to decide *what* to build. Use `ui-studio` when you have a product goal and want to build it. Use `/frontend-redesign` when you already have a frontend and want to improve it.
+
+---
+
+#### `ui-studio`
+
+Orchestrates full frontend development from a product goal to shipped UI. Establishes a shared product brief (goal, audience, aesthetic tone) as the north star, then coordinates frontend-design, ui-layout-designer, ui-ux-designer, ui-polisher, and react-performance-optimizer toward a coherent result.
+
+| | |
+|---|---|
+| **Invoke** | `/frontend:ui-studio` |
+| **Use for** | Building a new UI, page, or feature from scratch |
+
+**Flow:** Product Brief -> Design Direction -> Layout -> UX Patterns -> Implementation -> Polish -> Performance -> Review.
+
+> **When to use this vs other tools:** Use `ui-studio` when you have a clear product goal and want to build new UI. Use `premium-web-consultant` first if you need strategy and planning. Use `/frontend-redesign` to improve existing code.
 
 ---
 
@@ -1592,7 +1629,7 @@ End-to-end feature pipeline: brainstorm design, write implementation plan, execu
 
 #### `/frontend-redesign`
 
-Full frontend redesign pipeline: UX audit, layout system design, implementation, React performance optimization, UI polish, and final design audit with visual report.
+Full frontend redesign pipeline: UX audit, layout system design, implementation, React performance optimization, UI polish, and final design audit with visual report. Use this to **improve existing frontend code** -- not for planning or building from scratch.
 
 | | |
 |---|---|
@@ -1601,6 +1638,8 @@ Full frontend redesign pipeline: UX audit, layout system design, implementation,
 | **Checkpoints** | After layout spec and polish phases |
 | **Output** | `.frontend-redesign/report.md` -- actionable checklist with before/after comparison |
 | **Dependencies** | frontend, frontend-design plugins |
+
+> **Not sure which to use?** `/frontend:premium-web-consultant` for strategy ("what to build"), `/frontend:ui-studio` for new builds ("build it from scratch"), `/frontend-redesign` for existing code ("improve what we have").
 
 #### `/mobile-intel`
 

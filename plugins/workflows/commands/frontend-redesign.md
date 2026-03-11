@@ -5,6 +5,8 @@ argument-hint: "<target path or description> [--framework react|vue|svelte] [--s
 
 # Frontend Redesign Pipeline
 
+**Positioning:** This command improves existing frontend code. Use `premium-web-consultant` for strategy ("what to build") or `ui-studio` for building new UI from scratch.
+
 ## CRITICAL BEHAVIORAL RULES
 
 You MUST follow these rules exactly. Violating any of them is a failure.

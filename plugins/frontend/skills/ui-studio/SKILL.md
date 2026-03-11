@@ -5,7 +5,9 @@ description: Orchestrate full frontend development from a product goal to shippe
 
 # UI Studio
 
-Orchestrating skill for new UI creation. Without a shared brief, each specialist optimizes for its own domain and produces incoherent results — great layout, wrong tone; polished motion, wrong audience. This skill fixes that by anchoring every agent to the same product goal.
+Orchestrating skill for new UI creation. Without a shared brief, each specialist optimizes for its own domain and produces incoherent results -- great layout, wrong tone; polished motion, wrong audience. This skill fixes that by anchoring every agent to the same product goal.
+
+**Positioning:** Use `premium-web-consultant` first if you need strategy and planning before building. Use `/frontend-redesign` instead if improving an existing frontend codebase.
 
 ## Phase 0: Product Brief (always first)
 

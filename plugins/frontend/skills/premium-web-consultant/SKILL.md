@@ -7,7 +7,7 @@ description: Premium web design consultant that conducts structured client disco
 
 Strategic website planning skill. Bridges the gap between "I need a website" and writing code. Produces professional strategy documents through structured discovery, then orchestrates specialist agents at defined handoff points.
 
-**Positioning:** This skill handles the discovery and strategy phase. Hand off to `ui-studio` when ready to build.
+**Positioning:** This skill handles the discovery and strategy phase. Hand off to `ui-studio` when ready to build. Use `/frontend-redesign` instead if improving an existing frontend codebase.
 
 ---
 
