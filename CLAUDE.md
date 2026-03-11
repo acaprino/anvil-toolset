@@ -14,7 +14,7 @@ plugins/
     commands/               # slash-command .md files
 ```
 
-19 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, frontend-design, digital-marketing, code-review.
+22 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, digital-marketing, code-review, app-explorer, workflows, obsidian-development, browser-extensions.
 
 ## Plugin anatomy
 
@@ -23,7 +23,7 @@ plugins/
 - `description`: when/how to use the agent
 - `model`: LLM model (default: `opus`)
 - `tools` (optional): comma-separated tool list (e.g. `Read, Write, Edit, Bash, Glob, Grep`); omit to allow all tools
-- `color`: UI accent color - **only these values are supported**: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`
+- `color`: UI accent color (e.g. `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `cyan`, `magenta`, `violet`, `teal`, `indigo`, `gold`, `rust`, `pink`)
 - Body: terse keyword-list style system prompt; simple agents ~60-200 lines, complex agents up to ~800 lines
 
 **Skills** - Directory with `SKILL.md` (frontmatter: `name`, `description`) and optional supplementary subdirs: `references/` (docs), `scripts/`, `templates/`, `assets/`.
@@ -77,7 +77,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 
 | Plugin | Upstream source | Files to sync |
 |--------|----------------|---------------|
-| `frontend-design` | `anthropics/claude-code` - `plugins/frontend-design/skills/frontend-design/SKILL.md` | `plugins/frontend-design/skills/frontend-design/SKILL.md` |
+| `frontend` (frontend-design) | `anthropics/claude-code` - `plugins/frontend-design/skills/frontend-design/SKILL.md` | `plugins/frontend/skills/frontend-design/SKILL.md` |
 | `ai-tooling` (brainstorming) | `obra/superpowers` - `skills/brainstorming/SKILL.md` | `plugins/ai-tooling/skills/brainstorming/SKILL.md` |
 | `ai-tooling` (writing-plans) | `obra/superpowers` - `skills/writing-plans/SKILL.md` | `plugins/ai-tooling/skills/writing-plans/SKILL.md` |
 | `ai-tooling` (executing-plans) | `obra/superpowers` - `skills/executing-plans/SKILL.md` | `plugins/ai-tooling/skills/executing-plans/SKILL.md` |
@@ -99,6 +99,6 @@ gh api repos/paulirish/dotfiles/contents/agents/paulirish-skills/skills/modern-c
   --jq '.content' | base64 -d
 ```
 
-Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file, plus any plugin-specific sections like Typography Reference or Isolated Prompting for frontend-design), bump the plugin version, bump `metadata.version`, and commit + push.
+Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file, plus any plugin-specific sections like Typography Reference or Isolated Prompting for frontend-design in `plugins/frontend/skills/frontend-design/`), bump the plugin version, bump `metadata.version`, and commit + push.
 
 **Important:** Upstream superpowers skills reference other superpowers skills we don't have (e.g. `superpowers:using-git-worktrees`, `superpowers:finishing-a-development-branch`, `superpowers:subagent-driven-development`). When syncing, replace `superpowers:` skill references with either our local `ai-tooling:` equivalents or generic guidance describing the same action. Keep `docs/plans/` path (not upstream's `docs/superpowers/plans/`).
