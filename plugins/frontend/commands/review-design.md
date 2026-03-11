@@ -9,7 +9,7 @@ You are a senior frontend design auditor. Review frontend code for design qualit
 
 ## CRITICAL RULES
 
-1. **Auto-detect scope.** Check git diff for frontend file changes first. If found, review only changed files (diff mode, 3 agents). If no diff or `--full` flag, audit the entire frontend (full mode, 4 agents).
+1. **Auto-detect scope.** Check git diff for frontend file changes first. If found, review only changed files (diff mode, 4 agents). If no diff or `--full` flag, audit the entire frontend (full mode, 5 agents).
 2. **Design + CSS + Performance.** Ignore backend files, API routes, build config. Focus on components, stylesheets, layout files, state management.
 3. **Run all agents in parallel.** Fire all in a single response.
 4. **Write markdown report.** Output is `.design-review/report.md` -- an actionable checklist with scores, findings, and fix instructions.
@@ -30,12 +30,12 @@ git diff --cached --name-only | grep -E '\.(tsx|jsx|vue|svelte|css|scss|sass|les
 **Diff mode** (changed frontend files exist AND `--full` is NOT set):
 - Review only the changed frontend files
 - Get the diff: `git diff HEAD -- <frontend files>`
-- Run 3 agents: UX & Components, CSS & Visual Polish, React Performance
+- Run 4 agents: UX & Components, Layout & Spatial Design, Visual Polish & Motion, React Performance
 - This is the default when uncommitted frontend changes exist
 
 **Full mode** (no frontend changes in diff, OR `--full` flag set):
 - Scan entire frontend: `src/`, `app/`, `components/`, `pages/`, `styles/` -- or path from `$ARGUMENTS`
-- Run 4 agents: UX & Components, Layout System, CSS & Visual Polish, React Performance
+- Run 5 agents: UX & Components, Layout & Spatial Design, CSS Architecture, Visual Polish & Motion, React Performance
 
 ### Discover frontend files (full mode only)
 
@@ -62,7 +62,7 @@ This gives you the design language, patterns, and architecture to evaluate again
 
 ## Step 3: Run Parallel Review Agents
 
-Fire all agents **in parallel** in a single response (3 in diff mode, 4 in full mode):
+Fire all agents **in parallel** in a single response (4 in diff mode, 5 in full mode):
 
 ### Agent A: UX Patterns & Component Architecture
 
@@ -92,6 +92,29 @@ Task:
     6. **Design system adherence**: Are colors, spacing, and typography from a token system, or are they scattered arbitrary values?
     7. **Accessibility audit**: Semantic HTML, ARIA roles, keyboard navigation, focus management, color contrast awareness
     8. **Brief alignment** (if brief provided): Does the UX serve the stated goal and audience? Are interaction patterns appropriate for the target user?
+    9. **Laws of UX audit**: Evaluate against core UX laws:
+       - Fitts's Law: Are click/tap targets appropriately sized and positioned? Are primary actions easy to reach?
+       - Hick's Law: Are users overwhelmed by too many choices? Are complex decisions broken into steps?
+       - Jakob's Law: Do interaction patterns follow familiar conventions users expect from similar products?
+       - Miller's Law: Is information chunked into digestible groups (7 +/- 2)?
+       - Doherty Threshold: Do interactions feel responsive (< 400ms feedback)?
+       - Peak-End Rule: Are the peak moments and final interactions memorable and positive?
+       - Aesthetic-Usability Effect: Does visual polish compensate for minor usability issues?
+    10. **Senior production details**:
+        - 5-second glance test: Can a new user understand the page purpose in 5 seconds?
+        - Letter spacing on large headlines (> 32px should have tighter tracking)
+        - Nested rounded corners: inner radius = outer radius - gap (not matching radii)
+        - 8-point spacing grid consistency
+        - HSB color tinting for hover/active states (not opacity)
+        - Card design: do cards use visual hierarchy instead of labels?
+        - Kill lines/use space: is content tight or is there unnecessary padding/decoration?
+        - Action-benefit button copy: do CTAs describe the benefit, not just the action?
+        - Authentic photos vs stock photos
+    11. **Visual style consistency**: Identify which aesthetic the project uses (glassmorphism 2.0, bento grid, gradient revival, dark-first, motion-rich, brutalism, minimalism, typographic-first, archival index) and whether it's applied consistently across all pages and components
+    12. **UX pattern correctness**: Evaluate onboarding patterns (coachmarks, guided tour, blank slate, lazy registration, completeness meter), trust/social proof patterns, and cognitive load patterns
+    13. **Compliance-driven UX**: European Accessibility Act readiness, WCAG 2.2 new criteria (focus appearance 2.4.11, target size 2.5.8), AI transparency requirements
+    14. **Digital wellbeing**: Natural pause points, addictive pattern detection (dark patterns, infinite scroll without purpose), attention budget
+    15. **Sustainable UX**: Energy-efficient patterns (dark mode, reduced animations option, lazy loading), resource-heavy anti-patterns (autoplay video, excessive polling)
 
     For each finding: severity (Critical/High/Medium/Low), file, issue, specific fix recommendation.
     Note what's working well.
@@ -128,14 +151,18 @@ Task:
 
     ## Instructions
     Evaluate:
-    1. **Layout system**: Is there a consistent grid/layout pattern (CSS Grid, Flexbox, utility classes)? Or ad-hoc layouts per component?
-    2. **Spacing scale**: Is spacing derived from a consistent scale (4px/8px/rem)? Or arbitrary pixel values scattered everywhere?
-    3. **Responsive strategy**: Are breakpoints consistent? Mobile-first vs desktop-first? Are there layout shifts on resize?
-    4. **Typography system**: Font scale, line-height, letter-spacing -- are they tokens or raw values?
-    5. **Alignment & rhythm**: Do elements align to a clear baseline? Is vertical rhythm maintained?
-    6. **Above-the-fold**: Is the critical viewport optimized? Is the most important content immediately visible?
-    7. **Container strategy**: Max-widths, centering, content containers -- are they consistent?
-    8. **Brief alignment** (if brief provided): Does the layout serve the stated audience and aesthetic tone? Is the spatial hierarchy appropriate?
+    1. **Layout pattern identification**: Identify which layout pattern is used (holy grail, full-bleed, split screen, organic/anti-grid, editorial asymmetry, bento grid, sidebar+main, masonry, centered narrow, stacked sections, card grid with subgrid) and whether it's the right choice for the content type
+    2. **UI pattern selection audit**: Are the right display patterns chosen? Cards vs list vs table vs gallery vs carousel for data display. Navigation pattern correctness (tabs, accordion, breadcrumbs, fat footer). Content loading pattern (pagination vs continuous scroll vs load more)
+    3. **Page archetype audit**: Does the layout follow best practices for its archetype (dashboard, product page, pricing table, wizard, FAQ, settings panel)?
+    4. **Flow & onboarding layout**: Step indicators, single-step layouts, coachmark positioning, notification positioning, paywall layout, completeness meter layout, lazy registration gate
+    5. **Spacing scale**: Is spacing derived from a consistent scale (4px/8px/rem)? Or arbitrary pixel values scattered everywhere?
+    6. **Responsive strategy**: Are breakpoints consistent? Mobile-first vs desktop-first? Are there layout shifts on resize?
+    7. **Typography system**: Font scale, line-height, letter-spacing -- are they tokens or raw values?
+    8. **Spatial composition**: Visual weight distribution, proportion rules (rule of thirds, golden ratio), optical vs mathematical alignment, negative space usage, Z-axis depth
+    9. **Above-the-fold engineering**: Viewport height strategy, LCP optimization, the three instant questions (what is this, why should I care, what do I do next)
+    10. **Alignment & rhythm**: Do elements align to a clear baseline? Is vertical rhythm maintained?
+    11. **Container strategy**: Max-widths, centering, content containers -- are they consistent?
+    12. **Brief alignment** (if brief provided): Does the layout serve the stated audience and aesthetic tone? Is the spatial hierarchy appropriate?
 
     For each finding: severity (Critical/High/Medium/Low), file, issue, specific fix.
     Note what's done well.
@@ -152,14 +179,83 @@ Task:
     ```
 ```
 
-### Agent C: CSS Architecture & Visual Polish
+### Agent C1: CSS Architecture (full mode only)
+
+Skip this agent in diff mode. Only run in full mode.
+
+```
+Task:
+  subagent_type: "css-master"
+  description: "CSS architecture and modern feature adoption audit"
+  prompt: |
+    Audit the CSS architecture, modern feature adoption, and stylesheet quality of this frontend codebase.
+
+    ## Scope
+    [list of key files sampled]
+
+    ## File Contents
+    [paste sampled stylesheet, config, and component file contents]
+
+    ## Product Brief (if available)
+    [paste brief content or "No product brief found -- evaluate against CSS architecture best practices"]
+
+    ## Instructions
+    Evaluate:
+    1. **Modern CSS feature adoption**: Are these features used where beneficial?
+       - Container Queries for component-level responsiveness
+       - Native CSS nesting instead of preprocessor nesting
+       - `@scope` for component style isolation
+       - Cascade Layers (`@layer`) for specificity management
+       - `oklch()` / `color-mix()` for color systems
+       - `clamp()` for fluid typography and spacing
+       - Logical properties (`inline`, `block`) for internationalization
+       - `dvh` / `svh` / `lvh` for viewport units
+       - Anchor positioning for tooltips and popovers
+    2. **Architecture quality**:
+       - Layer structure: does the project organize styles into layers (reset/tokens/base/components/utilities/overrides)?
+       - Selector depth and specificity management -- are selectors shallow and predictable?
+       - `!important` abuse -- count and categorize all `!important` usage
+       - Dead CSS: unused selectors, legacy overrides, commented-out blocks
+    3. **Preprocessor migration readiness** (if SASS/Less is used):
+       - SASS variables vs CSS custom properties -- which is used, should it migrate?
+       - SASS nesting vs native nesting -- can the preprocessor be dropped?
+       - SASS mixins vs modern CSS alternatives (Container Queries, `clamp()`, logical properties)
+    4. **CSS performance**:
+       - `content-visibility` for off-screen content
+       - `will-change` discipline (set before animation, remove after)
+       - Layout thrashing -- styles that force reflow in animation loops
+       - Font loading strategies (`font-display`, preload, subsetting)
+    5. **Accessibility CSS**:
+       - `prefers-reduced-motion` -- is it respected for all animations?
+       - `prefers-color-scheme` -- does dark mode use it?
+       - `forced-colors` -- does high contrast mode work?
+       - `focus-visible` patterns -- are focus styles clear and consistent?
+    6. **Component isolation**: CSS Modules, `@scope`, naming conventions (BEM, utility-first) -- are styles scoped or leaking across components?
+    7. **Brief alignment** (if brief provided): Does the CSS architecture support the project's scale and team needs?
+
+    For each finding: severity (Critical/High/Medium/Low), file, issue, specific fix.
+    Note what's done well.
+
+    Return structured JSON at the end:
+    ```json
+    {
+      "findings": [
+        { "severity": "Medium", "category": "CSS Architecture", "file": "...", "issue": "...", "fix": "..." }
+      ],
+      "positives": ["..."],
+      "score": { "modern_css": 6, "architecture": 7, "performance": 8, "accessibility_css": 7, "overall": 7 }
+    }
+    ```
+```
+
+### Agent C2: Visual Polish & Motion
 
 ```
 Task:
   subagent_type: "ui-polisher"
-  description: "CSS architecture and visual polish audit"
+  description: "Visual polish and motion design audit"
   prompt: |
-    Audit the CSS architecture, code quality, and visual polish of this frontend codebase.
+    Audit the visual polish, animation quality, and motion design of this frontend codebase.
 
     ## Scope
     [list of key files sampled]
@@ -168,18 +264,33 @@ Task:
     [paste sampled stylesheet and component file contents]
 
     ## Product Brief (if available)
-    [paste brief content or "No product brief found -- evaluate against general CSS and visual polish best practices"]
+    [paste brief content or "No product brief found -- evaluate against general visual polish best practices"]
 
     ## Instructions
     Evaluate:
-    1. **CSS architecture**: Global styles pollution, specificity wars, selector depth, !important abuse
-    2. **Modern CSS usage**: Are CSS custom properties used? Container queries? Logical properties? Or legacy patterns?
-    3. **Animation quality**: Transitions feel smooth? GPU-accelerated properties? prefers-reduced-motion respected?
-    4. **Visual consistency**: Border-radius, shadow elevation, color palette -- are they consistent or scattered?
-    5. **Dark mode**: Is dark mode supported? Are colors properly adapted or just inverted?
-    6. **CSS performance**: Unnecessary repaints, layout-triggering animations, oversized background images
-    7. **Dead CSS**: Unused selectors, legacy overrides, commented-out blocks
-    8. **Component isolation**: Are styles scoped or do they leak? CSS Modules / Tailwind / CSS-in-JS used correctly?
+    1. **Visual consistency**: Border-radius, shadow elevation, color palette -- are they consistent or scattered?
+    2. **Dark mode**: Is dark mode supported? Are colors properly adapted or just inverted?
+    3. **Motion narrative**: Are scroll-triggered sequences telling a brand story? Is there cinematic page transition flow? Choreographed element entrances that build meaning? Pacing and rhythm variation?
+    4. **Native browser animation audit**:
+       - View Transitions API usage for page/route transitions
+       - `@starting-style` for DOM entry animations
+       - `transition-behavior: allow-discrete` for display/visibility changes
+       - CSS `animation-timeline` for scroll-driven animations
+       - AutoAnimate for list reordering
+    5. **Glassmorphism 2.0 assessment**: If frosted glass effects are used, are they subtle and tactile (mature) or heavy-handed? Proper `backdrop-filter` layering?
+    6. **Micro-interaction completeness**:
+       - Hover and press states on all interactive elements
+       - Input focus animations (not just outline)
+       - Toggle spring physics and checkbox satisfaction
+       - Form validation animations (shake, highlight, inline error entrance)
+       - Loading state transitions (skeleton to content)
+    7. **Animation technical quality**:
+       - Easing curves: ease-out for enters, ease-in for exits, spring for interactions
+       - GPU-accelerated properties only (`transform`, `opacity`) -- no animating `width`, `height`, `top`, `left`
+       - `prefers-reduced-motion` respected for all animations
+       - Consistent timing constants (not random durations)
+       - No janky animations (layout-triggering properties in animation loops)
+    8. **CSS performance**: Unnecessary repaints, oversized background images, unoptimized filters
     9. **Brief alignment** (if brief provided): Does the visual polish match the stated aesthetic tone? Is motion appropriate for the audience?
 
     For each finding: severity (Critical/High/Medium/Low), file, issue, specific fix.
@@ -189,10 +300,10 @@ Task:
     ```json
     {
       "findings": [
-        { "severity": "Low", "category": "CSS Architecture", "file": "...", "issue": "...", "fix": "..." }
+        { "severity": "Low", "category": "Visual Polish", "file": "...", "issue": "...", "fix": "..." }
       ],
       "positives": ["..."],
-      "score": { "css_architecture": 8, "visual_polish": 7, "animations": 9, "overall": 8 }
+      "score": { "visual_polish": 7, "motion_design": 6, "micro_interactions": 8, "overall": 7 }
     }
     ```
 ```
@@ -219,14 +330,29 @@ Task:
 
     ## Instructions
     Evaluate:
-    1. **Re-render prevention**: External store selectors returning objects/arrays without useShallow, missing memoization, component splitting
-    2. **State management**: Zustand/Jotai/Redux selector patterns, prop drilling, state duplication, useEffect chains
-    3. **React Compiler readiness**: Patterns the compiler can optimize vs patterns requiring manual intervention
-    4. **Bundle optimization**: Heavy imports, missing code splitting, lazy loading opportunities, tree-shaking blockers
-    5. **Virtualization**: Large lists/tables not using virtual scrolling
-    6. **Caching strategy**: TanStack Query config, stale times, cache invalidation patterns
-    7. **useEffect cleanup**: Missing AbortControllers, unsubscribed listeners, memory leak vectors
-    8. **Performance budget** (if brief provided): Does the current state meet the stated Core Web Vitals or performance targets?
+    1. **React Compiler readiness**: Is `babel-plugin-react-compiler` configured? Identify patterns the compiler can auto-optimize vs patterns requiring manual intervention (external store reads, non-React state mutations, dynamic property access)
+    2. **External store selector audit (CRITICAL)**:
+       - Selectors returning objects/arrays without `useShallow` -- causes re-renders on every store update
+       - Selectors with `.filter()` / `.map()` / `.reduce()` creating new references every render
+       - `useStore()` with no selector -- subscribes to entire store
+       - Component receiving store-derived object as prop without memoization
+    3. **React 19 API adoption**: Are newer APIs used where beneficial?
+       - `use()` for conditional data fetching and context
+       - `useOptimistic()` for optimistic UI updates
+       - `useFormStatus()` for form submission state
+       - `useActionState()` for server action results
+       - `useDeferredValue()` for separating critical vs deferrable updates
+    4. **State management**: Zustand/Jotai/Redux selector patterns, prop drilling, state duplication, useEffect chains
+    5. **Bundle optimization**: Heavy imports, missing code splitting, lazy loading opportunities, tree-shaking blockers
+    6. **Virtualization check**: Large lists/tables not using TanStack Virtual or similar, index as key in virtualized lists
+    7. **Context-aware caching**: TanStack Query config appropriate for app type? CRUD apps need short stale times, real-time apps need WebSocket invalidation, static content can use long cache
+    8. **useEffect cleanup audit**:
+       - Missing `AbortController` on fetch calls
+       - `Channel.onmessage` not nulled on unmount
+       - WebSocket connections not closed
+       - Missing `clearInterval` / `clearTimeout`
+       - Missing `removeEventListener`
+    9. **Performance budget** (if brief provided): Does the current state meet the stated Core Web Vitals or performance targets?
 
     For each finding: severity (Critical/High/Medium/Low), file, issue, specific fix with code example.
     Note what's done well.
@@ -247,14 +373,14 @@ Task:
 
 After all agents complete, create `.design-review/` directory and write `report.md`.
 
-Merge and deduplicate overlapping findings from all agents. Order by severity, then file name. Group findings by category (UX, Layout, CSS, Performance).
+Merge and deduplicate overlapping findings from all agents. Order by severity, then file name. Group findings by category (UX, Layout, CSS Architecture, Visual Polish & Motion, Performance).
 
 **Output file:** `.design-review/report.md`
 
 ```markdown
 # Design & Performance Review -- [date]
 
-Full frontend audit · [N] components · [M] stylesheets
+Full frontend audit - [N] components - [M] stylesheets
 
 ## Product Brief Context
 
@@ -267,6 +393,7 @@ Full frontend audit · [N] components · [M] stylesheets
 | UX Quality | X/10 |
 | Layout System | X/10 |
 | CSS Architecture | X/10 |
+| Visual Polish & Motion | X/10 |
 | Accessibility | X/10 |
 | Typography | X/10 |
 | React Performance | X/10 |
@@ -306,6 +433,14 @@ Critical: X | High: X | Medium: X | Low: X
 - **Fix**: [fix instruction]
 - [ ] Fixed
 
+### Visual Polish & Motion
+
+#### `AnimatedCard.tsx` -- [issue title]
+- **Severity**: High
+- **Issue**: [description]
+- **Fix**: [fix instruction]
+- [ ] Fixed
+
 ### React Performance
 
 #### `Store.ts` -- [issue title]
@@ -325,6 +460,9 @@ Critical: X | High: X | Medium: X | Low: X
 [Same format]
 
 ### CSS Architecture
+[Same format]
+
+### Visual Polish & Motion
 [Same format]
 
 ### React Performance
@@ -356,7 +494,7 @@ Design & performance review complete.
 Report: .design-review/report.md
 
 Overall Score: X/10
-UX: X/10 | Layout: X/10 | CSS: X/10 | Performance: X/10 | Accessibility: X/10
+UX: X/10 | Layout: X/10 | CSS: X/10 | Polish: X/10 | Performance: X/10 | Accessibility: X/10
 
 Critical: X | High: X | Medium: X | Low: X
 
