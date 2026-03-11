@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.53.0"
+    "version": "1.54.0"
   },
   "plugins": [
     {
@@ -587,7 +587,7 @@
       "name": "obsidian-development",
       "source": "./plugins/obsidian-development",
       "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, and pre-submission checks",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Alfio"
       },

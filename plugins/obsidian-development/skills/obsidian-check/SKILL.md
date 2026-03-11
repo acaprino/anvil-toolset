@@ -17,7 +17,38 @@ Review code against all ObsidianReviewBot rules before pushing. Reports violatio
 
 Check that `manifest.json`, `package.json`, and `src/` exist. If not, abort with message.
 
-### Step 2: Run TypeScript check
+### Step 2: Ensure eslint-plugin-obsidianmd is installed
+
+Check if `eslint-plugin-obsidianmd` is in `package.json` devDependencies. If NOT installed:
+
+1. Install it and its peer dependencies:
+
+```bash
+npm install --save-dev eslint eslint-plugin-obsidianmd @typescript-eslint/parser typescript-eslint @eslint/js
+```
+
+2. If no ESLint config file exists (`eslint.config.mjs`, `.eslintrc.*`), create `eslint.config.mjs`:
+
+```javascript
+import tsparser from "@typescript-eslint/parser";
+import { defineConfig } from "eslint/config";
+import obsidianmd from "eslint-plugin-obsidianmd";
+
+export default defineConfig([
+  ...obsidianmd.configs.recommended,
+  {
+    files: ["**/*.ts"],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: { project: "./tsconfig.json" },
+    },
+  },
+]);
+```
+
+3. Inform the user that `eslint-plugin-obsidianmd` was installed and configured.
+
+### Step 3: Run TypeScript check
 
 ```bash
 npx tsc --noEmit
@@ -25,43 +56,28 @@ npx tsc --noEmit
 
 Report any type errors.
 
-### Step 3: Run eslint-plugin-obsidianmd (if installed)
+### Step 4: Run eslint-plugin-obsidianmd
 
 ```bash
-npx eslint src/ --ext .ts 2>&1
+npx eslint src/ 2>&1
 ```
 
-If not installed, skip and note it.
+This covers sentence case (`ui/sentence-case`), inline styles, command rules, manifest validation, TFile/TFolder casts, forbidden elements, and more. Report all ESLint errors and warnings.
 
-### Step 4: Manual checks (scan all .ts files in src/)
+### Step 5: Manual checks (scan all .ts files in src/)
 
-Run these checks by reading the source code:
+These checks catch issues NOT covered by eslint-plugin-obsidianmd. Run by reading the source code:
 
 #### Required (blocking)
 
 | # | Check | How to detect |
 |---|-------|---------------|
-| 1 | **Sentence case** | Search for string literals in `setName()`, `setDesc()`, `createEl()` text, `setText()`, button labels, modal titles, `Notice()` — flag any Title Case |
-| 2 | **No inline styles** | Search for `.style.` assignments (`.style.display`, `.style.transform`, etc.) |
-| 3 | **No unnecessary type assertions** | Search for `as Type` where `??` fallback makes it redundant |
-| 4 | **Promises handled** | Search for async function calls without `await`, `void`, `.catch()`, or `.then()` with rejection |
-| 5 | **No async without await** | Search for `async` methods with no `await` inside |
-| 6 | **No promise where void expected** | Search for async callbacks in event handlers that expect void |
-| 7 | **No object stringification** | Search for template literals with `??` where left side could be an object |
-| 8 | **Setting.setHeading()** | Search for `createEl('h1')`, `createEl('h2')`, `createEl('h3')` in settings/modals |
-| 9 | **No detachLeavesOfType in onunload** | Search for `detachLeavesOfType` in `onunload()` |
-| 10 | **No TFile/TFolder cast** | Search for `as TFile` or `as TFolder` — should use `instanceof` |
-| 11 | **No forbidden elements** | Search for `createElement('style')`, `createElement('link')` |
-| 12 | **No plugin as component** | Search for `MarkdownRenderer.render(` where 5th arg is `this` in a Plugin class |
-| 13 | **No view refs in plugin** | Search for view type stored as plugin property |
-| 14 | **Use configDir** | Search for hardcoded `.obsidian` string |
-| 15 | **Platform API** | Search for `navigator.userAgent` or `navigator.platform` |
-| 16 | **No regex lookbehind** | Search for `(?<=` in regex (unless isDesktopOnly) |
-| 17 | **Command rules** | Check command IDs/names for "command", plugin ID, plugin name |
-| 18 | **No default hotkeys** | Check `addCommand()` for `hotkeys` property |
-| 19 | **File operations** | Check for `Vault.trash()`, `Vault.delete()` instead of `FileManager.trashFile()` |
-| 20 | **No sample code** | Search for `MyPlugin`, `SampleModal`, `SampleSettingTab` |
-| 21 | **Object.assign** | Search for `Object.assign(this.settings,` or similar 2-arg patterns |
+| 1 | **No unnecessary type assertions** | Search for `as Type` where `??` fallback makes it redundant |
+| 2 | **Promises handled** | Search for async function calls without `await`, `void`, `.catch()`, or `.then()` with rejection |
+| 3 | **No async without await** | Search for `async` methods with no `await` inside |
+| 4 | **No promise where void expected** | Search for async callbacks in event handlers that expect void |
+| 5 | **No object stringification** | Search for template literals with `??` where left side could be an object |
+| 6 | **Setting.setHeading()** | Search for `createEl('h1')`, `createEl('h2')`, `createEl('h3')` in settings/modals |
 
 #### Optional (warnings)
 
@@ -71,7 +87,7 @@ Run these checks by reading the source code:
 | 2 | **Unused variables** | TypeScript check catches these |
 | 3 | **console.log in lifecycle** | Search for `console.log` in `onload()`/`onunload()` |
 
-### Step 5: Check manifest.json
+### Step 6: Check manifest.json
 
 - `id`: alphanumeric + dashes, no "obsidian", no "plugin" suffix
 - `name`: no "Obsidian", no "Plugin" suffix
@@ -79,13 +95,13 @@ Run these checks by reading the source code:
 - All required fields present: `id`, `name`, `version`, `minAppVersion`, `description`, `author`
 - `version` matches latest git tag (if any)
 
-### Step 6: Check LICENSE
+### Step 7: Check LICENSE
 
 - File exists
 - Copyright year is current year
 - Copyright holder is not placeholder
 
-### Step 7: Report
+### Step 8: Report
 
 Output a structured report:
 
@@ -95,7 +111,7 @@ Output a structured report:
 ### TypeScript: [PASS/FAIL]
 [errors if any]
 
-### ESLint: [PASS/FAIL/SKIPPED]
+### ESLint: [PASS/FAIL]
 [errors if any]
 
 ### Required Violations: [count]
@@ -115,7 +131,7 @@ Output a structured report:
 [count] required issues, [count] warnings
 ```
 
-### Step 8: Offer to fix
+### Step 9: Offer to fix
 
 If violations are found, ask:
 1. Fix all automatically
