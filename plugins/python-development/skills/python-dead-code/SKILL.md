@@ -2,7 +2,7 @@
 created: 2026-03-10
 modified: 2026-03-10
 reviewed: 2026-03-10
-name: Python Dead Code Detection
+name: python-dead-code
 description: |
   Detect and remove unused Python code using vulture and ruff.
   Covers unused imports, variables, functions, classes, and unreachable code.
