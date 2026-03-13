@@ -272,19 +272,21 @@ opt-level = 3
 
 Problem: MSVC default linker (`link.exe`) stalls 30-60s on the final linking step (e.g. `anvil.exe`).
 
-Solution: Use `rust-lld-link.exe` -- much faster alternative linker.
+Solution: Use Rust's bundled LLD linker (`rust-lld.exe`) -- 3-12x faster, no external install needed.
 
 **Prerequisites:**
-- Requires Rust 1.92+ (`rustup update stable` if on older version)
-- Install component: `rustup component add rust-lld`
+```bash
+rustup component add llvm-tools
+```
 
 **Activate in `.cargo/config.toml`:**
 ```toml
 [target.x86_64-pc-windows-msvc]
-linker = "rust-lld-link.exe"
+linker = "rust-lld.exe"
 ```
 
-Applies to both debug and release builds. No other changes needed.
+Applies to both debug and release builds. MSVC Build Tools still required (only the linker is replaced).
+Caveats: large projects may hit COFF 65k symbol limit; avoid combining with `-Ctarget-cpu=native`.
 
 **Vite Configuration:**
 ```typescript
