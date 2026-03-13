@@ -268,6 +268,24 @@ panic = "abort"        # Smaller binary
 opt-level = 3
 ```
 
+**Windows Linker Optimization (rust-lld):**
+
+Problem: MSVC default linker (`link.exe`) stalls 30-60s on the final linking step (e.g. `anvil.exe`).
+
+Solution: Use `rust-lld-link.exe` -- much faster alternative linker.
+
+**Prerequisites:**
+- Requires Rust 1.92+ (`rustup update stable` if on older version)
+- Install component: `rustup component add rust-lld`
+
+**Activate in `.cargo/config.toml`:**
+```toml
+[target.x86_64-pc-windows-msvc]
+linker = "rust-lld-link.exe"
+```
+
+Applies to both debug and release builds. No other changes needed.
+
 **Vite Configuration:**
 ```typescript
 // vite.config.ts
