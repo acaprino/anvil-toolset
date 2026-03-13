@@ -35,19 +35,19 @@ graph TD
 
 ---
 
-## Code Review (`/code-review`)
+## Senior Review (`/senior-review`)
 
 Auto-detects scope (uncommitted changes, commits, or PR) and fires 4 agents in parallel.
 
 ```
-/code-review              # auto-detect scope
-/code-review 42           # review PR #42
-/code-review --auto-comment  # post findings as PR comments
+/senior-review              # auto-detect scope
+/senior-review 42           # review PR #42
+/senior-review --auto-comment  # post findings as PR comments
 ```
 
 ```mermaid
 graph TD
-    A["/code-review"] --> B{"Auto-detect scope"}
+    A["/senior-review"] --> B{"Auto-detect scope"}
     B --> |"uncommitted"| C["Gather diff + context"]
     B --> |"PR number"| C
     B --> |"branch diff"| C

@@ -338,7 +338,7 @@ Do NOT proceed to Phase 4 until the user approves.
 
 ## Phase 4: Review Changes
 
-Run the code-review process -- fire all 3 review agents **in parallel**:
+Run the senior-review process -- fire all 3 review agents **in parallel**:
 
 First, get the diff of all changes made during execution:
 

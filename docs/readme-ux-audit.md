@@ -159,7 +159,7 @@ claude plugin install <plugin-name>@anvil-toolset
 
 # Examples:
 claude plugin install python-development@anvil-toolset
-claude plugin install code-review@anvil-toolset
+claude plugin install senior-review@anvil-toolset
 claude plugin install ai-tooling@anvil-toolset
 ```
 
@@ -183,14 +183,14 @@ Then add a `<details>` block: "See all 22 plugin install commands" for those who
 claude plugin marketplace add acaprino/anvil-toolset
 \`\`\`
 
-**2.** Install a plugin (try `code-review` for instant value):
+**2.** Install a plugin (try `senior-review` for instant value):
 \`\`\`bash
-claude plugin install code-review@anvil-toolset
+claude plugin install senior-review@anvil-toolset
 \`\`\`
 
 **3.** Use it in Claude Code:
 \`\`\`
-/code-review
+/senior-review
 \`\`\`
 
 That's it. Browse all 22 plugins in the [overview table](#plugins-overview).
@@ -210,7 +210,7 @@ That's it. Browse all 22 plugins in the [overview table](#plugins-overview).
 - Add a GitHub stars badge (even if low, it signals the project is public and tracked)
 - If any users have tweeted or posted about the plugins, link to those
 - Add a "Changelog" or "Recent updates" section showing active maintenance
-- Consider adding 1-2 short screenshots or GIF demos showing a plugin in action (e.g., `/code-review` output)
+- Consider adding 1-2 short screenshots or GIF demos showing a plugin in action (e.g., `/senior-review` output)
 
 ---
 
@@ -233,7 +233,7 @@ That's it. Browse all 22 plugins in the [overview table](#plugins-overview).
 - **Development**
   - [Python Development](#python-development-plugin) | [TypeScript](#typescript-development-plugin) | [Tauri](#tauri-development-plugin) | [Frontend](#frontend-plugin) | [Frontend Design](#frontend-design-plugin)
 - **Code Quality**
-  - [Code Review](#code-review-plugin) | [Humanize](#humanize-plugin) | [Deep Dive Analysis](#deep-dive-analysis-plugin)
+  - [Senior Review](#senior-review-plugin) | [Humanize](#humanize-plugin) | [Deep Dive Analysis](#deep-dive-analysis-plugin)
 - **Productivity**
   - [AI Tooling](#ai-tooling-plugin) | [Workflows](#workflows-plugin) | [Project Setup](#project-setup-plugin) | [Utilities](#utilities-plugin)
 - **Specialized**
@@ -298,7 +298,7 @@ That's it. Browse all 22 plugins in the [overview table](#plugins-overview).
   Invoke with: `Use the <agent-name> agent to...`
 - **Skills** - Reusable knowledge that Claude draws on automatically when
   relevant. No explicit invocation needed.
-- **Commands** - Slash commands (like `/code-review`) that trigger specific
+- **Commands** - Slash commands (like `/senior-review`) that trigger specific
   workflows with structured output.
 ```
 

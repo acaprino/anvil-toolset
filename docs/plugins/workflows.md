@@ -11,9 +11,9 @@ End-to-end feature pipeline: brainstorm design, write implementation plan, execu
 | | |
 |---|---|
 | **Invoke** | `/feature-e2e <feature description> [--skip-brainstorm] [--skip-humanize] [--strict-mode]` |
-| **Pipeline** | brainstorming -> writing-plans -> executing-plans -> code-review -> humanize |
+| **Pipeline** | brainstorming -> writing-plans -> executing-plans -> senior-review -> humanize |
 | **Checkpoints** | After design, plan, execution, and review phases |
-| **Dependencies** | ai-tooling, code-review, humanize plugins |
+| **Dependencies** | ai-tooling, senior-review, humanize plugins |
 
 ### `/frontend-redesign`
 

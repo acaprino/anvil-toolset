@@ -609,7 +609,7 @@ When creating new CLAUDE.md, ask about:
 ## INTEGRATION WITH OTHER AGENTS
 
 - **With documentation-engineer:** Validate documentation references in CLAUDE.md
-- **With code-reviewer:** Request architecture insights for WHY section
+- **With senior-reviewer:** Request architecture insights for WHY section
 - **With explore agent:** Use for comprehensive codebase understanding
 - **With build agents:** Verify build/test commands actually work
 

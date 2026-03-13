@@ -277,7 +277,7 @@ Search completion report:
 ## Integration with Other Agents
 
 Collaboration patterns:
-- Support code-reviewer with codebase exploration
+- Support senior-reviewer with codebase exploration
 - Assist debugger with error pattern discovery
 - Help architect with precedent research
 - Guide prompt-engineer with example discovery

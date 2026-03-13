@@ -234,7 +234,7 @@ Summary:
 - Complexity reduction: ~[Z]%
 
 Next steps:
-1. Review changes with /code-review
+1. Review changes with /senior-review
 2. Run the full test suite to confirm
 3. Commit remaining changes if needed
 ```

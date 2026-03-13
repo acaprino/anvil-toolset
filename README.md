@@ -4,7 +4,7 @@
 [![Marketplace](https://img.shields.io/badge/marketplace-v1.56.0-green.svg)](.claude-plugin/marketplace.json)
 [![Plugins](https://img.shields.io/badge/plugins-22-orange.svg)](#plugins)
 
-Plugin set for [Anvil](https://github.com/acaprino/anvil). 22 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, code review, frontend, Tauri/Rust, AI tooling, Obsidian, and more -- so you spend less time prompting and more time shipping.
+Plugin set for [Anvil](https://github.com/acaprino/anvil). 22 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, and more -- so you spend less time prompting and more time shipping.
 
 **22 plugins | 19 agents | 25 skills | 18 commands** -- install only what you need.
 
@@ -22,7 +22,7 @@ Plugin set for [Anvil](https://github.com/acaprino/anvil). 22 ready-to-install p
 |------|-----------|------------|
 | **Agent** | A specialized AI persona with domain expertise | `Use the python-pro agent to implement rate limiting` |
 | **Skill** | A knowledge module that enhances Claude's capabilities | Referenced automatically when relevant |
-| **Command** | A slash command that triggers a specific workflow | `/code-review`, `/python-scaffold`, `/feature-e2e` |
+| **Command** | A slash command that triggers a specific workflow | `/senior-review`, `/python-scaffold`, `/feature-e2e` |
 
 ---
 
@@ -39,7 +39,7 @@ claude plugin marketplace add acaprino/anvil-toolset
 ```bash
 # Install individual plugins (pick what you need)
 claude plugin install python-development@anvil-toolset
-claude plugin install code-review@anvil-toolset
+claude plugin install senior-review@anvil-toolset
 claude plugin install frontend@anvil-toolset
 # ... see Plugins table below for all 22 available plugins
 ```
@@ -60,7 +60,7 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **python-development** | Modern Python development ecosystem with testing, packaging, async patterns, and code refactoring tools | 1 | 8 | 2 | [docs](docs/plugins/python-development.md) |
 | **humanize** | Make AI-generated code look human-written -- fixes names, removes boilerplate | 1 | - | 1 | [docs](docs/plugins/humanize.md) |
 | **deep-dive-analysis** | Understand any codebase in minutes with 7-phase systematic analysis | - | 1 | 1 | [docs](docs/plugins/deep-dive-analysis.md) |
-| **code-review** | Catch bugs before they ship -- 3 agents review architecture, security, and patterns in parallel | 3 | - | 3 | [docs](docs/plugins/code-review.md) |
+| **senior-review** | Catch bugs before they ship -- 3 agents review architecture, security, and patterns in parallel | 3 | - | 3 | [docs](docs/plugins/senior-review.md) |
 | **tauri-development** | Build cross-platform desktop and mobile apps with Tauri 2 and Rust | 2 | 1 | - | [docs](docs/plugins/tauri-development.md) |
 | **frontend** | Optimize React performance, polish UI, design layouts, and master modern CSS | 5 | 4 | 1 | [docs](docs/plugins/frontend.md) |
 | **ai-tooling** | Brainstorm, plan, and execute with structured AI-assisted workflows | 1 | 3 | 1 | [docs](docs/plugins/ai-tooling.md) |
@@ -80,7 +80,7 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **browser-extensions** | Build Firefox extensions with expert Manifest V2/V3 and AMO publishing guidance | - | 1 | - | [docs](docs/plugins/browser-extensions.md) |
 | **obsidian-development** | Pass ObsidianReviewBot on first submission with compliant scaffolding and checks | - | 3 | - | [docs](docs/plugins/obsidian-development.md) |
 
-See [Quick Start Workflows](docs/workflows.md) for end-to-end pipelines like `/feature-e2e`, `/code-review`, `/frontend-redesign`, and more.
+See [Quick Start Workflows](docs/workflows.md) for end-to-end pipelines like `/feature-e2e`, `/senior-review`, `/frontend-redesign`, and more.
 
 ---
 
@@ -100,7 +100,7 @@ anvil-toolset/
 │   │   ├── agents/
 │   │   ├── skills/
 │   │   └── commands/
-│   ├── code-review/
+│   ├── senior-review/
 │   │   ├── agents/
 │   │   └── commands/
 │   ├── frontend/

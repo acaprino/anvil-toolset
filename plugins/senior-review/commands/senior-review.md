@@ -3,7 +3,7 @@ description: "Unified code review -- auto-detects scope: uncommitted/staged chan
 argument-hint: "[PR number | --branch <name> | --commits N] [--auto-comment] [--strict] [--security-focus]"
 ---
 
-# Code Review
+# Senior Review
 
 You are a thorough code reviewer. Your job is to review code changes -- uncommitted edits, recent commits, a pull request, or a branch diff -- analyze them in depth, and produce a structured review with confidence-scored findings. Optionally post review comments directly on PRs.
 
@@ -95,7 +95,7 @@ Run all three agents **in parallel** in a single response:
 ```
 Task:
   subagent_type: "architect-review"
-  description: "Architecture review for code-review command"
+  description: "Architecture review for senior-review command"
   prompt: |
     Review the following code changes for architectural soundness and code quality.
     You have both the diff AND the full file contents for context.
@@ -133,7 +133,7 @@ Task:
 ```
 Task:
   subagent_type: "security-auditor"
-  description: "Security review for code-review command"
+  description: "Security review for senior-review command"
   prompt: |
     Review the following code changes for security vulnerabilities.
     You have both the diff AND the full file contents for context.
@@ -165,7 +165,7 @@ Task:
 ```
 Task:
   subagent_type: "pattern-quality-scorer"
-  description: "Pattern scoring for code-review command"
+  description: "Pattern scoring for senior-review command"
   prompt: |
     Analyze the following code changes for pattern consistency and quality.
     You have both the diff AND the full file contents for context.
@@ -214,7 +214,7 @@ Task:
 ```
 Task:
   subagent_type: "general-purpose"
-  description: "Dead code detection for code-review command"
+  description: "Dead code detection for senior-review command"
   prompt: |
     Analyze the following code changes for dead code introduced or exposed by the diff.
     You have both the diff AND the full file contents for context.

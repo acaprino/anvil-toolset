@@ -1,4 +1,4 @@
-# Code Review Plugin
+# Senior Review Plugin
 
 > Catch bugs before they ship. Three specialized agents review architecture, security, and code patterns in parallel -- like having a senior architect, security auditor, and quality engineer on every PR.
 
@@ -83,16 +83,16 @@ Orchestrate comprehensive multi-dimensional code review using all specialized re
 
 ---
 
-### `/code-review`
+### `/senior-review`
 
 Unified code review -- auto-detects scope: uncommitted/staged changes, recent commits, PR number, or branch diff. Runs architecture, security, and pattern analysis agents in parallel with confidence scoring.
 
 ```
-/code-review                    # auto-detect: uncommitted changes or branch diff
-/code-review 42                 # review PR #42
-/code-review --commits 3        # review last 3 commits
-/code-review --branch feature   # review branch diff
-/code-review --auto-comment     # post findings as PR comments
+/senior-review                    # auto-detect: uncommitted changes or branch diff
+/senior-review 42                 # review PR #42
+/senior-review --commits 3        # review last 3 commits
+/senior-review --branch feature   # review branch diff
+/senior-review --auto-comment     # post findings as PR comments
 ```
 
 ---

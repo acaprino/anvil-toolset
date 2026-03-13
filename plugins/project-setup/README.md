@@ -237,7 +237,7 @@ cat biome.json
 
 Works well with other agents:
 - **documentation-engineer**: Validates doc references in CLAUDE.md
-- **code-reviewer**: Gets architecture insights for WHY section
+- **senior-reviewer**: Gets architecture insights for WHY section
 - **explore agent**: Comprehensive codebase understanding
 
 ## Maintenance Recommendations

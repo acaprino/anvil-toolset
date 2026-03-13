@@ -1,6 +1,6 @@
 ---
 name: architect-review
-description: Critical architecture reviewer. Hunts for coupling violations, broken abstractions, missing error handling, state management issues, and API design flaws. Assumes code has bugs and finds them. Use in code-review pipeline.
+description: Critical architecture reviewer. Hunts for coupling violations, broken abstractions, missing error handling, state management issues, and API design flaws. Assumes code has bugs and finds them. Use in senior-review pipeline.
 model: opus
 color: cyan
 ---
