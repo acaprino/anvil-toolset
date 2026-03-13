@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.63.0"
+    "version": "1.63.1"
   },
   "plugins": [
     {
@@ -563,8 +563,8 @@
     {
       "name": "obsidian-development",
       "source": "./plugins/obsidian-development",
-      "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, and pre-submission checks",
-      "version": "1.1.0",
+      "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, pre-submission checks, and MarkMind mind map generation",
+      "version": "1.1.1",
       "author": {
         "name": "Alfio"
       },
@@ -576,14 +576,17 @@
         "review-bot",
         "scaffold",
         "lint",
-        "community-plugin"
+        "community-plugin",
+        "markmind",
+        "mind-map"
       ],
       "category": "development",
       "strict": false,
       "skills": [
         "./skills/obsidian-plugin-development",
         "./skills/obsidian-scaffold",
-        "./skills/obsidian-check"
+        "./skills/obsidian-check",
+        "./skills/markmind-mapper"
       ]
     },
     {
