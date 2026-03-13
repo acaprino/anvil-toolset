@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.63.1"
+    "version": "1.63.2"
   },
   "plugins": [
     {
@@ -563,8 +563,8 @@
     {
       "name": "obsidian-development",
       "source": "./plugins/obsidian-development",
-      "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, pre-submission checks, and MarkMind mind map generation",
-      "version": "1.1.1",
+      "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, and pre-submission checks",
+      "version": "1.1.0",
       "author": {
         "name": "Alfio"
       },
@@ -576,17 +576,14 @@
         "review-bot",
         "scaffold",
         "lint",
-        "community-plugin",
-        "markmind",
-        "mind-map"
+        "community-plugin"
       ],
       "category": "development",
       "strict": false,
       "skills": [
         "./skills/obsidian-plugin-development",
         "./skills/obsidian-scaffold",
-        "./skills/obsidian-check",
-        "./skills/markmind-mapper"
+        "./skills/obsidian-check"
       ]
     },
     {
@@ -612,6 +609,30 @@
       "strict": false,
       "skills": [
         "./skills/firefox-extension-dev"
+      ]
+    },
+    {
+      "name": "learning",
+      "source": "./plugins/learning",
+      "description": "Learning and knowledge management tools -- mind map generation, visual summaries, and study aids",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "learning",
+        "mind-map",
+        "markmind",
+        "obsidian",
+        "knowledge",
+        "study",
+        "visual"
+      ],
+      "category": "productivity",
+      "strict": false,
+      "skills": [
+        "./skills/markmind-mapper"
       ]
     }
   ]
