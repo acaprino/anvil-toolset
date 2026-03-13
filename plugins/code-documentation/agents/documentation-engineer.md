@@ -704,7 +704,7 @@ Use these markers:
 
 When working in multi-agent systems:
 
-- **With senior-reviewer:** Request review of doc accuracy against code
+- **With architect-review:** Request review of doc accuracy against code
 - **With frontend-developer:** Get UI component documentation
 - **With backend-developer:** Clarify API behavior uncertainties
 - **With qa-expert:** Use test cases as documentation examples

@@ -10,7 +10,7 @@ Rewrites source code to make it more readable and human-friendly without changin
 
 | | |
 |---|---|
-| **Model** | `sonnet` |
+| **Model** | `opus` |
 | **Use for** | Code cleanup, naming improvements, removing AI-generated boilerplate |
 
 **Invocation:**

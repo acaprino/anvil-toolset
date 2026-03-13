@@ -305,7 +305,7 @@ Structure refactoring output using the template from `assets/templates/summary_t
 
 ## Integration with Same-Package Skills
 
-- **python-testing-patterns** - Set up tests before refactoring, validate coverage after
+- **python-tdd** - Set up tests before refactoring, validate coverage after
 - **python-performance-optimization** - Deep profiling before/after refactoring
 - **python-packaging** - If refactoring a library, handle pyproject.toml and distribution
 - **uv-package-manager** - Use `uv run ruff`, `uv run complexipy` for tool execution

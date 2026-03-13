@@ -117,7 +117,7 @@ All improvements measured with concrete metrics:
 ### Composability
 
 Integrates with other skills:
-- **python-testing-patterns**: Ensure test coverage before/after
+- **python-tdd**: Ensure test coverage before/after
 - **python-performance-optimization**: Deep profiling validation
 - **async-python-patterns**: Async code restructuring
 - **uv-package-manager**: Tool execution via `uv run`

@@ -146,6 +146,23 @@ Fast Python dependency management with uv (10-100x faster than pip).
 
 ---
 
+### `python-dead-code`
+
+Detect and remove unused Python code using vulture and ruff.
+
+| | |
+|---|---|
+| **Invoke** | Skill reference |
+| **Use for** | Dead code detection, unused imports, unreachable code, framework-aware cleanup |
+
+**Two-tool approach:**
+- Ruff: Fast lint-level checks (F401 unused imports, F841 unused variables, F811 redefined names)
+- Vulture: Deeper analysis for unused functions, classes, and unreachable code
+
+**Framework-aware:** Handles false positives for Django, FastAPI, pytest, click, and more.
+
+---
+
 ### `python-comments`
 
 Write and audit Python code comments using antirez's 9-type taxonomy.

@@ -609,8 +609,8 @@ When creating new CLAUDE.md, ask about:
 ## INTEGRATION WITH OTHER AGENTS
 
 - **With documentation-engineer:** Validate documentation references in CLAUDE.md
-- **With senior-reviewer:** Request architecture insights for WHY section
-- **With explore agent:** Use for comprehensive codebase understanding
+- **With architect-review:** Request architecture insights for WHY section
+- **With documentation-engineer:** Use for comprehensive codebase understanding
 - **With build agents:** Verify build/test commands actually work
 
 ---

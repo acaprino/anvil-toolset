@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.68.0"
+    "version": "1.69.0"
   },
   "plugins": [
     {
@@ -615,7 +615,7 @@
       "name": "learning",
       "source": "./plugins/learning",
       "description": "Learning and knowledge management tools -- mind map generation, visual summaries, and study aids",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Alfio"
       },

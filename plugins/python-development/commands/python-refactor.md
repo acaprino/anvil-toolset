@@ -241,6 +241,6 @@ Next steps:
 
 ## Related Skills
 
-- `python-testing-patterns` -- Set up tests before refactoring
+- `python-tdd` -- Set up tests before refactoring
 - `python-performance-optimization` -- Profile if performance-critical
 - `async-python-patterns` -- For async code refactoring

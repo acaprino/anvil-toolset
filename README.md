@@ -1,12 +1,12 @@
 # Anvil Toolset
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v1.56.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-22-orange.svg)](#plugins)
+[![Marketplace](https://img.shields.io/badge/marketplace-v1.68.0-green.svg)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-23-orange.svg)](#plugins)
 
-Plugin set for [Anvil](https://github.com/acaprino/anvil). 22 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, and more -- so you spend less time prompting and more time shipping.
+Plugin set for [Anvil](https://github.com/acaprino/anvil). 23 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, and more -- so you spend less time prompting and more time shipping.
 
-**22 plugins | 19 agents | 25 skills | 18 commands** -- install only what you need.
+**23 plugins | 20 agents | 30 skills | 22 commands** -- install only what you need.
 
 ---
 
@@ -41,7 +41,7 @@ claude plugin marketplace add acaprino/anvil-toolset
 claude plugin install python-development@anvil-toolset
 claude plugin install senior-review@anvil-toolset
 claude plugin install frontend@anvil-toolset
-# ... see Plugins table below for all 22 available plugins
+# ... see Plugins table below for all 23 available plugins
 ```
 
 ### From Local Path (Development)
@@ -79,6 +79,7 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **app-explorer** | Map any webapp's screens and navigation with Playwright crawling | - | 1 | - | [docs](docs/plugins/app-explorer.md) |
 | **browser-extensions** | Build Firefox extensions with expert Manifest V2/V3 and AMO publishing guidance | - | 1 | - | [docs](docs/plugins/browser-extensions.md) |
 | **obsidian-development** | Pass ObsidianReviewBot on first submission with compliant scaffolding and checks | - | 3 | - | [docs](docs/plugins/obsidian-development.md) |
+| **learning** | Generate mind maps in Obsidian MarkMind Rich format from any content | - | 1 | 1 | [docs](docs/plugins/learning.md) |
 
 See [Quick Start Workflows](docs/workflows.md) for end-to-end pipelines like `/feature-e2e`, `/senior-review`, `/frontend-redesign`, and more.
 
@@ -107,7 +108,7 @@ anvil-toolset/
 │   │   ├── agents/
 │   │   ├── skills/
 │   │   └── commands/
-│   └── ...                       # 22 plugins total
+│   └── ...                       # 23 plugins total
 ├── LICENSE
 └── README.md
 ```

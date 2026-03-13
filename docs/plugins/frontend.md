@@ -40,7 +40,7 @@ Senior UI polish specialist and motion designer for premium interfaces.
 
 | | |
 |---|---|
-| **Model** | `sonnet` |
+| **Model** | `opus` |
 | **Use for** | Micro-interactions, animations, transitions, loading states |
 
 **Invocation:**
