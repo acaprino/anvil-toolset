@@ -1,6 +1,6 @@
 ---
 name: obsidian-scaffold
-description: Use when creating a new Obsidian community plugin from scratch. Scaffolds project structure, manifest, tsconfig, esbuild config, and a minimal plugin class that passes ObsidianReviewBot checks.
+description: Use PROACTIVELY when the user asks to start, create, bootstrap, or initialize a new Obsidian community plugin. Scaffolds project structure, manifest, tsconfig, esbuild config, and a minimal plugin class that passes ObsidianReviewBot checks.
 ---
 
 # Obsidian Plugin Scaffold

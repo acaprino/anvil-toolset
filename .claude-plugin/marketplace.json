@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.91.0"
+    "version": "1.92.0"
   },
   "plugins": [
     {
@@ -38,7 +38,7 @@
       "name": "deep-dive-analysis",
       "source": "./plugins/deep-dive-analysis",
       "description": "Systematic codebase analysis -- analyzes architecture, traces data flows, detects anti-patterns, and generates structured documentation for onboarding, architecture review, or code documentation",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "author": {
         "name": "Alfio"
       },
@@ -48,7 +48,10 @@
         "codebase",
         "documentation",
         "semantic",
-        "deep-dive"
+        "deep-dive",
+        "architecture",
+        "onboarding",
+        "anti-patterns"
       ],
       "category": "review",
       "strict": false,
@@ -63,7 +66,7 @@
       "name": "tauri-development",
       "source": "./plugins/tauri-development",
       "description": "Tauri 2 desktop and mobile development -- IPC optimization, Rust backend patterns, cross-platform builds, and React integration for high-performance apps",
-      "version": "1.6.0",
+      "version": "1.7.0",
       "author": {
         "name": "Alfio"
       },
@@ -89,7 +92,7 @@
       "name": "frontend",
       "source": "./plugins/frontend",
       "description": "React performance optimization, UI polishing, UX design, comprehensive CSS (BEM, CSS Modules, SASS, accessibility, cross-browser), and premium web consulting",
-      "version": "2.15.0",
+      "version": "2.16.0",
       "author": {
         "name": "Alfio"
       },
@@ -103,7 +106,7 @@
         "optimization",
         "css",
         "css-master",
-        "orchestration",
+        "layout-design",
         "product-brief",
         "web-consultant",
         "strategy",
@@ -163,7 +166,7 @@
       "name": "python-development",
       "source": "./plugins/python-development",
       "description": "Python development toolkit -- TDD with pytest, code refactoring with complexity metrics, performance profiling, async patterns, uv package management, dead code detection, comment auditing, and project scaffolding",
-      "version": "1.12.0",
+      "version": "1.13.0",
       "author": {
         "name": "Alfio"
       },
@@ -174,7 +177,10 @@
         "packaging",
         "async",
         "dead-code",
-        "vulture"
+        "vulture",
+        "pytest",
+        "uv",
+        "refactoring"
       ],
       "category": "development",
       "strict": false,
@@ -224,8 +230,8 @@
     {
       "name": "utilities",
       "source": "./plugins/utilities",
-      "description": "General utility skills for file organization, cleanup, dead code detection, and system maintenance",
-      "version": "1.3.0",
+      "description": "File organization and cleanup utilities -- sort messy folders, find duplicates, and multi-language dead code detection dispatching to language-specific tools",
+      "version": "1.4.0",
       "author": {
         "name": "ComposioHQ"
       },
@@ -236,12 +242,14 @@
         "cleanup",
         "duplicates",
         "folders",
-        "downloads",
-        "dead-code",
-        "unused-exports"
+        "downloads"
       ],
       "category": "utilities",
       "strict": false,
+      "dependencies": [
+        "python-development",
+        "typescript-development"
+      ],
       "skills": [
         "./skills/file-organizer"
       ],
@@ -276,8 +284,8 @@
     {
       "name": "research",
       "source": "./plugins/research",
-      "description": "Advanced search and information retrieval specialist for precise knowledge discovery across codebases and web sources",
-      "version": "1.2.0",
+      "description": "Complex multi-source research specialist -- use when initial searches fail, when research needs systematic coverage across codebase, docs, and web, or when finding specific information requires query optimization and iterative refinement",
+      "version": "1.3.0",
       "author": {
         "name": "Alfio"
       },
@@ -300,7 +308,7 @@
       "name": "business",
       "source": "./plugins/business",
       "description": "Legal advisory for technology companies -- contract review, data privacy (GDPR/CCPA), intellectual property, compliance frameworks, and risk mitigation",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Alfio"
       },
@@ -323,8 +331,8 @@
     {
       "name": "code-documentation",
       "source": "./plugins/code-documentation",
-      "description": "Technical documentation engineering with AI-powered codebase analysis, documentation creation, and management",
-      "version": "1.3.0",
+      "description": "Bottom-up technical documentation -- codebase analysis, API reference generation, doc refactoring and consolidation, ground truth verification, and tutorial creation",
+      "version": "1.4.0",
       "author": {
         "name": "Alfio"
       },
@@ -454,7 +462,7 @@
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
       "description": "SEO optimization and content marketing with technical audits, keyword research, content strategy, and engagement-driven campaigns",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "author": {
         "name": "Alfio"
       },
@@ -486,13 +494,14 @@
       "name": "senior-review",
       "source": "./plugins/senior-review",
       "description": "Multi-agent code review orchestration with architecture, security, pattern analysis, and calibrated quality scoring",
-      "version": "2.10.0",
+      "version": "2.11.0",
       "author": {
         "name": "Alfio"
       },
       "license": "MIT",
       "keywords": [
         "senior-review",
+        "code-review",
         "architecture",
         "security",
         "patterns",
@@ -515,7 +524,7 @@
       "name": "app-explorer",
       "source": "./plugins/app-explorer",
       "description": "AI-driven webapp explorer using Playwright MCP tools for interactive mapping of web applications - handles login, SPAs, modals, drawers, and dynamic content with intelligent BFS exploration and structured JSON sitemap output",
-      "version": "3.2.0",
+      "version": "3.3.0",
       "author": {
         "name": "Alfio"
       },
@@ -530,7 +539,7 @@
         "screenshots",
         "exploration"
       ],
-      "category": "utilities",
+      "category": "testing",
       "strict": false,
       "dependencies": [
         "playwright-skill"
@@ -583,7 +592,7 @@
       "name": "obsidian-development",
       "source": "./plugins/obsidian-development",
       "description": "Obsidian community plugin development with ObsidianReviewBot compliance, project scaffolding, and pre-submission checks",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Alfio"
       },
@@ -609,7 +618,7 @@
       "name": "browser-extensions",
       "source": "./plugins/browser-extensions",
       "description": "Expert Firefox extension (WebExtension) developer covering Manifest V2/V3, all 51 browser.* APIs, content scripts, background scripts, native messaging, cross-browser compatibility, AMO publishing, and web-ext CLI tooling",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "Alfio"
       },
@@ -622,7 +631,9 @@
         "manifest-v3",
         "content-scripts",
         "background-scripts",
-        "amo"
+        "amo",
+        "javascript",
+        "web-ext"
       ],
       "category": "development",
       "strict": false,
@@ -665,8 +676,8 @@
     {
       "name": "marketplace-ops",
       "source": "./plugins/marketplace-ops",
-      "description": "Marketplace consolidation and plugin management -- auditing, validation, AI quality review of descriptions and trigger keywords, upstream sync, plugin scaffolding, and health monitoring for the anvil-toolset ecosystem",
-      "version": "1.4.0",
+      "description": "Marketplace consolidation and plugin management -- auditing, validation, AI quality review, upstream sync, plugin scaffolding, and health monitoring for the anvil-toolset ecosystem",
+      "version": "1.5.0",
       "author": {
         "name": "Alfio"
       },
@@ -699,7 +710,7 @@
       "name": "playwright-skill",
       "source": "./plugins/playwright-skill",
       "description": "General-purpose browser automation with Playwright -- auto-detects dev servers, writes clean test scripts, supports responsive testing, login flows, form filling, link checking, and any browser task with visible or headless execution",
-      "version": "1.0.1",
+      "version": "1.1.0",
       "author": {
         "name": "lackeyjb"
       },

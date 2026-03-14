@@ -1,6 +1,6 @@
 ---
 name: content-marketer
-description: Expert content marketer specializing in content strategy, SEO optimization, and engagement-driven marketing. Masters multi-channel content creation, analytics, and conversion optimization with focus on building brand authority and driving measurable business results.
+description: Expert content marketer. Use PROACTIVELY when the user asks about marketing materials, conversion optimization, content strategy, social media, CTAs, or landing page copy. Covers multi-channel content creation, analytics, and conversion optimization.
 tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 model: opus
 color: orange

@@ -1,6 +1,6 @@
 ---
 name: deep-dive-analysis
-description: AI-powered systematic codebase analysis. Combines mechanical structure extraction with Claude's semantic understanding to produce documentation that captures not just WHAT code does, but WHY it exists and HOW it fits into the system. Includes pattern recognition, red flag detection, flow tracing, and quality assessment. Use for codebase analysis, documentation generation, architecture understanding, or code review.
+description: AI-powered systematic codebase analysis. Use PROACTIVELY when encountering unfamiliar code, before major refactoring, or when documentation is stale or missing. Combines structure extraction with semantic understanding to produce documentation capturing WHAT, WHY, HOW, and CONSEQUENCES. Includes pattern recognition, red flag detection, flow tracing, and quality assessment.
 ---
 
 # Deep Dive Analysis Skill

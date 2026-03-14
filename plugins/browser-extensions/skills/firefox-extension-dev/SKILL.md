@@ -1,6 +1,6 @@
 ---
 name: firefox-extension-dev
-description: Expert Firefox extension (WebExtension) developer. Covers Manifest V2/V3, browser.* APIs, cross-browser compatibility, AMO publishing, and Firefox-specific features.
+description: Expert Firefox extension (WebExtension) developer. Use PROACTIVELY when creating, debugging, or publishing any Firefox extension or browser add-on. Covers Manifest V2/V3, browser.* APIs, cross-browser compatibility, AMO publishing, and web-ext CLI.
 ---
 
 # Firefox Extension Development Expert
