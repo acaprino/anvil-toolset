@@ -13,6 +13,11 @@
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/skill-awareness.js\"",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/cleanup-builtins.js\"",
+            "timeout": 15
           }
         ]
       }
