@@ -119,7 +119,7 @@ this context with your specialized perspective.
 
 ## Step 3: Run Parallel Review Agents
 
-Run all three agents **in parallel** in a single response:
+Run all four agents **in parallel** in a single response:
 
 ### Agent A: Architecture & Code Quality
 
@@ -191,14 +191,14 @@ Task:
     For each finding: severity, CWE if applicable, file + line, confidence (0-100), attack scenario, concrete fix.
 ```
 
-### Agent C: Pattern Consistency & Scoring
+### Agent C: Pattern Consistency
 
 ```
 Task:
-  subagent_type: "senior-review:pattern-quality-scorer"
-  description: "Pattern scoring for senior-review command"
+  subagent_type: "general-purpose"
+  description: "Pattern consistency analysis"
   prompt: |
-    Analyze the following code changes for pattern consistency and quality.
+    You are a pattern consistency analyst. Analyze code changes for pattern deviations and anti-patterns.
     You have both the diff AND the full file contents for context.
 
     ## Changed Files
@@ -227,17 +227,7 @@ Task:
     ### CLAUDE.md Compliance
     Check each changed file against project conventions. Flag any deviations.
 
-    ### Quality Score
-    Score the changed code:
-
-    | Category        | Score | Confidence |
-    |-----------------|-------|------------|
-    | Code Quality    | X/10  | X%         |
-    | Security        | X/10  | X%         |
-    | Consistency     | X/10  | X%         |
-    | **Overall**     | **X/10** | **X%**  |
-
-    Default overall to 5/10. Justify any score above 7 with specific evidence.
+    For each finding: severity (Critical/High/Medium/Low), file + line, confidence (0-100), concrete fix.
 ```
 
 ### Agent D: Dead Code Detection

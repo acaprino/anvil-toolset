@@ -1,5 +1,5 @@
 ---
-description: "Full codebase review pipeline -- deep-dive structural analysis followed by senior multi-agent code review with consolidated scoring"
+description: "Full codebase review pipeline -- deep-dive structural analysis followed by comprehensive multi-agent code review covering architecture, security, performance, testing, documentation, best practices, CI/CD, dead code, and consolidated quality scoring"
 argument-hint: "<target path or description> [--skip-deep-dive] [--security-focus] [--performance-critical] [--strict-mode] [--framework react|spring|django|rails]"
 ---
 
@@ -23,7 +23,7 @@ This command requires agents, skills, and commands from other plugins. Before pr
 
 **Required plugins:**
 - `deep-dive-analysis` -- deep-dive-analysis skill/command (Phase 1)
-- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents, full-review command pattern (Phase 2)
+- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents (Phase 2)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
 
@@ -112,7 +112,16 @@ Determine what code to review from `$ARGUMENTS`:
 ## Pipeline Phases
 
 1. Deep Dive Structural Analysis
-2. Senior Code Review (Architecture + Security + Performance + Testing + Best Practices + Quality Scoring)
+2. Senior Code Review
+   - 2A: Architecture Review
+   - 2B: Security Vulnerability Assessment
+   - 2C: Performance Analysis
+   - 2D: Test Coverage Analysis
+   - 2E: Documentation & API Review
+   - 2F: Framework & Language Best Practices
+   - 2G: CI/CD & DevOps Practices
+   - 2H: Dead Code Analysis
+   - 2I: Code Quality, Pattern Analysis & Scoring
 3. Consolidated Report
 ```
 
@@ -307,6 +316,23 @@ Read `.full-review-pipeline/01-deep-dive-summary.md` and `.full-review-pipeline/
 
 This phase runs the senior-review process enriched with deep dive findings. All review agents receive the deep dive context to produce deeper, more targeted analysis.
 
+### Deep Dive Context Injection
+
+When deep dive was performed (not skipped), each review agent prompt in Phase 2 gets the relevant deep-dive findings injected:
+
+- For architect-review (2A): structure, interfaces, flows, semantics
+- For security-auditor (2B): flows (data paths), semantics (assumptions), risks
+- For performance agent (2C): structure, flows
+- For test/docs agents (2D, 2E): interfaces, flows, risks
+- For best practices agents (2F): all deep-dive findings
+- For CI/CD agent (2G): structure, risks
+- For dead code agent (2H): structure, interfaces
+- For pattern-quality-scorer (2I): all deep-dive findings
+
+Use this context to strengthen analysis. Do NOT re-report findings already covered in the deep dive -- instead focus on new issues the deep dive missed or issues that become apparent when combining deep-dive context with the specialized perspective.
+
+---
+
 ### Step 2A: Architecture Review (parallel with 2B)
 
 Run steps 2A and 2B in parallel using multiple Agent tool calls in a single response.
@@ -378,8 +404,8 @@ Task:
     - Severity (Critical / High / Medium / Low) with CVSS score if applicable
     - CWE reference where applicable
     - File and line location
-    - Attack scenario
-    - Specific remediation steps
+    - Proof of concept or attack scenario
+    - Specific remediation steps with code example
 
     Do NOT re-report security risks already in the deep dive risk report unless you have
     additional context or a more specific attack scenario.
@@ -400,20 +426,18 @@ After both 2A and 2B complete, consolidate into `.full-review-pipeline/02-archit
 
 [Summary from 2B, organized by severity]
 
-## Critical Issues for Phase 2C-2D Context
+## Critical Issues for Subsequent Steps
 
-[List findings that affect testing, performance, or best practices review]
+[List findings that affect testing, performance, documentation, or best practices review]
 ```
 
 Update `state.json`: add steps 2A and 2B to `completed_phases`.
 
 ---
 
-### Step 2C: Performance & Testing Review (parallel)
+### Step 2C: Performance Analysis (parallel with 2D and 2E)
 
-Run steps 2C and 2D in parallel.
-
-### Step 2C: Performance Analysis
+Run steps 2C, 2D, and 2E in parallel using multiple Agent tool calls in a single response.
 
 ```
 Task:
@@ -434,22 +458,23 @@ Task:
 
     ## Instructions
     Analyze:
-    1. **Database performance**: N+1 queries, missing indexes, unoptimized queries -- use flow traces to identify hot paths
-    2. **Memory management**: Leaks, unbounded collections, large allocations
+    1. **Database performance**: N+1 queries, missing indexes, unoptimized queries, connection pool sizing -- use flow traces to identify hot paths
+    2. **Memory management**: Leaks, unbounded collections, large object allocations
     3. **Caching**: Missing opportunities, stale cache risks, invalidation issues
-    4. **I/O bottlenecks**: Synchronous blocking, missing pagination, large payloads
+    4. **I/O bottlenecks**: Synchronous blocking calls, missing pagination, large payloads
     5. **Concurrency**: Race conditions, deadlocks, thread safety
-    6. **Scalability**: Horizontal scaling barriers, stateful components, single points of failure
+    6. **Frontend performance**: Bundle size, render performance, unnecessary re-renders, missing lazy loading
+    7. **Scalability**: Horizontal scaling barriers, stateful components, single points of failure
 
     For each finding:
     - Severity (Critical / High / Medium / Low)
     - Estimated performance impact
-    - Specific optimization with code example
+    - Specific optimization recommendation with code example
 
     Write your findings as a structured markdown document.
 ```
 
-### Step 2D: Test Coverage Analysis
+### Step 2D: Test Coverage Analysis (parallel with 2C and 2E)
 
 ```
 Task:
@@ -471,24 +496,62 @@ Task:
     ## Instructions
     Analyze:
     1. **Test coverage**: Which critical paths (from flow traces) have tests? Which don't?
-    2. **Test quality**: Behavior vs implementation testing, assertion quality
-    3. **Test pyramid**: Unit vs integration vs E2E ratio
+    2. **Test quality**: Are tests testing behavior or implementation? Assertion quality?
+    3. **Test pyramid adherence**: Unit vs integration vs E2E test ratio
     4. **Edge cases**: Boundary conditions, error paths, concurrent scenarios
-    5. **Security test gaps**: Are security-critical paths tested?
-    6. **Integration gaps**: Are interface contracts (from deep dive) validated by tests?
+    5. **Test maintainability**: Test isolation, mock usage, flaky test indicators
+    6. **Security test gaps**: Are security-critical paths tested? Auth, input validation?
+    7. **Performance test gaps**: Are performance-critical paths tested? Load testing?
+    8. **Integration gaps**: Are interface contracts (from deep dive) validated by tests?
 
     For each finding:
     - Severity (Critical / High / Medium / Low)
-    - What is untested
-    - Specific test recommendation
+    - What is untested or poorly tested
+    - Specific test recommendation with example test code
 
     Write your findings as a structured markdown document.
 ```
 
-After 2C and 2D complete, consolidate into `.full-review-pipeline/03-performance-testing.md`:
+### Step 2E: Documentation & API Review (parallel with 2C and 2D)
+
+```
+Task:
+  subagent_type: "general-purpose"
+  description: "Documentation review enriched with deep dive context"
+  prompt: |
+    You are a technical documentation architect. Review documentation completeness and accuracy.
+
+    ## Review Scope
+    [Insert contents of .full-review-pipeline/00-scope.md]
+
+    ## Deep Dive Context
+    [Insert key findings from .full-review-pipeline/dd-02-interfaces.md and dd-03-flows-semantics.md]
+
+    ## Prior Phase Context
+    [Insert key findings from .full-review-pipeline/02-architecture-security.md]
+
+    ## Instructions
+    Evaluate:
+    1. **Inline documentation**: Are complex algorithms and business logic explained? Are assumptions documented?
+    2. **API documentation**: Are endpoints documented with examples? Request/response schemas? Error responses?
+    3. **Architecture documentation**: ADRs, system diagrams, component documentation
+    4. **README completeness**: Setup instructions, development workflow, deployment guide, prerequisites
+    5. **Accuracy**: Does documentation match the actual implementation? Cross-reference with interface analysis
+    6. **Changelog/migration guides**: Are breaking changes documented? Version history?
+    7. **Onboarding**: Could a new developer understand the codebase from the docs alone?
+
+    For each finding:
+    - Severity (Critical / High / Medium / Low)
+    - What is missing or inaccurate
+    - Specific documentation recommendation
+
+    Write your findings as a structured markdown document.
+```
+
+After 2C, 2D, and 2E complete, consolidate into `.full-review-pipeline/03-performance-testing-docs.md`:
 
 ```markdown
-# Phase 2C-2D: Performance & Testing Review
+# Phase 2C-2E: Performance, Testing & Documentation Review
 
 ## Performance Findings
 
@@ -497,9 +560,17 @@ After 2C and 2D complete, consolidate into `.full-review-pipeline/03-performance
 ## Test Coverage Findings
 
 [Summary from 2D, organized by severity]
+
+## Documentation Findings
+
+[Summary from 2E, organized by severity]
+
+## Critical Issues for Subsequent Steps
+
+[List findings that affect best practices, CI/CD, or quality scoring]
 ```
 
-Update `state.json`: add steps 2C and 2D to `completed_phases`.
+Update `state.json`: add steps 2C, 2D, and 2E to `completed_phases`.
 
 ---
 
@@ -508,7 +579,7 @@ Update `state.json`: add steps 2C and 2D to `completed_phases`.
 Display a summary of all review findings so far:
 
 ```
-Phases 1-2 (partial) complete: Deep dive + Architecture + Security + Performance + Testing.
+Phases 1-2 (partial) complete: Deep dive + Architecture + Security + Performance + Testing + Documentation.
 
 Summary:
 - Deep Dive Risks: [X critical, Y high, Z medium]
@@ -516,12 +587,13 @@ Summary:
 - Security: [X critical, Y high, Z medium findings]
 - Performance: [X critical, Y high, Z medium findings]
 - Test Coverage: [X critical, Y high, Z medium findings]
+- Documentation: [X critical, Y high, Z medium findings]
 
 Please review:
 - .full-review-pipeline/02-architecture-security.md
-- .full-review-pipeline/03-performance-testing.md
+- .full-review-pipeline/03-performance-testing-docs.md
 
-1. Continue -- proceed to quality scoring and final report
+1. Continue -- proceed to best practices, CI/CD, dead code analysis, and quality scoring
 2. Fix critical issues first -- address findings before continuing
 3. Pause -- save progress and stop here
 ```
@@ -532,17 +604,18 @@ Do NOT proceed until the user approves.
 
 ---
 
-### Step 2E: Code Quality, Pattern Analysis & Scoring
+### Step 2F: Framework & Language Best Practices (parallel with 2G and 2H)
 
-Read all `.full-review-pipeline/*.md` files for full context.
+Read all previous `.full-review-pipeline/*.md` files for full context.
+
+Run steps 2F, 2G, and 2H in parallel using multiple Agent tool calls in a single response.
 
 ```
 Task:
-  subagent_type: "senior-review:pattern-quality-scorer"
-  description: "Code quality scoring enriched with deep dive and review context"
+  subagent_type: "general-purpose"
+  description: "Framework and language best practices review"
   prompt: |
-    Perform comprehensive code quality review, pattern consistency analysis, and quantitative scoring.
-    You have deep dive analysis AND prior review phase findings -- use all of them for calibrated scoring.
+    You are an expert in modern framework and language best practices. Verify adherence to current standards.
 
     ## Review Scope
     [Insert contents of .full-review-pipeline/00-scope.md]
@@ -550,62 +623,207 @@ Task:
     ## Deep Dive Context
     [Insert contents of .full-review-pipeline/01-deep-dive-summary.md]
 
-    ## Prior Review Findings
-    [Insert summaries from .full-review-pipeline/02-architecture-security.md and 03-performance-testing.md]
+    ## All Prior Findings
+    [Insert a concise summary of critical/high findings from all prior steps]
+
+    ## Instructions
+    Check for:
+    1. **Language idioms**: Is the code idiomatic for its language? Modern syntax and features?
+    2. **Framework patterns**: Does it follow the framework's recommended patterns? (e.g., React hooks, Django views, Spring beans, Tauri commands)
+    3. **Deprecated APIs**: Are any deprecated functions, libraries, or patterns used?
+    4. **Modernization opportunities**: Where could modern language/framework features simplify code?
+    5. **Package management**: Are dependencies up-to-date? Unnecessary dependencies? Proper lockfile?
+    6. **Build configuration**: Is the build optimized? Development vs production settings properly separated?
+    7. **Type safety**: Are type annotations used where available? Any unsafe type casts or any-typed values?
+
+    For each finding:
+    - Severity (Critical / High / Medium / Low)
+    - Current pattern vs recommended pattern
+    - Migration/fix recommendation with code example
+
+    Write your findings as a structured markdown document.
+```
+
+### Step 2G: CI/CD & DevOps Practices (parallel with 2F and 2H)
+
+```
+Task:
+  subagent_type: "general-purpose"
+  description: "CI/CD and DevOps practices review"
+  prompt: |
+    You are a DevOps engineer. Review CI/CD pipeline and operational practices.
+
+    ## Review Scope
+    [Insert contents of .full-review-pipeline/00-scope.md]
+
+    ## Deep Dive Context
+    [Insert key findings from .full-review-pipeline/dd-01-structure.md and dd-04-risks.md]
+
+    ## Critical Issues from Prior Steps
+    [Insert critical/high findings from all prior steps that impact deployment or operations]
+
+    ## Instructions
+    Evaluate:
+    1. **CI/CD pipeline**: Build automation, test gates, deployment stages, security scanning, linting gates
+    2. **Deployment strategy**: Blue-green, canary, rollback capabilities, zero-downtime deployment
+    3. **Infrastructure as Code**: Are infrastructure configs version-controlled and reviewed?
+    4. **Monitoring & observability**: Logging, metrics, alerting, dashboards, distributed tracing
+    5. **Incident response**: Runbooks, on-call procedures, rollback plans, post-mortem process
+    6. **Environment management**: Config separation, secret management, parity between environments
+    7. **Container/runtime**: Dockerfile best practices, image scanning, resource limits
+
+    For each finding:
+    - Severity (Critical / High / Medium / Low)
+    - Operational risk assessment
+    - Specific improvement recommendation
+
+    Write your findings as a structured markdown document.
+```
+
+### Step 2H: Dead Code Analysis (parallel with 2F and 2G)
+
+```
+Task:
+  subagent_type: "general-purpose"
+  description: "Dead code analysis"
+  prompt: |
+    You are a dead code detection specialist. Analyze the target code for unused symbols and unreachable code.
+
+    ## Review Scope
+    [Insert contents of .full-review-pipeline/00-scope.md]
+
+    ## Deep Dive Context
+    [Insert key findings from .full-review-pipeline/dd-01-structure.md and dd-02-interfaces.md]
+
+    ## Instructions
+    1. **Auto-detect language**: Check for package.json (TS/JS) or pyproject.toml / *.py (Python) or other project markers
+    2. **For TypeScript/JavaScript**: Run Knip analysis -- unused files, dependencies, exports, types
+    3. **For Python**: Run vulture (--min-confidence 80) + ruff (F401, F841, F811) -- unused imports, variables, functions, classes, unreachable code
+    4. **For mixed projects**: Analyze both language ecosystems
+
+    Account for framework conventions before flagging:
+    - Django: views referenced in urls.py, signal handlers, admin classes, management commands
+    - FastAPI/Flask: route handlers, dependency injection, event handlers
+    - React/Next.js: page components, API routes, middleware, dynamic imports
+    - pytest: fixtures, conftest, parametrize, plugin hooks
+    - General: __all__ exports, dunder methods, getattr/importlib dynamic access, decorators, re-exports
+
+    For each finding:
+    - Severity (High / Medium / Low)
+    - File and line location
+    - Category (unused import, unused function, unused variable, unused export, unreachable code, unused file, unused dependency)
+    - Confidence (0-100) -- how certain this is truly dead code
+    - Recommended action (remove, verify, defer)
+
+    Write your findings as a structured markdown document.
+```
+
+After 2F, 2G, and 2H complete, consolidate into `.full-review-pipeline/04-practices-cicd-deadcode.md`:
+
+```markdown
+# Phase 2F-2H: Best Practices, CI/CD & Dead Code
+
+## Framework & Language Best Practices Findings
+
+[Summary from 2F, organized by severity]
+
+## CI/CD & DevOps Findings
+
+[Summary from 2G, organized by severity]
+
+## Dead Code Findings
+
+[Summary from 2H, organized by severity]
+```
+
+Update `state.json`: add steps 2F, 2G, and 2H to `completed_phases`.
+
+---
+
+### Step 2I: Code Quality, Pattern Analysis & Scoring
+
+Read all `.full-review-pipeline/*.md` files for full context. This step runs AFTER all prior review steps because it needs all findings for calibrated scoring.
+
+```
+Task:
+  subagent_type: "senior-review:pattern-quality-scorer"
+  description: "Code quality scoring enriched with deep dive and all review context"
+  prompt: |
+    Perform comprehensive code quality review, pattern consistency analysis, and quantitative scoring.
+    You have deep dive analysis AND all prior review phase findings -- use all of them for calibrated scoring.
+
+    ## Review Scope
+    [Insert contents of .full-review-pipeline/00-scope.md]
+
+    ## Deep Dive Context
+    [Insert contents of .full-review-pipeline/01-deep-dive-summary.md]
+
+    ## All Prior Review Findings
+    [Insert summaries from:
+     - .full-review-pipeline/02-architecture-security.md
+     - .full-review-pipeline/03-performance-testing-docs.md
+     - .full-review-pipeline/04-practices-cicd-deadcode.md]
 
     ## Instructions
 
+    ### Context Assessment
+    Determine the code's scope, maturity stage (prototype/production/legacy). Use prior phase findings
+    to calibrate focus areas -- don't duplicate what's already been covered in detail.
+
     ### Code Quality Analysis
-    1. **Code complexity**: Cyclomatic/cognitive complexity, nesting depth
-    2. **Maintainability**: Naming, function length, class cohesion
-    3. **Code duplication**: Copy-pasted logic, missed abstractions
-    4. **Clean Code**: SOLID violations, code smells
-    5. **Technical debt**: Areas increasingly costly to change
-    6. **Error handling**: Missing handling, swallowed exceptions
+    1. **Code complexity**: Cyclomatic/cognitive complexity, deeply nested logic
+    2. **Maintainability**: Naming conventions, function/method length, class cohesion
+    3. **Code duplication**: Copy-pasted logic, missed abstraction opportunities
+    4. **Clean Code principles**: SOLID violations, code smells, anti-patterns
+    5. **Technical debt**: Areas that will become increasingly costly to change
+    6. **Error handling**: Missing error handling, swallowed exceptions, unclear error messages
 
     ### Pattern Consistency Detection
     For each file, identify dominant patterns and flag deviations:
-    - Error handling style
-    - Resource management
-    - Import conventions
-    - Null/optional handling
-    - Async patterns
+    - Error handling style (try/catch, Result types, error checks)
+    - Resource management (using, defer, finally, context managers)
+    - Import conventions (grouping, ordering)
+    - Null/optional handling (defensive checks, optional chaining)
+    - Async patterns (async/await vs callbacks vs blocking)
+
+    Key question: "Is there an established pattern in this file that this code should follow but doesn't?"
 
     ### Anti-Pattern Checklist
-    Flag: god objects, premature optimization, callback hell, mutable global state,
-    swallowed exceptions, tight third-party coupling, missing validation, sync I/O
-    blocking event loops, DB queries in loops, missing transaction boundaries, no rollback,
-    TODO/FIXME in critical paths.
+    Flag any occurrences of: god objects, premature optimization, callback hell, mutable global state,
+    swallowed exceptions, tight third-party coupling, missing validation on external data, sync I/O
+    blocking event loops, DB queries in loops, missing transaction boundaries, no rollback on partial
+    failures, TODO/FIXME in critical paths. Also flag consistency anti-patterns.
 
-    ### Mental Models (all six)
-    - **Security Engineer**: All input is malicious
-    - **Performance Engineer**: Big-O and I/O patterns
-    - **Team Lead**: Maintainable in 6 months?
+    ### Mental Models (all six perspectives)
+    - **Security Engineer**: Assume all input is malicious
+    - **Performance Engineer**: What's the Big-O? What's the I/O pattern?
+    - **Team Lead**: Maintainable in 6 months? Can juniors understand it?
     - **Systems Architect**: How does this fail? Blast radius?
     - **SRE**: What breaks at 3 AM?
-    - **Pattern Detective**: Dominant patterns, then scan for violations
+    - **Pattern Detective**: Dominant patterns per file, then scan for violations
 
     ### Quantitative Code Quality Score
-    Rate using ALL findings from deep dive + all review phases:
-    - **9-10**: Excellent -- production-ready, exemplary
+    Rate each category using ALL findings from deep dive + all review phases combined:
+    - **9-10**: Excellent -- production-ready, exemplary patterns
     - **7-8**: Good -- minor issues, safe to deploy
     - **5-6**: Adequate -- notable issues, fix before deploy
     - **3-4**: Poor -- significant issues, needs rework
     - **1-2**: Critical -- fundamental problems, unsafe
 
-    Provide scores for: Security, Performance, Maintainability, Testing, Architecture, Overall.
+    Provide scores for: Security, Performance, Architecture, Maintainability, Testing, Documentation, and Overall.
 
-    Write findings as structured markdown with Executive Summary, findings, What's Done Well, and Score table.
+    Write findings as structured markdown with Executive Summary, Code Quality Findings,
+    Pattern Consistency Findings, What's Done Well, and the Code Quality Score table.
 ```
 
-Write to `.full-review-pipeline/04-quality-scoring.md`:
+Write to `.full-review-pipeline/05-quality-scoring.md`:
 
 ```markdown
-# Phase 2E: Code Quality, Pattern Analysis & Scoring
+# Phase 2I: Code Quality, Pattern Analysis & Scoring
 
 ## Executive Summary
 
-[2-3 sentence overview]
+[2-3 sentence overview of code quality]
 
 ## Code Quality Findings
 
@@ -613,7 +831,7 @@ Write to `.full-review-pipeline/04-quality-scoring.md`:
 
 ## Pattern Consistency Findings
 
-[Pattern deviations, anti-patterns]
+[Pattern deviations, anti-patterns detected]
 
 ## What's Done Well
 
@@ -628,18 +846,19 @@ Write to `.full-review-pipeline/04-quality-scoring.md`:
 | Architecture    | X/10  |
 | Maintainability | X/10  |
 | Testing         | X/10  |
+| Documentation   | X/10  |
 | **Overall**     | **X/10** |
 ```
 
-Update `state.json`: add step 2E to `completed_phases`.
+Update `state.json`: add step 2I to `completed_phases`.
 
 ---
 
 ## Phase 3: Consolidated Report
 
-Read all `.full-review-pipeline/*.md` files (dd-* through 04). Generate the final consolidated report.
+Read all `.full-review-pipeline/*.md` files (dd-* through 05). Generate the final consolidated report.
 
-**Output file:** `.full-review-pipeline/05-final-report.md`
+**Output file:** `.full-review-pipeline/06-final-report.md`
 
 ```markdown
 # Full Review Pipeline Report
@@ -663,6 +882,7 @@ and the concrete problems found during review.]
 | Architecture    | X/10  |
 | Maintainability | X/10  |
 | Testing         | X/10  |
+| Documentation   | X/10  |
 | **Overall**     | **X/10** |
 
 ## Deep Dive Insights
@@ -673,34 +893,59 @@ and the concrete problems found during review.]
 
 ### Critical Issues (P0 -- Must Fix Immediately)
 
-[All Critical findings from deep dive + all review phases, with source reference]
+[All Critical findings from deep dive + all review phases, with source phase reference]
+
+- Security vulnerabilities with CVSS > 7.0
+- Data loss or corruption risks
+- Authentication/authorization bypasses
+- Production stability threats
 
 ### High Priority (P1 -- Fix Before Next Release)
 
-[All High findings]
+[All High findings from all phases]
+
+- Performance bottlenecks impacting user experience
+- Missing critical test coverage
+- Architectural anti-patterns causing technical debt
+- Outdated dependencies with known vulnerabilities
 
 ### Medium Priority (P2 -- Plan for Next Sprint)
 
-[All Medium findings]
+[All Medium findings from all phases]
+
+- Non-critical performance optimizations
+- Documentation gaps
+- Code refactoring opportunities
+- Test quality improvements
+- Modernization opportunities
 
 ### Low Priority (P3 -- Track in Backlog)
 
-[All Low findings]
+[All Low findings from all phases]
+
+- Style guide violations
+- Minor code smell issues
+- Nice-to-have improvements
+- Low-confidence dead code
 
 ## Findings by Category
 
-- **Architecture**: [count] findings ([breakdown])
-- **Security**: [count] findings ([breakdown])
-- **Performance**: [count] findings ([breakdown])
-- **Code Quality**: [count] findings ([breakdown])
-- **Pattern Consistency**: [count] findings ([breakdown])
-- **Testing**: [count] findings ([breakdown])
-- **Technical Debt**: [count] findings ([breakdown])
+- **Architecture**: [count] findings ([breakdown by severity])
+- **Security**: [count] findings ([breakdown by severity])
+- **Performance**: [count] findings ([breakdown by severity])
+- **Code Quality**: [count] findings ([breakdown by severity])
+- **Pattern Consistency**: [count] findings ([breakdown by severity])
+- **Testing**: [count] findings ([breakdown by severity])
+- **Documentation**: [count] findings ([breakdown by severity])
+- **Best Practices**: [count] findings ([breakdown by severity])
+- **CI/CD & DevOps**: [count] findings ([breakdown by severity])
+- **Dead Code**: [count] findings ([breakdown by severity])
+- **Technical Debt**: [count] findings ([breakdown by severity])
 
 ## Recommended Action Plan
 
 1. [Ordered list starting with critical items]
-2. [Group related fixes]
+2. [Group related fixes where possible]
 3. [Estimate relative effort: small/medium/large]
 
 ## Deep Dive vs Review Correlation
@@ -736,9 +981,10 @@ Full review pipeline complete for: $ARGUMENTS
 - Deep Dive Risks: .full-review-pipeline/dd-04-risks.md
 - Deep Dive Summary: .full-review-pipeline/01-deep-dive-summary.md
 - Architecture & Security: .full-review-pipeline/02-architecture-security.md
-- Performance & Testing: .full-review-pipeline/03-performance-testing.md
-- Quality Scoring: .full-review-pipeline/04-quality-scoring.md
-- Final Report: .full-review-pipeline/05-final-report.md
+- Performance, Testing & Docs: .full-review-pipeline/03-performance-testing-docs.md
+- Best Practices, CI/CD & Dead Code: .full-review-pipeline/04-practices-cicd-deadcode.md
+- Quality Scoring: .full-review-pipeline/05-quality-scoring.md
+- Final Report: .full-review-pipeline/06-final-report.md
 
 ## Summary
 - Total findings: [count]
@@ -746,7 +992,7 @@ Full review pipeline complete for: $ARGUMENTS
 - Code Quality Score: [X/10]
 
 ## Next Steps
-1. Review the full report at .full-review-pipeline/05-final-report.md
+1. Review the full report at .full-review-pipeline/06-final-report.md
 2. Address Critical (P0) issues immediately
 3. Plan High (P1) fixes for current sprint
 4. Add Medium (P2) and Low (P3) items to backlog
@@ -754,5 +1000,5 @@ Full review pipeline complete for: $ARGUMENTS
 
 If `--strict-mode` is set and Critical findings exist:
 ```
-STRICT MODE: Unresolved critical issues found. Review .full-review-pipeline/05-final-report.md before merging.
+STRICT MODE: Unresolved critical issues found. Review .full-review-pipeline/06-final-report.md before merging.
 ```
