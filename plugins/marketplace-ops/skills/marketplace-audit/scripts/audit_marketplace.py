@@ -11,6 +11,7 @@ Usage:
 
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -323,6 +324,61 @@ def audit():
                 for cmd_file in sorted(commands_dir.glob("*.md")):
                     if cmd_file.resolve() not in registered_command_files:
                         report.add("warning", f"Orphaned command: {cmd_file.relative_to(PROJECT_ROOT)}")
+
+    # Cross-reference consistency checks
+    marketplace_name = marketplace.get("name", "")
+
+    # Check 1: marketplace name vs git remote repo name
+    try:
+        remote_url = subprocess.check_output(
+            ["git", "remote", "get-url", "origin"],
+            cwd=str(PROJECT_ROOT),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        # Extract repo name from URL (handles https and ssh formats)
+        repo_name = remote_url.rstrip("/").rsplit("/", 1)[-1]
+        if repo_name.endswith(".git"):
+            repo_name = repo_name[:-4]
+        if marketplace_name and repo_name and marketplace_name != repo_name:
+            report.add(
+                "warning",
+                f"Marketplace name '{marketplace_name}' does not match "
+                f"git repo name '{repo_name}'",
+            )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        report.add("info", "Could not determine git remote - skipping repo name check")
+
+    # Check 2: plugin name vs source directory name
+    for plugin in plugins:
+        pname = plugin.get("name", "")
+        source = plugin.get("source", "")
+        if source:
+            dir_name = source.rstrip("/").rsplit("/", 1)[-1]
+            if pname and dir_name and pname != dir_name:
+                report.add(
+                    "warning",
+                    f"Plugin '{pname}': name does not match source "
+                    f"directory '{dir_name}'",
+                )
+
+    # Check 3: marketplace name vs CLAUDE.md project reference
+    claude_md = PROJECT_ROOT / "CLAUDE.md"
+    if claude_md.exists():
+        try:
+            claude_content = claude_md.read_text(encoding="utf-8")
+            # Look for "# <project-name>" header
+            header_match = re.search(r"^#\s+(\S+)", claude_content, re.MULTILINE)
+            if header_match:
+                claude_project_name = header_match.group(1)
+                if marketplace_name and claude_project_name != marketplace_name:
+                    report.add(
+                        "warning",
+                        f"Marketplace name '{marketplace_name}' does not match "
+                        f"CLAUDE.md project header '{claude_project_name}'",
+                    )
+        except Exception:
+            pass
 
     # Category analysis
     categories = {}

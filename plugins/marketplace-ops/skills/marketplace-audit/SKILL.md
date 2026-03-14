@@ -36,7 +36,11 @@ The script checks:
    - All names are kebab-case
    - Agent filename matches frontmatter `name` field
    - Plugin directory name matches marketplace.json `name` field
-5. **Marketplace.json schema**
+5. **Cross-reference consistency**
+   - Marketplace `name` matches git remote repo name
+   - Each plugin `name` matches its source directory name
+   - Marketplace `name` matches CLAUDE.md project header
+6. **Marketplace.json schema**
    - Every plugin has: name, source, description, version, author, license, keywords, category, strict
    - No duplicate plugin names
    - No duplicate keywords across plugins (warning only)
