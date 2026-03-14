@@ -1,0 +1,7 @@
+{
+  "name": "anvil-hooks",
+  "description": "Anvil session hooks -- ASCII logo on startup and security gate for hardcoded secrets detection",
+  "author": {
+    "name": "Alfio"
+  }
+}

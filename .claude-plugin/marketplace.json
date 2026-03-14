@@ -719,6 +719,26 @@
       "skills": [
         "./skills/playwright-skill"
       ]
+    },
+    {
+      "name": "anvil-hooks",
+      "source": "./plugins/anvil-hooks",
+      "description": "Anvil session hooks -- ASCII logo on startup and security gate for hardcoded secrets detection on Write/Edit",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "hooks",
+        "anvil",
+        "logo",
+        "security",
+        "secrets",
+        "guard"
+      ],
+      "category": "security",
+      "strict": false
     }
   ]
 }
