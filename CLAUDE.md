@@ -14,7 +14,7 @@ plugins/
     commands/               # slash-command .md files
 ```
 
-24 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, digital-marketing, senior-review, app-explorer, workflows, obsidian-development, browser-extensions, learning, marketplace-ops.
+25 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, digital-marketing, senior-review, app-explorer, workflows, obsidian-development, browser-extensions, learning, marketplace-ops, playwright.
 
 ## Plugin anatomy
 
@@ -83,6 +83,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `ai-tooling` (executing-plans) | `obra/superpowers` - `skills/executing-plans/SKILL.md` | `plugins/ai-tooling/skills/executing-plans/SKILL.md` |
 | `frontend` (css-master) | `paulirish/dotfiles` - `agents/paulirish-skills/skills/modern-css/SKILL.md` | `plugins/frontend/skills/css-master/SKILL.md`, `plugins/frontend/skills/css-master/references/argyle-cacadia-2025-deck.md` |
 | `deep-dive-analysis` (inspiration) | `gsd-build/get-shit-done` - `agents/gsd-codebase-mapper.md` | `plugins/deep-dive-analysis/commands/deep-dive-analysis.md` (patterns adopted, not direct copy) |
+| `playwright` (playwright-skill) | `lackeyjb/playwright-skill` - `skills/playwright-skill/` | `plugins/playwright/skills/playwright-skill/SKILL.md`, `plugins/playwright/skills/playwright-skill/API_REFERENCE.md`, `plugins/playwright/skills/playwright-skill/run.js`, `plugins/playwright/skills/playwright-skill/package.json`, `plugins/playwright/skills/playwright-skill/lib/helpers.js` |
 
 ### How to sync a plugin
 
@@ -101,6 +102,14 @@ gh api repos/paulirish/dotfiles/contents/agents/paulirish-skills/skills/modern-c
 
 # Fetch latest gsd-codebase-mapper.md from upstream (gsd-build/get-shit-done example)
 gh api repos/gsd-build/get-shit-done/contents/agents/gsd-codebase-mapper.md \
+  --jq '.content' | base64 -d
+
+# Fetch latest playwright-skill files from upstream (lackeyjb/playwright-skill example)
+gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/SKILL.md \
+  --jq '.content' | base64 -d
+gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/run.js \
+  --jq '.content' | base64 -d
+gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/lib/helpers.js \
   --jq '.content' | base64 -d
 ```
 

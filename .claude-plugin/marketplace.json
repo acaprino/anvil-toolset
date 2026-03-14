@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "1.80.0"
+    "version": "1.81.0"
   },
   "plugins": [
     {
@@ -673,6 +673,31 @@
         "./commands/marketplace-sync-upstream.md",
         "./commands/marketplace-scaffold-plugin.md",
         "./commands/marketplace-review.md"
+      ]
+    },
+    {
+      "name": "playwright",
+      "source": "./plugins/playwright",
+      "description": "General-purpose browser automation with Playwright -- auto-detects dev servers, writes clean test scripts, supports responsive testing, login flows, form filling, link checking, and any browser task with visible or headless execution",
+      "version": "1.0.0",
+      "author": {
+        "name": "lackeyjb"
+      },
+      "license": "MIT",
+      "keywords": [
+        "playwright",
+        "browser",
+        "automation",
+        "testing",
+        "web-automation",
+        "screenshots",
+        "responsive",
+        "e2e"
+      ],
+      "category": "testing",
+      "strict": false,
+      "skills": [
+        "./skills/playwright-skill"
       ]
     }
   ]
