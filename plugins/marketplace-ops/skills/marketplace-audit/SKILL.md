@@ -36,6 +36,10 @@ The script checks:
    - All names are kebab-case
    - Agent filename matches frontmatter `name` field
    - Plugin directory name matches marketplace.json `name` field
+   - Workflow command output directories match command filename (e.g., `feature-e2e.md` uses `.feature-e2e/`)
+   - No naming collisions between commands in different plugins (e.g., two plugins both defining `full-review.md`)
+   - Skill directory name matches frontmatter `name` field
+   - No em dash characters anywhere (use hyphen `-` or double hyphen `--`)
 5. **Cross-reference consistency**
    - Marketplace `name` matches git remote repo name
    - Each plugin `name` matches its source directory name
