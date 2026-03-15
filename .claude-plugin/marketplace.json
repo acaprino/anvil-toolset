@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.22.0"
+    "version": "2.23.0"
   },
   "plugins": [
     {
@@ -234,10 +234,10 @@
       ]
     },
     {
-      "name": "utilities",
-      "source": "./plugins/utilities",
-      "description": "File organization and cleanup utilities -- sort messy folders, find duplicates, and multi-language dead code detection dispatching to language-specific tools",
-      "version": "1.6.0",
+      "name": "system-utils",
+      "source": "./plugins/system-utils",
+      "description": "File organization and cleanup utilities -- sort messy folders, find duplicates, and restructure directory hierarchies",
+      "version": "2.0.0",
       "author": {
         "name": "ComposioHQ"
       },
@@ -252,16 +252,11 @@
       ],
       "category": "utilities",
       "strict": false,
-      "dependencies": [
-        "python-development",
-        "typescript-development"
-      ],
       "skills": [
         "./skills/file-organizer"
       ],
       "commands": [
-        "./commands/organize-files.md",
-        "./commands/cleanup-dead-code.md"
+        "./commands/organize-files.md"
       ]
     },
     {
@@ -502,8 +497,8 @@
     {
       "name": "senior-review",
       "source": "./plugins/senior-review",
-      "description": "Multi-agent code review orchestration with architecture, security, pattern analysis, and calibrated quality scoring",
-      "version": "2.12.0",
+      "description": "Multi-agent code review orchestration with architecture, security, pattern analysis, calibrated quality scoring, and multi-language dead code detection",
+      "version": "2.13.0",
       "author": {
         "name": "Alfio"
       },
@@ -514,10 +509,15 @@
         "architecture",
         "security",
         "patterns",
-        "quality"
+        "quality",
+        "dead-code"
       ],
       "category": "review",
       "strict": false,
+      "dependencies": [
+        "python-development",
+        "typescript-development"
+      ],
       "agents": [
         "./agents/architect-review.md",
         "./agents/security-auditor.md",
@@ -526,7 +526,8 @@
       "commands": [
         "./commands/full-review.md",
         "./commands/pr-review.md",
-        "./commands/code-review.md"
+        "./commands/code-review.md",
+        "./commands/cleanup-dead-code.md"
       ]
     },
     {
