@@ -19,7 +19,33 @@ You MUST follow these rules exactly. Violating any of them is a failure.
 
 ## Pre-flight Checks
 
-### 0. Dependency check
+### 0. Scope check -- is this the right command?
+
+This pipeline is for **building new UI from scratch or major redesigns**. Before starting, evaluate the user's request:
+
+**Full pipeline IS appropriate when:**
+- Building a new page, feature, or component from scratch
+- Major visual redesign of an existing UI
+- User explicitly wants the brainstorm -> design -> build -> review workflow
+
+**Full pipeline is NOT appropriate when:**
+- Fixing a specific layout bug (broken grid, overflow, clipping)
+- Reordering or repositioning existing components
+- Tweaking responsive behavior at specific breakpoints
+- Small CSS or styling adjustments
+
+**If the request is a targeted fix, do NOT run the pipeline.** Instead:
+1. Tell the user this is a fix, not a build-from-scratch task, so the full pipeline would be overkill
+2. Use the relevant specialized agent directly:
+   - Layout/grid/responsive issues -> spawn `frontend:ui-layout-designer` to analyze and fix
+   - Visual polish/animations -> spawn `frontend:ui-polisher`
+   - UX flow/interaction issues -> spawn `frontend:ui-ux-designer`
+   - React performance issues -> spawn `frontend:react-performance-optimizer`
+3. If no single agent fits, handle the fix directly with code analysis and edits
+
+Never silently skip the pipeline -- always explain to the user which path you are taking and why.
+
+### 1. Dependency check
 
 This command requires agents and skills from other plugins. Before proceeding, verify they are installed:
 
@@ -46,7 +72,7 @@ Or install the full marketplace:
 
 If only optional plugins are missing, warn but continue (skip their phases).
 
-### 1. Check for existing session
+### 2. Check for existing session
 
 Check if `.ui-studio/state.json` exists:
 
@@ -61,7 +87,7 @@ Check if `.ui-studio/state.json` exists:
   ```
 - If it exists and `status` is `"complete"`: Ask whether to archive and start fresh.
 
-### 2. Initialize state
+### 3. Initialize state
 
 Create `.ui-studio/` directory and `state.json`:
 
@@ -86,7 +112,7 @@ Create `.ui-studio/` directory and `state.json`:
 
 Parse `$ARGUMENTS` for flags. Auto-detect framework from project if not specified.
 
-### 3. Explore project context
+### 4. Explore project context
 
 Scan the current project to understand:
 - Language and framework (package.json, tsconfig.json, etc.)

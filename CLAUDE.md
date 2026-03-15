@@ -15,7 +15,7 @@ plugins/
     hooks/                  # hook handlers (JS) + hooks.json (anvil-hooks only)
 ```
 
-27 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, utilities, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, digital-marketing, senior-review, app-explorer, workflows, obsidian-development, browser-extensions, learning, marketplace-ops, playwright-skill, anvil-hooks, cc-usage.
+27 plugins: humanize, deep-dive-analysis, tauri-development, frontend, ai-tooling, python-development, stripe, system-utils, messaging, research, business, code-documentation, project-setup, mobile-development, typescript-development, csp, digital-marketing, senior-review, app-explorer, workflows, obsidian-development, browser-extensions, learning, marketplace-ops, playwright-skill, anvil-hooks, cc-usage.
 
 ## Plugin anatomy
 
@@ -25,17 +25,17 @@ plugins/
 - `model`: LLM model (default: `opus`)
 - `tools` (optional): comma-separated tool list (e.g. `Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, Task`); omit to allow all tools
 - `color`: UI accent color (e.g. `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `cyan`, `magenta`, `violet`, `teal`, `indigo`, `gold`, `rust`, `pink`)
-- Body: terse keyword-list style system prompt; simple agents ~60-200 lines, complex agents up to ~800 lines
+- Body: terse keyword-list style system prompt; simple agents ~50-200 lines, complex agents up to ~560 lines
 
 **Skills** - Directory with `SKILL.md` (frontmatter: `name`, `description`) and optional supplementary subdirs: `references/` (docs), `scripts/`, `templates/`, `assets/`, `lib/`.
 
-**Commands** - Slash-command `.md` files with usage instructions and examples. No frontmatter required.
+**Commands** - Slash-command `.md` files with YAML frontmatter (`description`, `argument-hint`) and usage instructions/examples.
 
-**Hooks** - Used by `anvil-hooks` plugin. Contains `hooks.json` (hook definitions) and `handlers/` directory with JS handler scripts. Uses `.claude-plugin/plugin.json` instead of marketplace registration for hook configuration.
+**Hooks** - Used by `anvil-hooks` plugin. Contains `hooks.json` (hook definitions) and `handlers/` directory with JS handler scripts. Uses `plugins/anvil-hooks/.claude-plugin/plugin.json` instead of marketplace registration for hook configuration.
 
 ## Conventions
 
-- Agent names: kebab-case matching the filename (e.g. `senior-code-reviewer.md`)
+- Agent names: kebab-case matching the filename (e.g. `search-specialist.md`)
 - Plugin names: kebab-case directory names
 - Default model: `opus` (Opus 4.6) for all agents
 - Agent body style: terse keyword lists, imperative tone, structured with markdown headers
