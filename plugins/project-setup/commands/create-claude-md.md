@@ -11,7 +11,7 @@ This command launches an interactive session to create a new `CLAUDE.md` file pe
 ## What This Does
 
 The agent will:
-1. Analyze your project structure and tech stack
+1. Analyze your project bottom-up (dependencies, entry points, source, config, tests, docs)
 2. Ask you questions about your workflow and preferences
 3. Clarify any ambiguous patterns found in the codebase
 4. Generate a concise, accurate `CLAUDE.md` following best practices
@@ -78,6 +78,7 @@ Your new CLAUDE.md will:
 - ✅ Include only universally applicable guidance
 - ✅ Respect the ~150-200 instruction budget
 - ✅ Be grounded in actual codebase reality
+- ✅ Mark unverifiable claims with `[UNVERIFIED]` and resolve before finalizing
 - ✅ Use regular hyphens `-` or `--`, never em dashes
 
 ## Related Commands

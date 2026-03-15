@@ -24,6 +24,7 @@ This is a React 18 + TypeScript web application for task management.
 - Zustand for state management (see `src/store/`)
 - React Query for data fetching (see `src/hooks/useApi.ts`)
 - Tailwind CSS for styling (see `tailwind.config.js`)
+- Redis for caching [UNVERIFIED]
 
 ## Project Structure
 
@@ -261,4 +262,5 @@ Before accepting a CLAUDE.md, verify:
 - [ ] References actual files
 - [ ] No invented features
 - [ ] Delegates formatting to tools
+- [ ] Unverifiable claims marked `[UNVERIFIED]` and resolved (verified or omitted)
 - [ ] No em dashes - uses regular hyphens `-` or `--`

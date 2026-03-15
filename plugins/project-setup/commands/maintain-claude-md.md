@@ -18,14 +18,15 @@ This command launches an interactive session to audit and optionally improve you
 ## What This Does
 
 The agent will:
-1. Read your `CLAUDE.md` file
-2. Verify every claim against your actual codebase
+1. Analyze your codebase bottom-up (dependencies, entry points, source, config, tests, docs)
+2. Read your `CLAUDE.md` last and verify every claim against established ground truth
 3. Detect obsolete file paths, dependencies, or commands
-4. Check for best practices (conciseness, progressive disclosure, instruction economy)
-5. Present findings with prioritized recommendations
-6. Ask if you want to apply improvements
-7. If yes: Guide you through interactive improvement workflow
-8. If no: Provide detailed audit report only
+4. Identify gaps - undocumented commands, dependencies, configs, or patterns
+5. Check for best practices (conciseness, progressive disclosure, instruction economy)
+6. Present findings with prioritized recommendations
+7. Ask if you want to apply improvements
+8. If yes: Guide you through interactive improvement workflow
+9. If no: Provide detailed audit report only
 
 ## When to Use
 
@@ -74,6 +75,11 @@ Agent: I can reduce from 450 to ~180 lines by:
        - Moving detailed guides to docs/development.md
        - Removing code samples (replace with file references)
        - Removing README duplicates
+
+       I also found gaps in your CLAUDE.md:
+       - "npm run lint" exists in package.json but not documented
+       - Prisma ORM is a key dependency but not mentioned
+       - docker-compose.yml not referenced
 
        I found these patterns to potentially document:
        - Custom hooks usage (src/hooks/)
@@ -145,6 +151,8 @@ The agent verifies:
 - **Tech stack**: Verifies frameworks, libraries, and tools referenced
 - **Code patterns**: Checks that documented patterns exist in codebase
 - **Architecture**: Validates architectural claims against actual structure
+- **Uncertainty**: Flags claims that cannot be verified from codebase alone
+- **Gaps**: Identifies undocumented commands, dependencies, configs, and patterns
 - **Best practices**: Assesses conciseness, progressive disclosure, instruction economy
 
 ## Improvement Categories
