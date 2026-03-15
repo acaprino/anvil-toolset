@@ -1,6 +1,16 @@
 ---
 name: writing-plans
-description: "Use when you have a spec or requirements for a multi-step task, before touching code. Also use after brainstorming when the task involves 3+ files or multiple implementation steps. TRIGGER when: user says 'write a plan', 'create a plan', 'implementation plan', 'plan this', 'break this into tasks'. DO NOT TRIGGER when: user wants to brainstorm first (use brainstorming), wants to execute an existing plan (use executing-plans), or is doing a simple one-file change."
+description: >
+  Use when you have a spec or requirements for a multi-step task, before touching code.
+  Also use after brainstorming when the task involves 3+ files or multiple implementation
+  steps. TRIGGER when: (1) user says 'write a plan', 'create a plan', 'implementation plan',
+  'plan this', 'break this into tasks'; (2) the conversation has produced a design, spec,
+  or set of decisions and is naturally transitioning toward implementation -- e.g., the user
+  approved an approach, confirmed architecture choices, or said "let's do it" / "go ahead" /
+  "proceed". A conversation that evolved through brainstorming into a confirmed design MUST
+  invoke this skill before writing any code, even if the user never explicitly said "write
+  a plan". DO NOT TRIGGER when: user wants to brainstorm first (use brainstorming), wants
+  to execute an existing plan (use executing-plans), or is doing a simple one-file change.
 ---
 
 Source: Ported from [obra/superpowers](https://github.com/obra/superpowers) -- `skills/writing-plans`
