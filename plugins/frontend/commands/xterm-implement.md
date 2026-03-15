@@ -14,7 +14,8 @@ You are an xterm.js integration expert. Implement new terminal features into exi
 3. **No duplicate setup.** Check if the requested addon/feature is already loaded. Don't double-load addons.
 4. **Respect loading order.** Addons have ordering requirements: `open()` before WebglAddon, WebSocket open before AttachAddon, FitAddon.fit() after container has dimensions.
 5. **Match existing code style.** Follow the project's import style, naming, and patterns.
-6. **Never enter plan mode.** Execute immediately.
+6. **Surgical edits only.** Do NOT rewrite entire components or hooks. Insert variables (especially Refs) at the highest scope needed to avoid ReferenceError in cleanup functions. If the file uses React Refs for mutable state in async timers, use Refs -- not `let` variables. Respect existing formatting and patterns.
+7. **Plan before complex features.** For features involving stream interception, coordinate translation, or high-frequency data handling, analyze the data flow before writing code.
 
 ## Step 1: Locate Existing Terminal Code
 

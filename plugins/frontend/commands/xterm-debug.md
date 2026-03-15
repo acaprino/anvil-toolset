@@ -15,7 +15,7 @@ If `--shallow` is in `$ARGUMENTS`, run only Phase 1 and skip Phase 2.
 2. **Use the xtermjs-skill.** Reference `frontend:xtermjs-skill` for correct patterns and API usage.
 3. **Explain root causes.** Don't just fix -- explain why the issue occurs so the developer learns.
 4. **Preserve existing behavior.** Fixes must not break working functionality. Addon loading order matters.
-5. **Never enter plan mode.** Execute immediately.
+5. **Plan before complex fixes.** For issues involving stream interception, coordinate translation, or timer race conditions, analyze the data flow before writing code.
 6. **Assume bugs exist.** Do not declare code "solid" unless you can justify why for each analysis category. Well-structured code still has edge cases, fragile assumptions, and implicit contracts that break under stress.
 
 ## Step 1: Locate xterm.js Usage
@@ -128,6 +128,42 @@ Check each pattern against the code:
 - FitAddon.fit() called before addon is loaded
 - AttachAddon loaded before WebSocket is open
 - Fix: load WebglAddon after `open()`, load AttachAddon after WebSocket `onopen`
+
+**P11: Timer Race Conditions (ReferenceError in cleanup)**
+- Timer variables (`setTimeout`, `requestAnimationFrame`) declared inside a callback but referenced in a different scope (e.g. useEffect cleanup)
+- Causes ReferenceError or fails to clear the timer, leading to callbacks firing after disposal
+- Fix: store timers in `useRef` when using React, ensuring visibility across the callback scope and the cleanup function
+
+**P12: Scroll Jumping on refresh()**
+- `terminal.refresh()` resets the viewport scroll position, causing the user to lose their reading position
+- Also triggered by buffer shrinkage during resize reflow being misinterpreted as a terminal clear
+- Fix: wrap refresh in a helper that saves and restores scroll position. Add a temporal guard to ignore buffer shrinkage within a short window after resize events
+
+**P13: Ghost Cursors During Rapid Output**
+- During high-frequency PTY output (LLM streaming), the cursor flickers at random positions because it is shown between writes
+- Cursor save/restore ANSI sequences (used by spinners and status updates) leave ghost cursors at update positions
+- Fix: hide cursor at the start of every PTY write (`\x1b[?25l`), restore with a debounced timer (80-100ms) that fires only when output stops. Detect CUP and save/restore sequences to suppress cursor show during positioning
+
+**P14: Duplicate Paste Events**
+- Paste fires twice -- once from a custom handler and once from the browser's native paste event
+- Fix: call `preventDefault()` on the paste event. Add debounce guard for rapid successive pastes
+
+**P15: Stale PTY Dimensions After Spawn**
+- PTY size tracking retains column/row count from a previous session after spawning a new process
+- Fix: reset PTY size tracking after every spawn, then re-fit
+
+**P16: Container display:none During Init**
+- Terminal initialized on a container with `display: none` causes incorrect column/row calculation
+- Fix: use `visibility: hidden` instead, or defer initialization until the container is visible
+
+**P17: WebGL Silent Death After Standby**
+- After system sleep/standby, WebGL context is lost but the addon's `onContextLoss` callback often does not fire
+- Terminal appears black or stops rendering
+- Fix: implement 3-layer detection (addon callback + DOM `webglcontextlost` event on canvas + periodic health check). All layers trigger fallback to canvas renderer
+
+**P18: Narrow Columns After Tab Switch**
+- Switching between tabs causes narrow terminal columns because `fitAddon.fit()` runs before the container has correct dimensions
+- Fix: defer `fit()` to the next `requestAnimationFrame` on tab switch
 
 ## Phase 1 Report
 
