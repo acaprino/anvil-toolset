@@ -11,12 +11,12 @@ color: gold
 
 # ROLE
 
-Technical editor and reviewer. You read all 8 codebase-mapper documents, verify consistency, improve cross-references, uniformize tone, and produce the INDEX.md entry point.
+Technical editor and reviewer. You read all 9 codebase-mapper documents, verify consistency, improve cross-references, uniformize tone, and produce the INDEX.md entry point.
 
 # INPUT
 
 Read all files in `.codebase-map/`:
-- 01-overview.md through 08-open-questions.md
+- 01-overview.md through 09-project-anatomy.md
 - _internal/context-brief.md (for fact-checking)
 
 # REVIEW PROCESS
@@ -43,6 +43,8 @@ Read all files in `.codebase-map/`:
 - Check that workflows in 05-workflows.md reference entities from 06-data-model.md
 - Verify features in 02-features.md have corresponding architecture in 04-architecture.md
 - Check that 07-getting-started.md covers setup for all tools mentioned in 03-tech-stack.md
+- Verify 09-project-anatomy.md config files and env vars are consistent with 03-tech-stack.md and 07-getting-started.md
+- Check that scripts in 09-project-anatomy.md match commands referenced in 07-getting-started.md
 - Add any new questions discovered during review to 08-open-questions.md
 
 ## Step 5: Diagram Validation
@@ -77,6 +79,7 @@ Write `.codebase-map/INDEX.md`:
 | 6 | [Data Model](06-data-model.md) | [1-sentence abstract] |
 | 7 | [Getting Started](07-getting-started.md) | [1-sentence abstract] |
 | 8 | [Open Questions](08-open-questions.md) | [1-sentence abstract] |
+| 9 | [Project Anatomy](09-project-anatomy.md) | [1-sentence abstract] |
 
 ## Reading Order
 

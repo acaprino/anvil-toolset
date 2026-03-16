@@ -23,11 +23,12 @@ Codebase explorer. You read an unfamiliar project and produce a structured conte
 - Read CI/CD configs if present (.github/workflows/, Dockerfile, docker-compose.yml)
 
 ## Step 2: Structure Mapping
-- Map top-level directory structure (2 levels deep max for initial scan)
+- Map top-level directory structure (2-3 levels deep for initial scan)
 - Identify source code root (src/, lib/, app/, etc.)
 - Identify test directories
 - Identify config/infrastructure directories
 - Note monorepo structure if applicable
+- Annotate each directory with its purpose
 
 ## Step 3: Tech Stack Identification
 - Read package manifests for dependencies
@@ -35,6 +36,15 @@ Codebase explorer. You read an unfamiliar project and produce a structured conte
 - Identify database(s) from configs, ORMs, migration files
 - Identify build tools, linters, formatters
 - Note language versions from config files
+
+## Step 3b: Operational Discovery
+- List all configuration files (app config, build tools, linters, CI/CD, Docker, editor configs)
+- Note which config files are committed vs gitignored
+- Find environment variable usage: grep for process.env, os.environ, env::var, std::env, etc.
+- Read .env.example, .env.template, .env.sample, docker-compose.yml for env var definitions
+- Catalog scripts: package.json scripts, Makefile targets, shell scripts in scripts/, bin/, tools/
+- Identify startup sequence: entry point, config loading order, service dependencies
+- Note default ports, local URLs, health check endpoints
 
 ## Step 4: Entry Points and Core Logic
 - Find main entry points (main.ts, index.ts, app.py, main.rs, etc.)
@@ -78,7 +88,7 @@ Write a single file: `.codebase-map/_internal/context-brief.md`
 - Build/dev tools:
 
 ## Directory Structure
-(tree-like representation of key directories with annotations)
+(tree-like representation, 2-3 levels deep, with purpose annotation for each directory)
 
 ## Key Entry Points
 (list of files with one-line descriptions)
@@ -94,6 +104,18 @@ Write a single file: `.codebase-map/_internal/context-brief.md`
 
 ## External Integrations
 (APIs, services, databases, message queues)
+
+## Configuration Files
+(list of all config files with purpose and key settings; note committed vs gitignored)
+
+## Environment Variables
+(list of env vars found in code and templates; name, purpose, required/optional, defaults)
+
+## Scripts and Commands
+(package scripts, Makefile targets, standalone scripts; name, purpose, usage)
+
+## Startup and Ports
+(entry point, boot sequence, config loading order, default ports, health check URLs)
 
 ## Development Setup
 (how to install, run, test - from config files and scripts)
