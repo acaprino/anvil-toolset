@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.36.0"
+    "version": "2.38.0"
   },
   "plugins": [
     {
@@ -92,7 +92,7 @@
       "name": "frontend",
       "source": "./plugins/frontend",
       "description": "React performance optimization, UI polishing, UX design, comprehensive CSS (BEM, CSS Modules, SASS, accessibility, cross-browser), xterm.js terminal emulators, and premium web consulting",
-      "version": "2.26.0",
+      "version": "2.27.0",
       "author": {
         "name": "Alfio"
       },
@@ -140,8 +140,8 @@
     {
       "name": "ai-tooling",
       "source": "./plugins/ai-tooling",
-      "description": "AI development workflow -- prompt engineering and optimization, structured brainstorming with design approval gates, and implementation planning with TDD execution",
-      "version": "1.9.0",
+      "description": "AI development workflow -- prompt engineering and optimization, structured brainstorming with design approval gates, implementation planning with TDD execution, and Claude Agent SDK integration guide",
+      "version": "2.0.0",
       "author": {
         "name": "Alfio"
       },
@@ -152,7 +152,11 @@
         "ai",
         "optimization",
         "planning",
-        "brainstorming"
+        "brainstorming",
+        "agent-sdk",
+        "claude-code-sdk",
+        "subagents",
+        "mcp"
       ],
       "category": "ai-ml",
       "strict": false,
@@ -163,7 +167,8 @@
         "./skills/brainstorming",
         "./skills/writing-plans",
         "./skills/executing-plans",
-        "./skills/anvil-forge"
+        "./skills/anvil-forge",
+        "./skills/claude-agent-sdk"
       ],
       "commands": [
         "./commands/prompt-optimize.md"
