@@ -368,6 +368,7 @@ Task:
     [paste ESLint JSON report if captured in Step 1.5, or "No linter output available"]
 
     ## Instructions
+    Reference: read the `react-best-practices` skill rules for additional performance checks to apply.
     Evaluate:
     1. **React Compiler readiness**: Is `babel-plugin-react-compiler` configured? Identify patterns the compiler can auto-optimize vs patterns requiring manual intervention (external store reads, non-React state mutations, dynamic property access)
     2. **External store selector audit (CRITICAL)**:
