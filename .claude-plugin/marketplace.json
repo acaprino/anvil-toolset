@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.42.0"
+    "version": "2.44.0"
   },
   "plugins": [
     {
@@ -471,8 +471,8 @@
     {
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
-      "description": "SEO optimization, content marketing, and brand naming -- technical audits, keyword research, content strategy, and strategic brand naming with morphological generation, phonosymbolic priming, market saturation analysis, domain checks, trademark screening, and weighted scoring",
-      "version": "1.14.0",
+      "description": "SEO optimization, content marketing, brand naming, and domain hunting -- technical audits, keyword research, content strategy, strategic brand naming with lateral thinking generation (semantic collision, vocabulary shift, invisible hinge, polarization), phonotactic refinement, market saturation analysis, domain checks, trademark screening, weighted scoring, and registrar price comparison with promo code hunting",
+      "version": "1.16.0",
       "author": {
         "name": "Alfio"
       },
@@ -489,7 +489,10 @@
         "naming",
         "branding",
         "domain-check",
-        "trademark"
+        "trademark",
+        "domain-hunter",
+        "registrar",
+        "domain-price"
       ],
       "category": "marketing",
       "strict": false,
@@ -501,7 +504,8 @@
         "./agents/content-marketer.md"
       ],
       "skills": [
-        "./skills/brand-naming"
+        "./skills/brand-naming",
+        "./skills/domain-hunter"
       ],
       "commands": [
         "./commands/seo-audit.md",

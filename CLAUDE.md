@@ -88,6 +88,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `deep-dive-analysis` (inspiration) | `gsd-build/get-shit-done` - `agents/gsd-codebase-mapper.md` | `plugins/deep-dive-analysis/commands/deep-dive-analysis.md` (patterns adopted, not direct copy) |
 | `playwright-skill` | `lackeyjb/playwright-skill` - `skills/playwright-skill/` | `plugins/playwright-skill/skills/playwright-skill/SKILL.md`, `plugins/playwright-skill/skills/playwright-skill/API_REFERENCE.md`, `plugins/playwright-skill/skills/playwright-skill/run.js`, `plugins/playwright-skill/skills/playwright-skill/package.json`, `plugins/playwright-skill/skills/playwright-skill/lib/helpers.js` |
 | `frontend` (react-best-practices) | `vercel-labs/agent-skills` - `skills/react-best-practices/` | `plugins/frontend/skills/react-best-practices/SKILL.md`, `plugins/frontend/skills/react-best-practices/references.md`, `plugins/frontend/skills/react-best-practices/rules/*.md` |
+| `digital-marketing` (domain-hunter) | `ReScienceLab/opc-skills` - `skills/domain-hunter/` | `plugins/digital-marketing/skills/domain-hunter/SKILL.md`, `plugins/digital-marketing/skills/domain-hunter/references/registrars.md`, `plugins/digital-marketing/skills/domain-hunter/references/spaceship-api.md` |
 
 ### How to sync a plugin
 
@@ -122,6 +123,16 @@ gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/SKILL
 gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/AGENTS.md \
   --jq '.content' | base64 -d  # saved locally as references.md
 # For rules: iterate all files in skills/react-best-practices/rules/
+
+# Fetch latest domain-hunter files from upstream (ReScienceLab/opc-skills example)
+# NOTE: Upstream Step 3 uses dedicated Twitter/Reddit Python scripts - replace with WebSearch
+# queries targeting site:x.com and site:reddit.com when syncing
+gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/SKILL.md \
+  --jq '.content' | base64 -d
+gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/references/registrars.md \
+  --jq '.content' | base64 -d
+gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/references/spaceship-api.md \
+  --jq '.content' | base64 -d
 ```
 
 Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file, plus any plugin-specific sections like Typography Reference or Isolated Prompting for frontend-design in `plugins/frontend/skills/frontend-design/`), bump the plugin version, bump `metadata.version`, and commit + push.

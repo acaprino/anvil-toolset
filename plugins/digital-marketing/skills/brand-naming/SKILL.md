@@ -2,11 +2,11 @@
 name: brand-naming
 description: >
   Brand naming strategist -- generates, filters, scores, and validates brand names
-  through a structured workflow. Use when creating brand names, product names, app names,
-  startup names, or any naming project. Covers 7 naming archetypes (brandable names,
-  evocative, short phrase, compound words, alternate spelling, non-English words, real words),
-  linguistic/cultural filtering, weighted scoring, domain availability checks, market
-  saturation analysis (existing apps, websites, businesses with same name), trademark
+  through a lateral thinking workflow. Use when creating brand names, product names, app names,
+  startup names, or any naming project. Uses 4 lateral thinking techniques (semantic collision,
+  vocabulary shift, invisible hinge, polarization) for creative generation, then filters with
+  7 naming archetypes, linguistic/phonotactic rules, weighted scoring, domain availability checks,
+  market saturation analysis (existing apps, websites, businesses with same name), trademark
   pre-screening, and SEO analysis. Trigger on: "brand name", "naming", "name my app",
   "name my product", "product name", "startup name", "come up with a name",
   "nome del brand", "naming strategico".
@@ -64,75 +64,57 @@ Display the ban list before proceeding.
 
 Hard constraints for all name generation - apply during generation, not post-hoc:
 
-- **NEVER propose single dictionary words** (any language) or common nouns as brand names
-- Assume all single common words in tech/app sectors are 100% taken (domains, trademarks, app stores)
 - **NEVER use banned morphemes** from the sector ban list
-- Skip directly to neologisms, blends, morphological inventions, or obscure foreign words
-- The only exception: truly obscure words from non-major languages (e.g., Basque, Swahili, Finnish) that have zero tech/brand presence - and even these must be verified
+- Skip common, overused words that saturate the sector
+- Single dictionary words are allowed ONLY if truly obscure, archaic, or decontextualized - not top-5000 frequency words in any major language. Words like Apple, Slack, Tinder work because they're common words ripped from their original context into an unrelated domain. Words like "Health" or "Cloud" in their native sector do not.
+- The only exception for foreign words: truly obscure words from non-major languages (e.g., Basque, Swahili, Finnish) that have zero tech/brand presence - and even these must be verified
 
-### Step 2: Massive Generation (Brainstorming)
+### Step 2: Massive Generation (Lateral Thinking)
 
-Generate at least 30 name candidates across seven archetypes. Before generating, identify the target emotions from the brief and map them to phonosymbolic sounds (see Phonosymbolism Quick Reference). Use these sounds as the starting palette for generation.
+Generate at least 30 name candidates using four lateral thinking techniques. The goal is creative explosion - push for unexpected, surprising names that don't sound like every other startup.
 
-**Phonosymbolic Priming** - Start generation from sound, not meaning:
-1. List 2-3 target emotions (e.g., Simplicity, AI, Fluidity)
-2. Map to ideal sounds (e.g., Simplicity -> `i`, `e`, `l`; Fluidity -> `f`, `v`, `s`, `l`; AI -> `i`, `k`, `t`)
-3. Assemble candidate syllables from the selected sound palette FIRST
-4. Then layer meaning on top of the phonetic skeleton
-5. Discard sounds that contradict the brand personality unless explicitly requested
+**Technique 1: Semantic Collision** - Force distant semantic fields together
+- Ban ALL industry-related words entirely during this technique
+- Pick 3 unrelated domains (e.g., for a fintech: marine biology, architecture, astronomy)
+- Find words, concepts, or metaphors from those domains that share the brand's core values
+- Collide them: blend, compound, or juxtapose words from different domains
+- The best names come from unexpected connections (Slack = loose rope -> workplace calm)
 
-Generate candidates from each of the seven archetypes below. Not every archetype will suit every brief -- prioritize the ones that match the brand's goals, but always explore at least 4-5 archetypes.
+**Technique 2: Vocabulary Shift** - Hunt for obscure, archaic, or decontextualized real words
+- Raid etymological dictionaries, dead languages, obsolete English, trade jargon from unrelated fields
+- Look for words that sound beautiful but have fallen out of common use
+- Decontextualize common words by placing them in an alien sector
+- Push beyond the first 10,000 words anyone would think of
+- Examples: Palantir (Tolkien's seeing stone), Asana (yoga pose), Quora (Latin plural of quorum)
 
-**1. Brandable Names** (coined/invented words - distinctive, easy to trademark, requires brand-building)
-- Use morphological techniques to create entirely new words:
-  - *Clipping & Suffixing* - Extract root morpheme, apply non-standard suffixes (-io, -ia, -ly, -fy, -os, -ix, -ara, -ova, -ium, -eo, -ika). E.g., Spot- + -ify = Spotify, Lumin- + -a = Lumina
-  - *V-C-V-C-V Phonotactic Structures* - Alternating vowel-consonant patterns, universally pronounceable, 2-3 syllables. E.g., Oralo, Avion, Eluma, Asana
-  - *Cross-linguistic Blending* - Fuse morphemes from different languages where both carry meaning. E.g., Auralux (Latin aura + lux), Zenkai (Japanese zen + kai)
-- Each invented name should note which technique was used
-- Examples: Google, Rolex, Kodak, Noom, Oura
+**Technique 3: Invisible Hinge** - For neologisms and blends
+- Source words must share 2-3 letters at the join point so the blend sounds natural, not stitched
+- The overlap is the "hinge" - it makes the portmanteau feel like a real word
+- Bad: Health + App = Healthapp (no hinge, just glued). Good: Pin + Interest = Pinterest (shared "in")
+- Test: cover each half - does the remaining fragment still hint at its source word?
+- Examples: Instagram (instant + telegram), Groupon (group + coupon), Microsoft (micro + soft)
 
-**2. Evocative** (suggests energy, aspiration, or emotion through real-word combinations)
-- Combine real words or fragments that evoke the brand's energy or promise
-- Focus on emotional resonance and storytelling potential
-- Can use metaphors from nature, mythology, or aspiration
-- Examples: RedBull, Forever21, Strava, Nike, Lululemon
+**Technique 4: Polarization** - Contrarian, provocative names that break sector conventions
+- What would make the industry uncomfortable? Name that.
+- Use contradiction, irony, or subversion of expectations
+- Names that provoke a double-take or violate sector naming norms
+- Examples: Liquid Death (water), The Ordinary (skincare), Gong (sales), Discord (communication), Patagonia (outdoor gear named after a harsh region)
 
-**3. Short Phrase** (2-3 word descriptive phrases - instant clarity, SEO-friendly)
-- Combine keywords: product function + benefit + audience hint
-- Must communicate the value proposition immediately
-- Harder to trademark but excellent for discovery
-- Examples: Dollar Shave Club, MyFitnessPal, WeTransfer, Booking.com
+**Generate freely across all four techniques.** Do not self-censor during generation - even rough, weird, or provocative candidates are valuable at this stage.
 
-**4. Compound Words** (two real words merged into one - balanced clarity and distinctiveness)
-- Merge two meaningful words into a single brand name
-- Both words should contribute to the brand meaning
-- Can capitalize internal letters (camelCase) or run together
-- Examples: FedEx, Microsoft, YouTube, Facebook, Snapchat, WordPress
+**Archetype Classification** - After generating 30+ names, classify each into one of 7 archetypes to check diversity:
 
-**5. Alternate Spelling** (intentionally misspelled real words - distinctive, registrable)
-- Apply vowel dropping, consonant shifting, or phonetic substitution:
-  - Drop interior vowels (Tumbler -> Tumblr, Flicker -> Flickr)
-  - Swap consonants for phonetic neighbors (ph->f, c->k, s->z)
-  - Swap vowels (a->o, e->i, y for i)
-  - Double a consonant or truncate endings
-- Must remain pronounceable and recognizable
-- Examples: Lyft, Fiverr, Tumblr, Flickr, Figma, Reddit
+1. **Brandable Names** - Coined/invented words (Google, Rolex, Kodak, Noom, Oura)
+2. **Evocative** - Suggests energy, aspiration, or emotion (RedBull, Strava, Nike, Lululemon)
+3. **Short Phrase** - 2-3 word descriptive phrases (Dollar Shave Club, MyFitnessPal, WeTransfer)
+4. **Compound Words** - Two real words merged (FedEx, YouTube, Snapchat, WordPress)
+5. **Alternate Spelling** - Intentionally misspelled (Lyft, Fiverr, Tumblr, Flickr, Reddit)
+6. **Non-English Words** - Foreign words with relevant meaning (Toyota, Audi, Volvo, Samsung, Lego)
+7. **Real Words** - Existing words repurposed (Apple, Amazon, Slack, Stripe, Notion, Linear)
 
-**6. Non-English Words** (foreign words with relevant meaning - cultural depth, unique)
-- Select words from non-English languages that carry brand-relevant meaning
-- Prefer obscure enough words to be registrable
-- Must be pronounceable in target markets
-- Etymology should be a discoverable brand story
-- Examples: Toyota, Audi, Volvo (Latin: "I roll"), Samsung (Korean: "three stars"), Lego (Danish: "play well")
+If any archetype has 0 entries, generate a few more using that archetype as a lens. The archetypes are a diversity check, not generation buckets.
 
-**7. Real Words** (existing English words repurposed - immediate recognition, metaphorical power)
-- Common words given new context through the brand
-- Must have strong metaphorical or aspirational connection
-- Hardest to trademark and register domains, but most memorable
-- Only viable if the word is not already dominant in the target sector
-- Examples: Apple, Amazon, Slack, Stripe, Square, Notion, Linear
-
-Apply CO.ME.OR.GO criteria during generation:
+Apply CO.ME.OR.GO as evaluation criteria (not generation constraints):
 - **CO**rto (short) - prefer 1-3 syllables
 - **ME**morabile (memorable) - easy to recall after one hearing
 - **OR**iginale (original) - distinct from competitors
@@ -145,7 +127,7 @@ From the 30+ candidates, filter down to the best 8-10 by checking:
 - Pronunciation ease in all target languages
 - No negative/offensive meanings in English, Italian, Spanish, French, German, Portuguese, Chinese, Japanese
 - No unfortunate phonetic associations (sounds like profanity, disease, etc.)
-- Phonosymbolism alignment (round sounds = soft/friendly, sharp sounds = energy/precision)
+- **Phonosymbolism alignment** - Does the sound match the brand personality? Round sounds (b, m, l, o, a) = soft/friendly. Sharp sounds (k, t, p, i, e) = energy/precision. Flowing sounds (s, f, v) = elegance/smoothness. Reject names whose sound contradicts the intended brand feel.
 - No excessive similarity to existing major brands
 
 ### Step 3b: Quick Domain Gate
@@ -154,14 +136,28 @@ Before full analysis, run a rapid viability check on each of the 8-10 filtered c
 
 - For each name, WebSearch for `"name.com"` and `"name" app`
 - If .com is owned by an established company (Fortune 500, funded startup, active SaaS), **silently discard** the name
-- Generate a replacement name using the same morphological techniques and re-filter it
+- Generate a replacement name using the lateral thinking techniques and re-filter it
 - Only names that pass this quick gate proceed to the full Step 4-6 analysis
 - Goal: eliminate obviously blocked names before spending search calls on deep analysis
 
+### Step 3c: Phonotactic Refinement
+
+For the 8-10 candidates that survived filtering, offer targeted phonotactic refinement for promising-but-rough names:
+
+- If a name has the right meaning/feel but sounds harsh, generate 10 variants softening consonants or opening final vowels
+- If a name is too long, try clipping techniques (remove interior syllables, truncate endings)
+- Apply suffix shifts to improve mouthfeel (-ia, -o, -a endings for warmth; -ix, -ik, -os for precision)
+- Swap vowels to change personality (a/o for openness, i/e for sharpness)
+- Soften or harden consonant clusters to match brand tone
+
+This is where the morphological toolkit (see Refinement Toolkit below) is genuinely useful - for polishing promising names, not for generating them from scratch.
+
 ### Step 4: Domain and Social Check
 
+> **Tip:** For deep registrar price comparison, promo code hunting, and purchase guidance on your final picks, use the `digital-marketing:domain-hunter` skill.
+
 For the top 8-10 names that passed the Quick Domain Gate, verify:
-- `.com` domain availability (use `scripts/domain_checker.py` if API key configured, otherwise use WebSearch)
+- `.com` domain availability (use `domain-hunter/scripts/domain_checker.py` if API key configured, otherwise use WebSearch)
 - Alternative TLDs: `.app`, `.io`, `.co`, `.dev`, or country-specific
 - Social media handle availability on major platforms (search via web)
 
@@ -279,7 +275,11 @@ Deliver the top 3 names with:
 | Maximum memorability | Real Words | Apple, Slack, Notion |
 | Premium positioning | Non-English Words / Evocative | Audi, Tesla, Lululemon |
 
-### Phonosymbolism Quick Reference
+### Refinement Toolkit
+
+These tools are for Step 3c phonotactic refinement - polishing promising names, not generating from scratch.
+
+#### Phonosymbolism Quick Reference
 
 - Vowels `a`, `o` - open, warm, large, friendly
 - Vowels `i`, `e` - small, precise, light, fast
@@ -288,18 +288,28 @@ Deliver the top 3 names with:
 - Consonants `s`, `f`, `v` - flowing, smooth, elegant
 - Consonants `r`, `g` - rugged, powerful, dynamic
 
-### Morphological Generation Techniques
+#### Morphological Refinement Techniques
 
-See `references/naming-frameworks.md` for the full morphological toolkit including suffix inventories, consonant shift rules, V-C-V-C-V structures, and cross-linguistic blending patterns.
+- **Suffix shifts** - Swap endings to change personality: -ia/-a (warm, approachable), -ix/-ik (sharp, technical), -os/-io (balanced, international), -eo/-ova (modern, distinctive)
+- **Vowel swaps** - Open vowels (a, o) for warmth and trust; closed vowels (i, e) for precision and speed
+- **Consonant softening** - Replace hard stops (k, t, p) with softer alternatives (g, d, b) or fricatives (s, f, v) to reduce harshness
+- **Clipping** - Remove interior syllables or truncate endings to shorten (e.g., Tumbler -> Tumblr, Flicker -> Flickr)
+- **Cross-linguistic blending** - Fuse morphemes from different languages where both carry meaning (e.g., Auralux from Latin aura + lux)
+
+See `references/naming-frameworks.md` for the full morphological toolkit including suffix inventories, consonant shift rules, and cross-linguistic blending patterns.
 
 ## Domain Checker Script
 
-If the user has configured API keys, use the domain checker script:
+If the user has configured API keys, use the domain checker script (located in domain-hunter):
 
 ```bash
-python scripts/domain_checker.py name1 name2 name3
+python ../domain-hunter/scripts/domain_checker.py name1 name2 name3
 ```
 
-The script checks `.com` availability via WHOIS API. See `scripts/domain_checker.py` for setup instructions.
+The script checks `.com`, `.app`, `.io`, `.co` availability via WHOIS API. See `domain-hunter/scripts/domain_checker.py` for setup instructions.
 
 If no API key is available, fall back to WebSearch queries like `"namexyz.com" site:whois` or check registrar sites manually.
+
+## Related Skills
+
+- **`digital-marketing:domain-hunter`** - Once you have final name picks, use domain-hunter for registrar price comparison, promo code hunting, and purchase recommendations. Complements this skill's availability checks with pricing intelligence.
