@@ -87,6 +87,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `frontend` (css-master) | `paulirish/dotfiles` - `agents/paulirish-skills/skills/modern-css/SKILL.md` | `plugins/frontend/skills/css-master/SKILL.md`, `plugins/frontend/skills/css-master/references/argyle-cacadia-2025-deck.md` |
 | `deep-dive-analysis` (inspiration) | `gsd-build/get-shit-done` - `agents/gsd-codebase-mapper.md` | `plugins/deep-dive-analysis/commands/deep-dive-analysis.md` (patterns adopted, not direct copy) |
 | `playwright-skill` | `lackeyjb/playwright-skill` - `skills/playwright-skill/` | `plugins/playwright-skill/skills/playwright-skill/SKILL.md`, `plugins/playwright-skill/skills/playwright-skill/API_REFERENCE.md`, `plugins/playwright-skill/skills/playwright-skill/run.js`, `plugins/playwright-skill/skills/playwright-skill/package.json`, `plugins/playwright-skill/skills/playwright-skill/lib/helpers.js` |
+| `frontend` (react-best-practices) | `vercel-labs/agent-skills` - `skills/react-best-practices/` | `plugins/frontend/skills/react-best-practices/SKILL.md`, `plugins/frontend/skills/react-best-practices/references.md`, `plugins/frontend/skills/react-best-practices/rules/*.md` |
 
 ### How to sync a plugin
 
@@ -114,6 +115,13 @@ gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/run.js \
   --jq '.content' | base64 -d
 gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/lib/helpers.js \
   --jq '.content' | base64 -d
+
+# Fetch latest react-best-practices from upstream (vercel-labs/agent-skills example)
+gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/SKILL.md \
+  --jq '.content' | base64 -d
+gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/AGENTS.md \
+  --jq '.content' | base64 -d  # saved locally as references.md
+# For rules: iterate all files in skills/react-best-practices/rules/
 ```
 
 Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file, plus any plugin-specific sections like Typography Reference or Isolated Prompting for frontend-design in `plugins/frontend/skills/frontend-design/`), bump the plugin version, bump `metadata.version`, and commit + push.
