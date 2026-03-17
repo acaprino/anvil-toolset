@@ -2,14 +2,14 @@
 ---
 name: react-best-practices
 description: >
-  React and Next.js performance optimization guidelines from Vercel Engineering (62 rules across 8 categories).
+  React and Next.js performance optimization guidelines from Vercel Engineering (63 rules across 8 categories).
   Use when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns.
   Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
 ---
 
 # Vercel React Best Practices
 
-Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Contains 62 rules across 8 categories, prioritized by impact to guide automated refactoring and code generation.
+Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Contains 63 rules across 8 categories, prioritized by impact to guide automated refactoring and code generation.
 
 ## When to Apply
 
@@ -50,6 +50,7 @@ Reference these guidelines when:
 - `bundle-defer-third-party` - Load analytics/logging after hydration
 - `bundle-conditional` - Load modules only when feature is activated
 - `bundle-preload` - Preload on hover/focus for perceived speed
+- `bundle-manual-chunks` - Split vendor bundles via manualChunks for cache efficiency
 
 ### 3. Server-Side Performance (HIGH)
 
