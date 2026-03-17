@@ -408,3 +408,5 @@ web-ext sign --channel unlisted --api-key $WEB_EXT_API_KEY --api-secret $WEB_EXT
 - `references/browser-api-reference.md` - Complete list of all 51 browser.* APIs with methods, events, and permissions
 - `references/manifest-schema.md` - Full manifest.json key reference with MV2/MV3 examples
 - `references/amo-publishing.md` - AMO publishing checklist, review policies, CSP, security best practices, i18n
+- `references/mdn-api-urls.md` - Direct MDN URL index for all browser.* APIs, manifest keys, and Extension Workshop resources
+- `references/best-practices.md` - Best practices, pitfalls, and anti-patterns: JS patterns, Workers, sessions, startup, security, performance, cross-browser
