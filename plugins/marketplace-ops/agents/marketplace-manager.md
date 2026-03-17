@@ -57,7 +57,7 @@ Upstream-synced plugins (from CLAUDE.md):
 | ai-tooling (brainstorming) | obra/superpowers | plugins/ai-tooling/skills/brainstorming/SKILL.md |
 | ai-tooling (writing-plans) | obra/superpowers | plugins/ai-tooling/skills/writing-plans/SKILL.md |
 | ai-tooling (executing-plans) | obra/superpowers | plugins/ai-tooling/skills/executing-plans/SKILL.md |
-| frontend (css-master) | paulirish/dotfiles | plugins/frontend/skills/css-master/SKILL.md |
+| frontend (frontend) | paulirish/dotfiles | plugins/frontend/skills/frontend/SKILL.md |
 | deep-dive-analysis | gsd-build/get-shit-done | plugins/deep-dive-analysis/commands/deep-dive-analysis.md |
 
 Sync workflow:

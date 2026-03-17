@@ -23,8 +23,8 @@ You MUST follow these rules exactly. Violating any of them is a failure.
 This command requires agents from other plugins. Before proceeding, verify they are installed:
 
 **Required plugins:**
-- `tauri-development` -- rust-engineer, tauri-optimizer agents (Phases 1-2)
-- `frontend` -- ui-layout-designer, ui-polisher agents (Phases 4-5)
+- `tauri-development` -- rust-engineer, tauri-desktop agents (Phases 1-2)
+- `frontend` -- ui-layout-designer, web-designer agents (Phases 4-5)
 - `react-development` -- react-performance-optimizer agent (Phase 3)
 
 Check by looking for the agent/skill files. If a required plugin is missing:
@@ -189,7 +189,7 @@ Read `.tauri-pipeline/01-rust-review.md` for context.
 
 ```
 Task:
-  subagent_type: "tauri-optimizer"
+  subagent_type: "tauri-desktop"
   description: "Tauri IPC architecture and optimization review"
   prompt: |
     Review the Tauri 2 IPC architecture, plugin usage, and optimization opportunities.
@@ -346,7 +346,7 @@ Read `.tauri-pipeline/03-react-performance.md` and `.tauri-pipeline/04-layout.md
 
 ```
 Task:
-  subagent_type: "ui-polisher"
+  subagent_type: "web-designer"
   description: "UI polish and animation review for Tauri desktop app"
   prompt: |
     Review the visual polish, animations, and micro-interactions of this Tauri 2 desktop app.

@@ -37,10 +37,10 @@ daisyUI is a Tailwind CSS component library that provides semantic class names f
 
 | Need | Route to |
 |------|----------|
-| CSS architecture, modern CSS features, responsive images | **css-master** |
+| CSS architecture, modern CSS features, responsive images | **web-designer** |
 | Page layout composition, grid systems, breakpoint strategy | **ui-layout-designer** agent |
-| Animations, micro-interactions, visual polish | **ui-polisher** agent |
-| UX flows, design tokens, component hierarchy | **ui-ux-designer** agent |
+| Animations, micro-interactions, visual polish | **web-designer** agent |
+| UX flows, design tokens, component hierarchy | **web-designer** agent |
 | Distinctive visual identity, avoiding generic aesthetics | **frontend-design** |
 | shadcn/ui components (different library, Radix-based) | **shadcn-ui** |
 

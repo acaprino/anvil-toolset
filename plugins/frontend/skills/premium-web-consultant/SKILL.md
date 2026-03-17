@@ -1,6 +1,6 @@
 ---
 name: premium-web-consultant
-description: Premium web design consultant that conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and orchestrates ui-ux-designer, ui-layout-designer, css-master, seo-specialist, and content-marketer agents automatically. Use when planning a new website or redesign before any code is written.
+description: Premium web design consultant that conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and orchestrates web-designer, ui-layout-designer, web-designer, seo-specialist, and content-marketer agents automatically. Use when planning a new website or redesign before any code is written.
 ---
 
 # Premium Web Consultant
@@ -140,7 +140,7 @@ Sections:
 
 ### HANDOFF SEQUENCE: IA Validation -> Layout Design
 
-**Step 1: ui-ux-designer**
+**Step 1: web-designer**
 
 ```
 HANDOFF
@@ -218,7 +218,7 @@ Ask:      Define the CSS architecture to implement this design
 -------------------------------
 ```
 
-Invoke `css-master` agent. Record CSS architecture decisions in the design direction document.
+Invoke `web-designer` agent. Record CSS architecture decisions in the design direction document.
 
 ---
 
@@ -336,13 +336,13 @@ This prevents each specialist from solving the wrong problem.
 | Phase | Agent | Plugin | Purpose |
 |-------|-------|--------|---------|
 | 1 | seo-specialist | digital-marketing | Competitor SEO analysis |
-| 2 | ui-ux-designer | frontend | IA validation, user flows, conversion funnels |
+| 2 | web-designer | frontend | IA validation, user flows, conversion funnels |
 | 2 | ui-layout-designer | frontend | Page layout, grid systems, responsive breakpoints |
-| 3 | css-master | frontend | CSS architecture, spacing, typography, responsive |
+| 3 | web-designer | frontend | CSS architecture, spacing, typography, responsive |
 | 4 | content-marketer | digital-marketing | Per-page messaging, CTA strategy |
 | 4 | seo-specialist | digital-marketing | Keyword mapping, meta suggestions |
 
 Notes:
 - SEO specialist invoked twice: Phase 1 for competitive analysis, Phase 4 for keyword mapping (needs sitemap from Phase 2)
-- Phase 2 agents run sequentially: ui-ux-designer validates IA first, then ui-layout-designer uses the optimized output
+- Phase 2 agents run sequentially: web-designer validates IA first, then ui-layout-designer uses the optimized output
 - After Phase 5, hand off to `ui-studio` for implementation

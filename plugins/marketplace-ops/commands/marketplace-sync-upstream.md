@@ -15,7 +15,7 @@ Synchronize locally-ported plugins with their upstream source repositories.
 | ai-tooling | brainstorming | obra/superpowers | skills/brainstorming/SKILL.md |
 | ai-tooling | writing-plans | obra/superpowers | skills/writing-plans/SKILL.md |
 | ai-tooling | executing-plans | obra/superpowers | skills/executing-plans/SKILL.md |
-| frontend | css-master | paulirish/dotfiles | agents/paulirish-skills/skills/modern-css/SKILL.md |
+| frontend | frontend | paulirish/dotfiles | agents/paulirish-skills/skills/modern-css/SKILL.md |
 | deep-dive-analysis | deep-dive-analysis | gsd-build/get-shit-done | agents/gsd-codebase-mapper.md |
 
 ## Sync procedure

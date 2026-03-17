@@ -37,7 +37,7 @@ Use the react-performance-optimizer agent to analyze [component/app]
 | Render time | < 16ms | < 16ms |
 | Memory baseline | N/A | < 100MB |
 
-**Agent delegation:** Defers CSS issues to `css-master`, layout to `ui-layout-designer`, animation jank to `ui-polisher`, and Tauri IPC/Rust to `tauri-optimizer`.
+**Agent delegation:** Defers CSS issues and animation jank to `web-designer`, layout to `ui-layout-designer`, and Tauri IPC/Rust to `tauri-desktop`.
 
 ---
 

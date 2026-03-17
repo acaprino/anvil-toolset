@@ -38,8 +38,8 @@ This pipeline is for **building new UI from scratch or major redesigns**. Before
 1. Tell the user this is a fix, not a build-from-scratch task, so the full pipeline would be overkill
 2. Use the relevant specialized agent directly:
    - Layout/grid/responsive issues -> spawn `frontend:ui-layout-designer` to analyze and fix
-   - Visual polish/animations -> spawn `frontend:ui-polisher`
-   - UX flow/interaction issues -> spawn `frontend:ui-ux-designer`
+   - Visual polish/animations -> spawn `frontend:web-designer`
+   - UX flow/interaction issues -> spawn `frontend:web-designer`
    - React performance issues -> spawn `react-development:react-performance-optimizer`
 3. If no single agent fits, handle the fix directly with code analysis and edits
 
@@ -51,7 +51,7 @@ This command requires agents and skills from other plugins. Before proceeding, v
 
 **Required plugins:**
 - `ai-tooling` -- brainstorming, writing-plans, executing-plans skills (Phases 1, 6, 7)
-- `frontend` -- ui-ux-designer, ui-layout-designer, ui-polisher agents, frontend-design and css-master skills (Phases 2-5, 8-9)
+- `frontend` -- web-designer, ui-layout-designer, web-designer agents, frontend-design and web-designer skills (Phases 2-5, 8-9)
 - `react-development` -- react-performance-optimizer agent (Phase 8)
 
 **Optional plugins:**
@@ -413,11 +413,11 @@ Update `state.json`: set `current_phase` to 4, add phase 3 to `completed_phases`
 
 ## Phase 4: UX Patterns
 
-Agent: **ui-ux-designer**
+Agent: **web-designer**
 
 ```
 Task:
-  subagent_type: "frontend:ui-ux-designer"
+  subagent_type: "frontend:web-designer"
   description: "UX patterns and interaction design"
   prompt: |
     Design UX patterns and interactions for this product.
@@ -763,11 +763,11 @@ Do NOT proceed until the user approves.
 
 ## Phase 9: UI Polish & Micro-interactions
 
-Agent: **ui-polisher**
+Agent: **web-designer**
 
 ```
 Task:
-  subagent_type: "frontend:ui-polisher"
+  subagent_type: "frontend:web-designer"
   description: "UI polish and micro-interactions"
   prompt: |
     Polish the implemented UI to match the product brief's aesthetic tone.

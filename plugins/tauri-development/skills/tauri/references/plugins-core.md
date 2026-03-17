@@ -27,7 +27,7 @@ This automatically:
 | `os` | yes | yes | OS information |
 | `deep-link` | yes | yes | URL scheme handling |
 
-For mobile-only plugins (biometric, barcode-scanner, haptics, nfc), see `tauri2-mobile/references/plugins-mobile.md`.
+For mobile-only plugins (biometric, barcode-scanner, haptics, nfc), see `references/plugins-mobile.md`.
 
 ## Plugin Configuration
 
@@ -79,7 +79,7 @@ pub fn run() {
 }
 ```
 
-For mobile deep link configuration (custom schemes, app links, Android Intent Filters, iOS Associated Domains), see `tauri2-mobile/references/plugins-mobile.md`.
+For mobile deep link configuration (custom schemes, app links, Android Intent Filters, iOS Associated Domains), see `references/plugins-mobile.md`.
 
 ## Opener Plugin (External URLs)
 

@@ -33,7 +33,7 @@ If CLAUDE.md says "don't use TDD" and a skill says "always use TDD," follow the 
 
 Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you -- follow it directly. Never use the Read tool on skill files.
 
-Skills are namespaced by plugin: `plugin-name:skill-name` (e.g., `ai-tooling:brainstorming`, `frontend:css-master`).
+Skills are namespaced by plugin: `plugin-name:skill-name` (e.g., `ai-tooling:brainstorming`, `frontend:frontend`).
 
 ---
 
@@ -59,7 +59,7 @@ Before responding to ANY user message, run this check:
    --> ai-tooling:writing-plans to create a plan first
 
 5. Is this frontend/UI work?
-   --> Check: frontend:css-master, frontend:frontend-design, frontend:ui-studio,
+   --> Check: frontend:frontend, frontend:frontend-design, frontend:ui-studio,
        frontend:premium-web-consultant, workflows:frontend-redesign
 
 6. Is this a code review request?
@@ -103,12 +103,12 @@ These thoughts mean STOP -- you are rationalizing not using a skill:
 When multiple skills could apply, use this order:
 
 1. **Process skills first** (brainstorming, writing-plans) -- these determine HOW to approach the task
-2. **Domain skills second** (frontend-design, css-master, python-tdd) -- these guide execution
+2. **Domain skills second** (frontend-design, frontend, python-tdd) -- these guide execution
 3. **Review skills last** (code-review, full-review) -- these validate the result
 
 Examples:
 - "Build a new dashboard" --> brainstorming --> writing-plans --> frontend skills --> review
-- "Fix this CSS bug" --> css-master skill directly
+- "Fix this CSS bug" --> frontend skill directly
 - "Review this code" --> code-review or full-review
 - "Create a Python API" --> brainstorming --> python-tdd --> writing-plans --> executing-plans
 
@@ -132,7 +132,7 @@ If the user's request matches a workflow scope, suggest the workflow instead of 
 
 **Rigid** (brainstorming, TDD): Follow exactly. Don't adapt away the discipline. The gates exist for a reason.
 
-**Flexible** (frontend-design, css-master): Adapt principles to context. Use judgment.
+**Flexible** (frontend-design, frontend): Adapt principles to context. Use judgment.
 
 The skill itself tells you which type it is.
 

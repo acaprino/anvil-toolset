@@ -38,13 +38,13 @@
 
 ## Information Architecture
 
-*[Insert complete Phase 2 output - sitemap-template.md, including ui-ux-designer validation notes and ui-layout-designer layout specs]*
+*[Insert complete Phase 2 output - sitemap-template.md, including web-designer validation notes and ui-layout-designer layout specs]*
 
 ---
 
 ## Design Direction
 
-*[Insert complete Phase 3 output - design-direction-template.md, including css-master architecture decisions]*
+*[Insert complete Phase 3 output - design-direction-template.md, including web-designer architecture decisions]*
 
 ---
 

@@ -454,7 +454,7 @@ strip = true
 panic = "abort"
 ```
 
-See the `tauri-optimizer` agent for detailed build optimization guidance.
+See the `tauri-desktop` agent for detailed build optimization guidance.
 
 ## Common Issues
 

@@ -11,7 +11,7 @@ Expert marketplace operations manager for anvil-toolset.
 | | |
 |---|---|
 | **Model** | opus |
-| **Color** | gold |
+| **Color** | yellow |
 | **Tools** | Read, Write, Edit, Bash, Glob, Grep, WebFetch |
 | **Use for** | Adding, auditing, reorganizing, versioning, or syncing plugins |
 

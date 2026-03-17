@@ -52,7 +52,7 @@ Full frontend redesign pipeline: UX audit, layout system design, implementation,
 | | |
 |---|---|
 | **Invoke** | `/frontend-redesign <target path> [--framework react\|vue\|svelte] [--skip-performance] [--strict-mode]` |
-| **Pipeline** | ui-ux-designer -> ui-layout-designer -> frontend-design -> react-performance-optimizer -> ui-polisher -> design audit |
+| **Pipeline** | web-designer -> ui-layout-designer -> frontend-design -> react-performance-optimizer -> web-designer -> design audit |
 | **Checkpoints** | After layout spec and polish phases |
 | **Output** | `.frontend-redesign/report.md` -- actionable checklist with before/after comparison |
 | **Dependencies** | [frontend](frontend.md), [react-development](react-development.md) |
@@ -151,7 +151,7 @@ Competitive mobile intelligence: analyze a competitor Android app via ADB, brain
 | | |
 |---|---|
 | **Invoke** | `/mobile-intel <app-package-name> [--device <device-id>] [--skip-scaffold]` |
-| **Pipeline** | analyze-mobile-app -> brainstorming -> ui-ux-designer -> writing-plans -> tauri2-mobile |
+| **Pipeline** | analyze-mobile-app -> brainstorming -> web-designer -> writing-plans -> tauri-mobile |
 | **Checkpoints** | After analysis, brainstorm, and plan phases |
 | **Pre-flight** | Verifies ADB device connection |
 | **Dependencies** | [mobile-development](mobile-development.md), [ai-tooling](ai-tooling.md), [frontend](frontend.md), [tauri-development](tauri-development.md) |
@@ -181,7 +181,7 @@ End-to-end Tauri 2 desktop app pipeline: Rust backend review, Tauri IPC optimiza
 | | |
 |---|---|
 | **Invoke** | `/tauri-pipeline <target path> [--rust-only] [--frontend-only] [--strict-mode]` |
-| **Pipeline** | rust-engineer -> tauri-optimizer -> react-performance-optimizer -> ui-layout-designer -> ui-polisher |
+| **Pipeline** | rust-engineer -> tauri-desktop -> react-performance-optimizer -> ui-layout-designer -> web-designer |
 | **Checkpoints** | After Tauri IPC review |
 | **Pre-flight** | Verifies `src-tauri/` directory and `tauri.conf.json` exist |
 | **Dependencies** | [tauri-development](tauri-development.md), [frontend](frontend.md), [react-development](react-development.md) |
@@ -208,7 +208,7 @@ End-to-end mobile app pipeline: competitor analysis via ADB, feature brainstorm,
 | | |
 |---|---|
 | **Invoke** | `/mobile-tauri-pipeline <app-package-name or description> [--device <device-id>] [--skip-scaffold] [--skip-review] [--strict-mode]` |
-| **Pipeline** | analyze-mobile-app -> brainstorming -> ui-ux-designer -> writing-plans -> tauri2-mobile -> rust-engineer -> tauri-optimizer |
+| **Pipeline** | analyze-mobile-app -> brainstorming -> web-designer -> writing-plans -> tauri-mobile -> rust-engineer -> tauri-desktop |
 | **Checkpoints** | After analysis, brainstorm, plan, and scaffold phases |
 | **Dependencies** | [mobile-development](mobile-development.md), [ai-tooling](ai-tooling.md), [frontend](frontend.md), [tauri-development](tauri-development.md) |
 
@@ -221,7 +221,7 @@ End-to-end UI development pipeline: brainstorm product concept, design direction
 | | |
 |---|---|
 | **Invoke** | `/ui-studio <product goal or feature description> [--skip-brainstorm] [--skip-review] [--skip-humanize] [--strict-mode] [--framework react\|vue\|svelte\|html]` |
-| **Pipeline** | brainstorming -> ui-ux-designer -> ui-layout-designer -> writing-plans -> executing-plans -> ui-polisher -> react-performance-optimizer -> code-review -> humanize |
+| **Pipeline** | brainstorming -> web-designer -> ui-layout-designer -> writing-plans -> executing-plans -> web-designer -> react-performance-optimizer -> code-review -> humanize |
 | **Checkpoints** | After design, plan, execution, polish, and review phases |
 | **Dependencies** | [ai-tooling](ai-tooling.md), [frontend](frontend.md), [react-development](react-development.md), [senior-review](senior-review.md), [humanize](humanize.md) |
 

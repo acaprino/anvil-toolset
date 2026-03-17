@@ -26,7 +26,7 @@ You MUST follow these rules exactly. Violating any of them is a failure.
 This command requires agents from the `frontend` plugin. Before proceeding, verify it is installed by checking that these agents are available:
 
 **Required plugins:**
-- `frontend` -- ui-ux-designer, ui-layout-designer, ui-polisher, css-master agents; frontend-design skill
+- `frontend` -- web-designer, ui-layout-designer, web-designer, web-designer agents; frontend-design skill
 - `react-development` -- react-performance-optimizer agent
 
 Check by looking for the agent/skill files. If the `frontend` plugin is missing, STOP and tell the user:
@@ -141,7 +141,7 @@ Read a representative cross-section:
 
 ```
 Task:
-  subagent_type: "ui-ux-designer"
+  subagent_type: "web-designer"
   description: "UX audit and user flow redesign"
   prompt: |
     Perform a comprehensive UX audit of this frontend application and design improved user flows.
@@ -389,7 +389,7 @@ Read `.frontend-redesign/03-implementation-log.md` and `.frontend-redesign/04-pe
 
 ```
 Task:
-  subagent_type: "ui-polisher"
+  subagent_type: "web-designer"
   description: "UI polish and micro-interactions for redesigned frontend"
   prompt: |
     Add visual polish and micro-interactions to this redesigned frontend.
@@ -464,7 +464,7 @@ Run all three audit agents **in parallel** in a single response:
 
 ```
 Task:
-  subagent_type: "ui-ux-designer"
+  subagent_type: "web-designer"
   description: "Final UX audit of redesigned frontend"
   prompt: |
     Perform a final UX audit of the redesigned frontend.
@@ -543,7 +543,7 @@ Task:
 
 ```
 Task:
-  subagent_type: "ui-polisher"
+  subagent_type: "web-designer"
   description: "Final CSS and polish audit of redesigned frontend"
   prompt: |
     Audit the CSS architecture and visual polish of the redesigned frontend.

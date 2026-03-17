@@ -24,11 +24,11 @@ This command requires agents and skills from other plugins. Before proceeding, v
 
 **Required plugins:**
 - `mobile-development` -- analyze-mobile-app skill (Phase 1)
-- `frontend` -- ui-ux-designer agent (Phase 3)
+- `frontend` -- web-designer agent (Phase 3)
 - `ai-tooling` -- brainstorming, writing-plans skills (Phases 2, 4)
 
 **Optional plugins:**
-- `tauri-development` -- tauri2-mobile skill (Phase 5, skip scaffold if missing)
+- `tauri-development` -- tauri-mobile skill (Phase 5, skip scaffold if missing)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
 
@@ -288,7 +288,7 @@ Read `.mobile-intel/01-competitor-analysis.md` and `.mobile-intel/02-brainstorm.
 
 ```
 Task:
-  subagent_type: "ui-ux-designer"
+  subagent_type: "web-designer"
   description: "Design improved UX for mobile app based on competitor analysis"
   prompt: |
     Design the UX for a new mobile app that improves on a competitor's weaknesses.
@@ -395,11 +395,11 @@ Do NOT proceed to Phase 5 until the user approves.
 
 Read `.mobile-intel/04-implementation-plan.md` for the implementation plan.
 
-Use the tauri2-mobile skill guidance to scaffold the project:
+Use the tauri-mobile skill guidance to scaffold the project:
 
 ### Step 5A: Initialize Tauri 2 project
 
-Follow the tauri2-mobile skill process:
+Follow the tauri-mobile skill process:
 - Create project with `npm create tauri-app@latest` or equivalent
 - Configure for mobile targets (Android and/or iOS)
 - Set up the project structure from the implementation plan

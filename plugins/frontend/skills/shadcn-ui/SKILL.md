@@ -39,10 +39,10 @@ This skill works alongside the other frontend skills. Route to them when appropr
 
 | Need | Route to |
 |------|----------|
-| CSS architecture, modern CSS features, responsive patterns | **css-master** |
+| CSS architecture, modern CSS features, responsive patterns | **web-designer** |
 | Page layout composition, grid systems, breakpoint strategy | **ui-layout-designer** agent |
-| Animations, micro-interactions, visual polish | **ui-polisher** agent |
-| UX flows, design tokens, component hierarchy | **ui-ux-designer** agent |
+| Animations, micro-interactions, visual polish | **web-designer** agent |
+| UX flows, design tokens, component hierarchy | **web-designer** agent |
 | Distinctive visual identity, avoiding generic AI aesthetics | **frontend-design** |
 | React 19 patterns, Server Components, performance | **react-performance-optimizer** agent |
 

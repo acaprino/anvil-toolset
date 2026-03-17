@@ -25,10 +25,10 @@ This command requires agents and skills from other plugins. Before proceeding, v
 **Required plugins:**
 - `mobile-development` -- analyze-mobile-app skill (Phase 1)
 - `ai-tooling` -- brainstorming, writing-plans, executing-plans skills (Phases 2, 5, 6)
-- `frontend` -- ui-ux-designer agent (Phase 3)
+- `frontend` -- web-designer agent (Phase 3)
 
 **Optional plugins:**
-- `tauri-development` -- tauri2-mobile skill, rust-engineer, tauri-optimizer agents (Phases 4, 7, 8)
+- `tauri-development` -- tauri-mobile skill, rust-engineer, tauri-desktop agents (Phases 4, 7, 8)
 - `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents (Phase 9)
 - `humanize` -- humanize agent (Phase 10)
 
@@ -234,7 +234,7 @@ Read `.mobile-tauri-pipeline/01-competitor-analysis.md` and `.mobile-tauri-pipel
 
 ```
 Task:
-  subagent_type: "ui-ux-designer"
+  subagent_type: "web-designer"
   description: "Design improved UX for mobile app"
   prompt: |
     Design the UX for a new mobile app that improves on a competitor's weaknesses.
@@ -515,7 +515,7 @@ Read `.mobile-tauri-pipeline/07-rust-review.md` for context.
 
 ```
 Task:
-  subagent_type: "tauri-development:tauri-optimizer"
+  subagent_type: "tauri-development:tauri-desktop"
   description: "Tauri IPC and mobile optimization review"
   prompt: |
     Review the Tauri 2 IPC architecture and mobile-specific optimizations.
