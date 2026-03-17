@@ -27,7 +27,7 @@ Security auditor specializing in DevSecOps, cybersecurity, and compliance framew
 | | |
 |---|---|
 | **Model** | `opus` |
-| **Use for** | Security audits, DevSecOps, compliance (GDPR/HIPAA/SOC2), threat modeling |
+| **Use for** | Security audits, DevSecOps, compliance (OWASP/GDPR), threat modeling |
 
 **Invocation:**
 ```

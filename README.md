@@ -1,12 +1,12 @@
 # Anvil Toolset
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v2.66.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-32-orange.svg)](#plugins)
+[![Marketplace](https://img.shields.io/badge/marketplace-v2.67.0-green.svg)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-33-orange.svg)](#plugins)
 
-Plugin set for [Anvil](https://github.com/acaprino/anvil). 32 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, RAG systems, and more -- so you spend less time prompting and more time shipping.
+Plugin set for [Anvil](https://github.com/acaprino/anvil). 33 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, RAG systems, and more -- so you spend less time prompting and more time shipping.
 
-**32 plugins | 35 agents | 48 skills | 38 commands** -- install only what you need.
+**33 plugins | 35 agents | 49 skills | 38 commands** -- install only what you need.
 
 ---
 
@@ -41,7 +41,7 @@ claude plugin marketplace add acaprino/anvil-toolset
 claude plugin install python-development@anvil-toolset
 claude plugin install senior-review@anvil-toolset
 claude plugin install frontend@anvil-toolset
-# ... see Plugins table below for all 32 available plugins
+# ... see Plugins table below for all 33 available plugins
 ```
 
 ### From Local Path (Development)
@@ -70,6 +70,7 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **project-setup** | Create and maintain accurate CLAUDE.md files with ground truth verification | 1 | - | 2 | [docs](docs/plugins/project-setup.md) |
 | **csp** | Solve scheduling, routing, and assignment problems with OR-Tools CP-SAT | 1 | - | - | [docs](docs/plugins/csp.md) |
 | **digital-marketing** | Run SEO audits, content strategy, brand naming, and domain hunting | 2 | 2 | 3 | [docs](docs/plugins/digital-marketing.md) |
+| **docs** | Craft magnetic, top-tier README.md files with progressive disclosure and badges | - | 1 | - | [docs](docs/plugins/docs.md) |
 | **messaging** | Design and optimize RabbitMQ messaging with expert AMQP patterns | 1 | - | - | [docs](docs/plugins/messaging.md) |
 | **research** | Find precise answers fast with quick search and deep multi-source research | 2 | - | - | [docs](docs/plugins/research.md) |
 | **mobile-development** | Analyze competitor Android apps via ADB with automated screenshots | - | 1 | - | [docs](docs/plugins/mobile-development.md) |
@@ -87,6 +88,7 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **codebase-mapper** | Generate human-readable codebase guides with 10 narrative docs and Mermaid diagrams | 10 | 1 | 4 | [docs](docs/plugins/codebase-mapper.md) |
 | **git-worktrees** | Manage parallel development with git worktrees -- create, pause, resume, merge | 1 | 1 | 1 | [docs](docs/plugins/git-worktrees.md) |
 | **rag-development** | Design and audit RAG systems -- chunking, embeddings, vector DBs, advanced patterns | 2 | 1 | 1 | [docs](docs/plugins/rag-development.md) |
+| **react-development** | React 19 performance, state management, bundle optimization, Vercel best practices | 1 | 1 | 1 | [docs](docs/plugins/react-development.md) |
 | **xterm** | Build and debug xterm.js terminal emulators with addon support and PTY wiring | - | 1 | 2 | [docs](docs/plugins/xterm.md) |
 
 See [Quick Start Workflows](docs/plugins/workflows.md) for end-to-end pipelines like `/feature-e2e`, `/code-review`, `/frontend-redesign`, and more.
@@ -101,7 +103,6 @@ anvil-toolset/
 ├── .claude-plugin/
 │   └── marketplace.json
 ├── docs/
-│   ├── workflows.md
 │   └── plugins/
 │       └── <plugin-name>.md      # one file per plugin
 ├── plugins/
@@ -116,7 +117,7 @@ anvil-toolset/
 │   │   ├── agents/
 │   │   ├── skills/
 │   │   └── commands/
-│   └── ...                       # 32 plugins total
+│   └── ...                       # 33 plugins total
 ├── LICENSE
 └── README.md
 ```

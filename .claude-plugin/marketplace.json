@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.66.0"
+    "version": "2.67.0"
   },
   "plugins": [
     {
@@ -995,6 +995,30 @@
       ],
       "commands": [
         "./commands/rag-audit.md"
+      ]
+    },
+    {
+      "name": "docs",
+      "source": "./plugins/docs",
+      "description": "README and project documentation authoring -- craft magnetic, top-tier README.md files with progressive disclosure, hero sections, badges, quick start, feature tables, Mermaid diagrams, and community sections",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "readme",
+        "documentation",
+        "open-source",
+        "badges",
+        "shields",
+        "quick-start",
+        "progressive-disclosure"
+      ],
+      "category": "documentation",
+      "strict": false,
+      "skills": [
+        "./skills/readme-craft"
       ]
     }
   ]
