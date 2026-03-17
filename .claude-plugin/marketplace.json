@@ -66,7 +66,7 @@
       "name": "tauri-development",
       "source": "./plugins/tauri-development",
       "description": "Tauri 2 desktop and mobile development -- IPC optimization, Rust backend patterns, cross-platform builds, and React integration for high-performance apps",
-      "version": "2.0.0",
+      "version": "2.1.0",
       "author": {
         "name": "Alfio"
       },
@@ -81,13 +81,12 @@
       "category": "development",
       "strict": false,
       "agents": [
-        "./agents/tauri-optimizer.md",
+        "./agents/tauri-desktop.md",
+        "./agents/tauri-mobile.md",
         "./agents/rust-engineer.md"
       ],
       "skills": [
-        "./skills/tauri-core",
-        "./skills/tauri-desktop",
-        "./skills/tauri2-mobile"
+        "./skills/tauri"
       ]
     },
     {

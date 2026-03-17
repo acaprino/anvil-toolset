@@ -4,18 +4,18 @@
 
 ## Agents
 
-### `tauri-optimizer`
+### `tauri-desktop`
 
-Expert in Tauri v2 + React optimization for trading and high-frequency data scenarios.
+Expert in Tauri v2 + React desktop optimization for trading and high-frequency data scenarios, plus desktop-specific features.
 
 | | |
 |---|---|
 | **Model** | `opus` |
-| **Use for** | IPC optimization, state management, memory leaks, WebView tuning, Raw Payloads with rkyv, Canvas/OffscreenCanvas HFT rendering, backpressure |
+| **Use for** | IPC optimization, state management, memory leaks, WebView tuning, Raw Payloads with rkyv, Canvas/OffscreenCanvas HFT rendering, backpressure, window management, shell plugin, desktop bundling, platform WebViews |
 
 **Invocation:**
 ```
-Use the tauri-optimizer agent to analyze [project/file]
+Use the tauri-desktop agent to analyze [project/file]
 ```
 
 **Performance targets:**
@@ -25,6 +25,22 @@ Use the tauri-optimizer agent to analyze [project/file]
 | Memory baseline | < 100MB | < 150MB |
 | IPC latency | < 0.5ms | < 1ms |
 | Frame rate | 60 FPS | > 30 FPS |
+
+---
+
+### `tauri-mobile`
+
+Expert in Tauri 2 mobile development for Android and iOS.
+
+| | |
+|---|---|
+| **Model** | `opus` |
+| **Use for** | Mobile setup, emulator/ADB, mobile plugins (biometric, haptics, NFC), IAP, OAuth deep links, code signing, store deployment, mobile CI/CD |
+
+**Invocation:**
+```
+Use the tauri-mobile agent to review [mobile project/feature]
+```
 
 ---
 
@@ -52,15 +68,17 @@ Use the rust-engineer agent to implement [feature]
 
 ## Skills
 
-### `tauri-core`
+### `tauri`
 
-Universal Tauri 2 development patterns for both desktop and mobile.
+Unified Tauri 2 development knowledge base covering core, desktop, and mobile patterns.
 
 | | |
 |---|---|
-| **Use for** | Rust commands, IPC (invoke/channels/events), core plugins (fs, store, sql, http), OAuth/PKCE, CI/CD pipelines |
+| **Use for** | Rust commands, IPC, core plugins, OAuth, CI/CD, window management, shell plugin, desktop bundling, platform WebViews, mobile setup, mobile plugins, IAP, store deployment |
 
 **References:**
+
+#### Core
 | File | Content |
 |------|---------|
 | setup.md | Rust, Node, Tauri CLI prerequisites, project init |
@@ -70,43 +88,15 @@ Universal Tauri 2 development patterns for both desktop and mobile.
 | authentication.md | OAuth/PKCE via system browser, CSRF/nonce protection |
 | ci-cd.md | Provider-agnostic CI/CD: caching, matrix builds, signing |
 
----
-
-### `tauri-desktop`
-
-Desktop-specific Tauri 2 development patterns.
-
-| | |
-|---|---|
-| **Use for** | Window management, system tray, shell plugin, desktop bundling, WebView platform differences |
-
-**References:**
+#### Desktop
 | File | Content |
 |------|---------|
-| window-management.md | Multi-window, frameless, system tray, native menus |
+| window-management.md | Multi-window, frameless, system tray, menus, global shortcuts |
 | shell-plugin.md | Child processes, sidecar binaries, scoped commands |
-| build-deploy.md | .msi, .dmg, .AppImage bundling, code signing, auto-updater |
+| build-deploy-desktop.md | .msi, .dmg, .AppImage bundling, code signing, auto-updater |
 | platform-webviews.md | WebView2, WKWebView, WebKitGTK differences |
 
----
-
-### `tauri2-mobile`
-
-Mobile-specific Tauri 2 development for Android and iOS.
-
-| | |
-|---|---|
-| **Use for** | Mobile setup, emulator/ADB, mobile plugins (biometric, haptics, NFC), IAP, store deployment |
-
-**Quick commands:**
-| Task | Command |
-|------|---------|
-| Init Android | `npm run tauri android init` |
-| Dev Android | `npm run tauri android dev` |
-| Build APK | `npm run tauri android build --apk` |
-| Build iOS | `npm run tauri ios build` |
-
-**References:**
+#### Mobile
 | File | Content |
 |------|---------|
 | setup-mobile.md | Android SDK, Xcode, NDK, mobile HMR |
