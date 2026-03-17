@@ -1,6 +1,29 @@
 {
-  "description": "Anvil session hooks -- startup logo, skill awareness, security gate, and autocompact",
+  "description": "Anvil session hooks -- startup logo, skill awareness, security gate, autocompact, brainstorm gate, and review gate",
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/review-gate.js\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/handlers/brainstorm-gate.js\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [

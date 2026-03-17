@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.64.0"
+    "version": "2.66.0"
   },
   "plugins": [
     {
@@ -800,8 +800,8 @@
     {
       "name": "anvil-hooks",
       "source": "./plugins/anvil-hooks",
-      "description": "Anvil session hooks -- ASCII logo on startup, skill awareness injection, security gate for hardcoded secrets, autocompact when context is high, and cleanup of duplicate built-in plugins",
-      "version": "1.4.0",
+      "description": "Anvil session hooks -- ASCII logo on startup, skill awareness injection, security gate for hardcoded secrets, autocompact when context is high, cleanup of duplicate built-in plugins, brainstorm gate for creative/building prompts, and review gate for PR/merge operations",
+      "version": "1.6.0",
       "author": {
         "name": "Alfio"
       },
@@ -814,12 +814,43 @@
         "secrets",
         "guard",
         "autocompact",
-        "context"
+        "context",
+        "brainstorm",
+        "gate",
+        "review",
+        "pr",
+        "merge"
       ],
       "category": "security",
       "strict": false,
       "optionalDependencies": [
-        "ai-tooling"
+        "ai-tooling",
+        "git-worktrees",
+        "senior-review"
+      ]
+    },
+    {
+      "name": "prompt-improver",
+      "source": "./plugins/prompt-improver",
+      "description": "Intelligent prompt optimization -- enriches vague prompts with research-based clarifying questions before Claude Code executes them",
+      "version": "0.5.1",
+      "author": {
+        "name": "severity1"
+      },
+      "license": "MIT",
+      "keywords": [
+        "prompt",
+        "improvement",
+        "clarification",
+        "vague",
+        "research",
+        "questions",
+        "hook"
+      ],
+      "category": "ai-ml",
+      "strict": false,
+      "skills": [
+        "./skills/prompt-improver"
       ]
     },
     {
