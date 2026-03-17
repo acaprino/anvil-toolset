@@ -1,12 +1,12 @@
 # Anvil Toolset
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v2.61.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-31-orange.svg)](#plugins)
+[![Marketplace](https://img.shields.io/badge/marketplace-v2.66.0-green.svg)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-32-orange.svg)](#plugins)
 
-Plugin set for [Anvil](https://github.com/acaprino/anvil). 31 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, RAG systems, and more -- so you spend less time prompting and more time shipping.
+Plugin set for [Anvil](https://github.com/acaprino/anvil). 32 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, RAG systems, and more -- so you spend less time prompting and more time shipping.
 
-**31 plugins | 35 agents | 47 skills | 38 commands** -- install only what you need.
+**32 plugins | 35 agents | 48 skills | 38 commands** -- install only what you need.
 
 ---
 
@@ -41,7 +41,7 @@ claude plugin marketplace add acaprino/anvil-toolset
 claude plugin install python-development@anvil-toolset
 claude plugin install senior-review@anvil-toolset
 claude plugin install frontend@anvil-toolset
-# ... see Plugins table below for all 27 available plugins
+# ... see Plugins table below for all 32 available plugins
 ```
 
 ### From Local Path (Development)
@@ -81,7 +81,8 @@ claude plugin install ./anvil-toolset/plugins/python-development
 | **learning** | Generate mind maps in Obsidian MarkMind Rich format and interactive force-graphs | - | 3 | 1 | [docs](docs/plugins/learning.md) |
 | **marketplace-ops** | Audit, scaffold, create, and manage plugins in the anvil-toolset ecosystem | 1 | 2 | 4 | [docs](docs/plugins/marketplace-ops.md) |
 | **playwright-skill** | General-purpose browser automation with Playwright for testing and interaction | - | 1 | - | [docs](docs/plugins/playwright-skill.md) |
-| **anvil-hooks** | Session hooks -- startup branding, skill awareness, security gate, autocompact | - | - | - | [docs](docs/plugins/anvil-hooks.md) |
+| **anvil-hooks** | Session hooks -- startup branding, skill awareness, security gate, autocompact, brainstorm gate, review gate | - | - | - | [docs](docs/plugins/anvil-hooks.md) |
+| **prompt-improver** | Intelligent prompt optimization -- enriches vague prompts with research-based clarifying questions | - | 1 | - | [docs](docs/plugins/prompt-improver.md) |
 | **cc-usage** | Analyze Claude Code token usage, costs, and billing from local session data | - | 1 | 1 | [docs](docs/plugins/cc-usage.md) |
 | **codebase-mapper** | Generate human-readable codebase guides with 10 narrative docs and Mermaid diagrams | 10 | 1 | 4 | [docs](docs/plugins/codebase-mapper.md) |
 | **git-worktrees** | Manage parallel development with git worktrees -- create, pause, resume, merge | 1 | 1 | 1 | [docs](docs/plugins/git-worktrees.md) |
@@ -115,7 +116,7 @@ anvil-toolset/
 │   │   ├── agents/
 │   │   ├── skills/
 │   │   └── commands/
-│   └── ...                       # 31 plugins total
+│   └── ...                       # 32 plugins total
 ├── LICENSE
 └── README.md
 ```

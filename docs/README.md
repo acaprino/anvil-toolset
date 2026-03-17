@@ -9,7 +9,7 @@ Custom Claude Code plugin marketplace. Agents, skills, and commands for developm
 | Plugin | Category | Description | Docs |
 |--------|----------|-------------|------|
 | [ai-tooling](plugins/ai-tooling.md) | ai-ml | Prompt engineering, brainstorming, planning, execution, Claude Agent SDK | 1 agent, 5 skills, 1 command |
-| [anvil-hooks](plugins/anvil-hooks.md) | security | Session hooks -- startup logo, skill awareness, security gate, autocompact | hooks only |
+| [anvil-hooks](plugins/anvil-hooks.md) | security | Session hooks -- startup logo, skill awareness, security gate, autocompact, brainstorm gate, review gate | hooks only |
 | [app-explorer](plugins/app-explorer.md) | testing | AI-driven webapp explorer using Playwright for interactive mapping | 1 skill |
 | [browser-extensions](plugins/browser-extensions.md) | development | Firefox WebExtension development -- Manifest V2/V3, browser.* APIs, AMO publishing | 1 skill |
 | [business](plugins/business.md) | business | Legal advisory, privacy policies, GDPR/HIPAA compliance, contract review | 1 agent, 1 skill |
@@ -38,6 +38,7 @@ Custom Claude Code plugin marketplace. Agents, skills, and commands for developm
 | [tauri-development](plugins/tauri-development.md) | development | Tauri 2 desktop/mobile -- IPC optimization, Rust backend, cross-platform | 2 agents, 1 skill |
 | [typescript-development](plugins/typescript-development.md) | development | TypeScript best practices and dead code detection via Knip | 2 skills |
 | [workflows](plugins/workflows.md) | workflow | Cross-plugin pipelines -- feature e2e, frontend redesign, UI studio, reviews | 7 commands |
+| [prompt-improver](plugins/prompt-improver.md) | ai-ml | Intelligent prompt optimization -- enriches vague prompts with research-based clarifying questions | 1 skill, hooks |
 | [xterm](plugins/xterm.md) | frontend | xterm.js terminal emulator -- addons, PTY wiring, debugging, features | 1 skill, 2 commands |
 
 ## Quick Start Recipes
