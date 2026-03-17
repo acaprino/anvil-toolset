@@ -268,7 +268,7 @@ Agent tool call:
     ## Instructions
     Check ONLY for dead code introduced or exposed by the reviewed changes:
     1. Unused imports -- new imports added by the diff that are never referenced
-    2. Unused functions/variables -- new definitions that are never called or read
+    2. Unused functions/variables/constants -- new definitions (including module-level constants, class attributes, and configuration values) that are never called, read, or imported by any other module
     3. Unreachable code -- code after return/raise/break added by the diff
     4. Unused exports -- new exports that no consumer imports
     5. Orphaned code -- existing code that became dead because the diff removed its only caller
@@ -276,7 +276,7 @@ Agent tool call:
     Do NOT flag:
     - Pre-existing dead code unrelated to the diff
     - Framework conventions (Django views, pytest fixtures, signal handlers, route decorators)
-    - Symbols exported via __all__, used via getattr, or referenced dynamically
+    - Symbols exported via __all__, used via getattr, referenced dynamically, or used as configuration keys looked up at runtime
     - Dunder methods (__init__, __str__, etc.)
 
     For each finding provide:

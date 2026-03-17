@@ -623,7 +623,7 @@ Agent tool call:
     For each finding, provide:
     - Severity (High / Medium / Low)
     - File and line location
-    - Category (unused import, unused function, unused variable, unused export, unreachable code)
+    - Category (unused import, unused function, unused variable, unused constant/module-level definition, unused export, unreachable code, unused file)
     - Confidence (0-100) -- how certain this is truly dead code
     - Recommended action
 
