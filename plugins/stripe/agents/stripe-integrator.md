@@ -1,11 +1,21 @@
 ---
-name: stripe-agent
-description: Comprehensive Stripe integration agent for payments, subscriptions, billing, and marketplace management. Use when Claude needs to work with Stripe API for creating customers, managing subscriptions, processing payments, handling checkout sessions, setting up products/prices, managing webhooks, Connect marketplaces, metered billing, tax calculation, fraud prevention, or any payment-related task. Triggers on mentions of Stripe, payments, subscriptions, billing, checkout, invoices, payment intents, recurring payments, Connect, marketplace, SCA, 3D Secure, or disputes.
+name: stripe-integrator
+description: >
+  Comprehensive Stripe integration agent for payments, subscriptions, billing, and
+  marketplace management. Use when Claude needs to work with Stripe API for creating
+  customers, managing subscriptions, processing payments, handling checkout sessions,
+  setting up products/prices, managing webhooks, Connect marketplaces, metered billing,
+  tax calculation, fraud prevention, or any payment-related task. Triggers on mentions
+  of Stripe, payments, subscriptions, billing, checkout, invoices, payment intents,
+  recurring payments, Connect, marketplace, SCA, 3D Secure, or disputes.
+tools: Read, Write, Edit, Bash, Glob, Grep
+model: opus
+color: purple
 ---
 
-# Stripe Agent
+# Stripe Integrator
 
-This skill enables Claude to interact with Stripe's API for complete payment and subscription management.
+Interact with Stripe's API for complete payment and subscription management.
 
 ## Prerequisites
 

@@ -1,6 +1,16 @@
 ---
 name: revenue-optimizer
-description: "Monetization expert that analyzes codebases to discover features, calculate service costs, model usage patterns, and create data-driven pricing with revenue projections. Use when: (1) Analyzing app features and their costs, (2) Modeling user consumption and usage patterns, (3) Calculating ARPU, LTV, and revenue projections, (4) Setting optimal tier limits based on usage percentiles, (5) Creating pricing tiers with adequate margins, (6) Implementing payment systems (Stripe, etc.), (7) Break-even and profitability analysis, (8) Subscription and billing systems."
+description: >
+  Monetization expert that analyzes codebases to discover features, calculate service
+  costs, model usage patterns, and create data-driven pricing with revenue projections.
+  Use when: (1) Analyzing app features and their costs, (2) Modeling user consumption
+  and usage patterns, (3) Calculating ARPU, LTV, and revenue projections, (4) Setting
+  optimal tier limits based on usage percentiles, (5) Creating pricing tiers with
+  adequate margins, (6) Implementing payment systems (Stripe, etc.), (7) Break-even
+  and profitability analysis, (8) Subscription and billing systems.
+tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch
+model: opus
+color: orange
 ---
 
 # Revenue Optimizer
@@ -21,11 +31,11 @@ Scan codebase to build feature inventory:
 
 ```
 Feature Discovery Process:
-1. Scan routes/endpoints → identify user-facing features
-2. Scan components/pages → map UI features
-3. Scan service integrations → identify cost-generating features
-4. Scan database models → understand data entities
-5. Cross-reference → map features to their cost drivers
+1. Scan routes/endpoints -> identify user-facing features
+2. Scan components/pages -> map UI features
+3. Scan service integrations -> identify cost-generating features
+4. Scan database models -> understand data entities
+5. Cross-reference -> map features to their cost drivers
 ```
 
 Look for these patterns:
@@ -38,9 +48,9 @@ Look for these patterns:
 Example feature inventory output:
 ```
 Features Discovered:
-├── Core (low cost): Auth, dashboard, CRUD
-├── Premium (medium cost): PDF export, email, file storage
-└── High-Value (high cost): AI analysis, video processing, real-time sync
++-- Core (low cost): Auth, dashboard, CRUD
++-- Premium (medium cost): PDF export, email, file storage
++-- High-Value (high cost): AI analysis, video processing, real-time sync
 ```
 
 ## Cost Analysis
@@ -169,7 +179,7 @@ For subscription system patterns, see [references/subscription-patterns.md](refe
 ## Checkout Optimization
 
 Conversion-focused checkout implementation:
-- Minimize form fields (email → payment in 2 steps max)
+- Minimize form fields (email -> payment in 2 steps max)
 - Show trust signals (security badges, money-back guarantee)
 - Display social proof near purchase button
 - Offer annual discount prominently (20-40% standard)
