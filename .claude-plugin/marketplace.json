@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.85.0"
+    "version": "2.86.0"
   },
   "plugins": [
     {
@@ -915,7 +915,7 @@
       "name": "git-worktrees",
       "source": "./plugins/git-worktrees",
       "description": "Git worktree management for parallel development -- create, list, pause, resume, remove, and merge worktrees with proactive WIP detection, conflict early warning, and session context recovery",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Alfio"
       },
