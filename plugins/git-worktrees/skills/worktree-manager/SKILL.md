@@ -46,7 +46,7 @@ Would you like to:
 
 1. Ask for worktree name and description
 2. `git stash push -m "wt-migration: <name>"`
-3. Create worktree via `/wt new <name>` flow
+3. Create worktree via `/wt new <name> --desc "..."` -- pass name and description directly, never prompt for category or work type
 4. In the new worktree: `git stash pop`
 5. Confirm: "WIP moved to worktree '<name>'. Current branch is now clean."
 
@@ -104,7 +104,7 @@ When user says "what am I working on" or returns after a break:
 When user says "I need to work on N things" or lists multiple tasks:
 
 1. Parse the tasks from user input
-2. For each task, propose a worktree name and branch
+2. For each task, derive a worktree name and description from the user's task list -- never prompt for categories or work types
 3. Show plan:
    ```
    I'll create 3 worktrees:
@@ -140,7 +140,7 @@ Cleanup recommendations:
       -> Pause? Remove?
 
   Missing (path gone):
-    - deleted-wt: path ../worktrees/project-deleted-wt not found
+    - deleted-wt: path .worktrees/deleted-wt not found
       -> Remove from registry
 ```
 

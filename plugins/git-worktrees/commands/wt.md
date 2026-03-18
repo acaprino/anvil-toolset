@@ -5,7 +5,30 @@ argument-hint: "<subcommand> [args] [--branch X] [--from Y] [--desc '...'] [--se
 
 # Worktree Manager
 
-Manage git worktrees for parallel development. Registry lives in `.worktrees/registry.json` (gitignored). Worktrees are created as siblings to the repo at `../worktrees/<project>-<name>/`.
+Manage git worktrees for parallel development. Registry lives in `.worktrees/registry.json` (gitignored). Worktrees are created inside the project at `.worktrees/<name>/`.
+
+## Critical Rules
+
+- Follow this spec exactly. Never invent menus, categories, options, or workflows not defined here.
+- Never ask about work type, category, or priority. These concepts do not exist in this system.
+- Only ask questions explicitly scripted in each subcommand section below.
+- If the user's message contains enough context, extract values directly instead of asking.
+
+## Intent Inference
+
+Before parsing `$ARGUMENTS` for an explicit subcommand, check if the user's natural language implies one:
+
+| User says (examples) | Inferred subcommand |
+|---|---|
+| "start a new worktree", "create a worktree", "new worktree for X" | `new` |
+| "show my worktrees", "list worktrees" | `list` |
+| "worktree status", "how are my worktrees" | `status` |
+| "pause X", "stop working on X" | `pause` |
+| "resume X", "continue X", "pick up X" | `resume` |
+| "remove X", "delete X worktree", "clean up X" | `rm` |
+| "merge X", "land X", "finish X" | `merge` |
+
+If intent maps to a subcommand, proceed directly with that subcommand -- no confirmation menu.
 
 ## Parse Subcommand
 
@@ -21,7 +44,7 @@ From `$ARGUMENTS`, extract the subcommand and its arguments:
 | `rm` | `/wt rm <name>` |
 | `merge` | `/wt merge <name> [--squash\|--rebase\|--pr]` |
 
-If no subcommand or unrecognized, show usage summary and exit.
+If no explicit subcommand AND no inferable intent from user context, show usage summary and exit.
 
 ## Initialization
 
@@ -35,7 +58,7 @@ On first run (no `.worktrees/` directory):
 ```json
 {
   "project": "<project-name>",
-  "worktree_dir": "../worktrees",
+  "worktree_dir": ".worktrees",
   "default_setup": "auto",
   "worktrees": []
 }
@@ -53,13 +76,19 @@ Create a new worktree for parallel development.
 - `--setup "cmd"` - override setup command
 - `--no-setup` - skip setup entirely
 
+### Constraints
+
+- Only ask for name (if not provided) and description (if no `--desc` flag).
+- Never ask about work type, category, priority, or any other classification.
+- If the user's message contains descriptive context (e.g. "worktree for fixing OAuth"), extract it as the description automatically instead of asking.
+
 ### Steps
 
 1. Validate `<name>` is kebab-case, not already in registry
 2. Read registry, determine paths:
    - Branch: `--branch` or `wt/<name>`
    - Base: `--from` or current branch
-   - Path: `<worktree_dir>/<project>-<name>/`
+   - Path: `<worktree_dir>/<name>/`
 3. Create worktree:
    ```bash
    git worktree add -b <branch> <path> <base>
