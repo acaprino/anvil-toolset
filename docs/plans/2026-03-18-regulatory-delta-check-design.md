@@ -17,7 +17,7 @@ Real-world trigger: iubenda notified about Google Additional Consent updates for
 The delta check activates when the agent detects it is operating on an **existing compliance document**:
 
 - User passes a file to read (privacy policy, cookie policy, DPA, etc.)
-- User uses language indicating review/update of existing document ("rivedi", "aggiorna", "audit", "controlla")
+- User uses language indicating review/update of existing document ("review", "update", "audit", "check", "assess", "rivedi", "aggiorna", "controlla")
 
 If the document lacks a metadata block with generation date, the agent asks the user when the document was last generated/updated to define the search window.
 
@@ -29,14 +29,16 @@ For brand-new document generation (no existing file), the phase is skipped entir
 - Read the file and identify: jurisdictions covered, normative sources cited (GDPR articles, EDPB guidelines, Garante provvedimenti, etc.), generation/last-update date
 - Build a list of "normative dependencies" of the document
 
-**Step 2 - Targeted regulatory search (parallel WebSearch):**
-- For each relevant institutional source, run time-filtered queries from document date to today:
-  - `site:edpb.europa.eu guidelines {year}` for new EDPB guidelines
-  - `site:garanteprivacy.it provvedimenti {year}` for new Garante provvedimenti
-  - `site:eur-lex.europa.eu` for legislative amendments
-  - `site:curia.europa.eu` for relevant new CJEU rulings
+**Step 2 - Targeted regulatory search (sequential WebSearch calls):**
+- For each relevant institutional source, run year-based queries covering the years from the document date to today (WebSearch does not support native date ranges, so use year terms as proxy, e.g. `guidelines 2025 2026`):
+  - `site:edpb.europa.eu guidelines {topic} {year}` for new EDPB guidelines
+  - `site:garanteprivacy.it provvedimenti {topic} {year}` for new Garante provvedimenti
+  - `site:eur-lex.europa.eu {regulation} {year}` for legislative amendments
+  - `site:curia.europa.eu {topic} {year}` for relevant new CJEU rulings
 - Queries are calibrated to the specific jurisdictions and topics of the document (not generic)
+- Cap at 4-6 targeted queries, prioritizing the jurisdictions and normative sources most central to the document. If the document covers many jurisdictions, focus on the primary ones and note others as unchecked in the output
 - Sources are exclusively institutional (no CMP changelogs, no industry blogs)
+- If WebSearch returns no results for a source, note it as "unable to verify" in the output table. If all queries fail, report the delta check as inconclusive and proceed with the normal workflow
 
 **Step 3 - Cascading output:**
 
@@ -66,18 +68,20 @@ Periodo coperto: {data documento} - {oggi}
 Nessun aggiornamento normativo rilevante rilevato per le jurisdictions e i temi coperti dal documento.
 ```
 
+Output language follows the agent's existing language convention (match user's language). The templates above are illustrative using Italian.
+
 On user request for detail: the agent explains the impact of the selected item and proposes the specific modification to the document.
 
 ### Agent-Specific Integration
 
 **`privacy-doc-generator`:**
-- Inserted as PHASE 0, before the existing PHASE 1 (Context Gathering)
+- Inserted as PHASE 0, before the existing PHASE 1 (Context Gathering). Existing phases (1-5) retain their current numbering; the new phase is numbered 0 to indicate it runs before them
 - Skipped for generation from scratch
 - Delta check results feed into PHASE 1: if updates are found, the questionnaire incorporates them (e.g., "your document does not cover X, introduced by Y - do you want to include it?")
 
 **`legal-advisor`:**
-- Inserted as Step 0 in "Core Approach", before "Identify legal domain"
-- Lighter version: produces an advisory summary rather than structured modification proposals (since legal-advisor doesn't generate structured documents)
+- Add a new section `## Phase 0 -- Regulatory Delta Check` at the top of the `# Workflow` section, before `## Phase 1 -- Research & Assessment`. Also prepend a step 0 to the Core Approach numbered list referencing it
+- Lighter version than privacy-doc-generator: uses the same summary table format but omits the "Sezione impattata" column and replaces modification proposals with risk advisories (matching legal-advisor's existing output format of Issue/Analysis/Recommendation/Risk Level)
 - Activates when user asks to review existing contracts, policies, or compliance posture
 
 ### What Does NOT Change
@@ -91,6 +95,7 @@ On user request for detail: the agent explains the impact of the selected item a
 - **Files modified:** `plugins/business/agents/privacy-doc-generator.md`, `plugins/business/agents/legal-advisor.md`
 - **No new files created**
 - **No new plugins or components**
+- **No changes to agent tool lists required** -- both agents already include WebSearch and WebFetch
 
 ## Decisions
 

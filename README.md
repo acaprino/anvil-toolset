@@ -2,13 +2,13 @@
 
 # Anvil Toolset
 
-**32 specialized plugins for Claude Code -- so you spend less time prompting and more time shipping.**
+**33 specialized plugins for Claude Code -- so you spend less time prompting and more time shipping.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v2.81.0-green?style=flat)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-32-orange?style=flat)](#plugins)
-[![Agents](https://img.shields.io/badge/agents-39-purple?style=flat)](#plugins)
-[![Skills](https://img.shields.io/badge/skills-44-teal?style=flat)](#plugins)
+[![Marketplace](https://img.shields.io/badge/marketplace-v2.83.0-green?style=flat)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-33-orange?style=flat)](#plugins)
+[![Agents](https://img.shields.io/badge/agents-40-purple?style=flat)](#plugins)
+[![Skills](https://img.shields.io/badge/skills-46-teal?style=flat)](#plugins)
 [![Commands](https://img.shields.io/badge/commands-38-red?style=flat)](#plugins)
 
 </div>
@@ -86,6 +86,7 @@ That's it. Plugins activate automatically when relevant -- or invoke them direct
 | **[prompt-improver](docs/plugins/prompt-improver.md)** | Enrich vague prompts with research-based questions | - | 1 | - |
 | **[anvil-hooks](docs/plugins/anvil-hooks.md)** | Session hooks -- startup branding, skill awareness, security gate | - | - | - |
 | **[docs](docs/plugins/docs.md)** | Craft top-tier README.md files | - | 1 | 1 |
+| **[testing](docs/plugins/testing.md)** | TDD methodology and behavior-driven test generation | 1 | 1 | - |
 
 **A** = Agents, **S** = Skills, **C** = Commands
 
@@ -119,7 +120,7 @@ anvil-toolset/
 │   │   └── commands/          # slash-command .md files
 │   ├── senior-review/
 │   ├── frontend/
-│   └── ...                    # 32 plugins total
+│   └── ...                    # 33 plugins total
 ├── LICENSE
 └── README.md
 ```

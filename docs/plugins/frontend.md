@@ -1,6 +1,6 @@
 # Frontend Plugin
 
-> Two agents and six skills for every layer of frontend work -- from CSS architecture to premium polish.
+> Two agents and seven skills for every layer of frontend work -- from CSS architecture to premium polish.
 
 ## Quick Reference
 
