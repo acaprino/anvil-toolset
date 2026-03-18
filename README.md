@@ -1,125 +1,137 @@
+<div align="center">
+
 # Anvil Toolset
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Marketplace](https://img.shields.io/badge/marketplace-v2.67.0-green.svg)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-33-orange.svg)](#plugins)
+**32 specialized plugins for Claude Code -- so you spend less time prompting and more time shipping.**
 
-Plugin set for [Anvil](https://github.com/acaprino/anvil). 33 ready-to-install plugins for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) -- an AI coding CLI by Anthropic. Specialized agents, skills, and commands for Python, senior review, frontend, Tauri/Rust, AI tooling, Obsidian, RAG systems, and more -- so you spend less time prompting and more time shipping.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
+[![Marketplace](https://img.shields.io/badge/marketplace-v2.81.0-green?style=flat)](.claude-plugin/marketplace.json)
+[![Plugins](https://img.shields.io/badge/plugins-32-orange?style=flat)](#plugins)
+[![Agents](https://img.shields.io/badge/agents-39-purple?style=flat)](#plugins)
+[![Skills](https://img.shields.io/badge/skills-44-teal?style=flat)](#plugins)
+[![Commands](https://img.shields.io/badge/commands-38-red?style=flat)](#plugins)
 
-**33 plugins | 35 agents | 49 skills | 38 commands** -- install only what you need.
+</div>
 
 ---
 
-## Why Use These Plugins?
+## Why Anvil?
 
-- **Specialized agents outperform generic prompts** -- each plugin encodes domain expertise developed over months
+- **Domain experts, not generic prompts** -- each plugin encodes months of specialized knowledge (Python, Rust, React, security, SEO, legal...)
 - **Multi-agent orchestration** -- code review fires architecture, security, and pattern analysis in parallel
-- **Cross-plugin workflows** -- chain brainstorming, planning, implementation, review, and cleanup into single commands
-- **Install only what you need** -- each plugin is independent with no runtime dependencies
-- **Community-driven and open source** -- MIT licensed, contributions welcome
+- **End-to-end workflows** -- chain brainstorming, planning, implementation, review, and cleanup into single commands
+- **Install only what you need** -- every plugin is independent, no runtime dependencies
+- **Community-driven** -- MIT licensed, upstream-synced with projects from Anthropic, Vercel, and others
 
-| Type | What it is | How to use |
-|------|-----------|------------|
-| **Agent** | A specialized AI persona with domain expertise | `Use the python-pro agent to implement rate limiting` |
-| **Skill** | A knowledge module that enhances Claude's capabilities | Claude references it automatically when relevant |
-| **Command** | A slash command that triggers a specific workflow | `/senior-review`, `/python-scaffold`, `/feature-e2e` |
+## Quick Start
 
----
-
-## Installation
-
-### From GitHub (Recommended)
-
-**Step 1:** Add the marketplace
 ```bash
+# Add the marketplace
 claude plugin marketplace add acaprino/anvil-toolset
-```
 
-**Step 2:** Install the plugins you need
-```bash
-# Install individual plugins (pick what you need)
+# Install the plugins you need
 claude plugin install python-development@anvil-toolset
 claude plugin install senior-review@anvil-toolset
 claude plugin install frontend@anvil-toolset
-# ... see Plugins table below for all 33 available plugins
 ```
 
-### From Local Path (Development)
+That's it. Plugins activate automatically when relevant -- or invoke them directly:
 
 ```bash
-git clone https://github.com/acaprino/anvil-toolset.git
-claude plugin install ./anvil-toolset/plugins/python-development
+# Slash commands
+/code-review          # Multi-agent architecture + security + pattern review
+/feature-e2e          # Brainstorm -> plan -> implement -> review -> humanize
+/python-scaffold      # Scaffold a production-ready Python project
+
+# Agents
+"Use the python-pro agent to implement rate limiting"
+"Ask the rust-engineer to review my Tauri backend"
 ```
 
 ---
 
 ## Plugins
 
-| Plugin | Description | Agents | Skills | Commands | Docs |
-|--------|-------------|:------:|:------:|:--------:|:----:|
-| **python-development** | Modern Python development ecosystem with testing, packaging, async patterns, and code refactoring tools | 1 | 8 | 2 | [docs](docs/plugins/python-development.md) |
-| **humanize** | Make AI-generated code look human-written -- fixes names, removes boilerplate | 1 | - | 1 | [docs](docs/plugins/humanize.md) |
-| **deep-dive-analysis** | Understand any codebase in minutes with 7-phase systematic analysis | - | 1 | 1 | [docs](docs/plugins/deep-dive-analysis.md) |
-| **senior-review** | Catch bugs before they ship -- 3 agents review architecture, security, and patterns in parallel | 3 | - | 4 | [docs](docs/plugins/senior-review.md) |
-| **tauri-development** | Build cross-platform desktop and mobile apps with Tauri 2 and Rust | 2 | 1 | - | [docs](docs/plugins/tauri-development.md) |
-| **frontend** | Polish UI, design layouts, master modern CSS, and consult on web strategy | 4 | 6 | 1 | [docs](docs/plugins/frontend.md) |
-| **ai-tooling** | Brainstorm, plan, execute, and optimize prompts with structured workflows | 1 | 5 | 1 | [docs](docs/plugins/ai-tooling.md) |
-| **stripe** | Integrate Stripe payments without reading 500 pages of docs | - | 2 | - | [docs](docs/plugins/stripe.md) |
-| **system-utils** | Clean up messy folders, find duplicates, and organize directories | - | 1 | 1 | [docs](docs/plugins/system-utils.md) |
-| **business** | Navigate tech law, compliance, contracts, and risk management | 1 | 1 | - | [docs](docs/plugins/business.md) |
-| **project-setup** | Create and maintain accurate CLAUDE.md files with ground truth verification | 1 | - | 2 | [docs](docs/plugins/project-setup.md) |
-| **csp** | Solve scheduling, routing, and assignment problems with OR-Tools CP-SAT | 1 | - | - | [docs](docs/plugins/csp.md) |
-| **digital-marketing** | Run SEO audits, content strategy, brand naming, and domain hunting | 2 | 2 | 3 | [docs](docs/plugins/digital-marketing.md) |
-| **docs** | Craft magnetic, top-tier README.md files with progressive disclosure and badges | - | 1 | - | [docs](docs/plugins/docs.md) |
-| **messaging** | Design and optimize RabbitMQ messaging with expert AMQP patterns | 1 | - | - | [docs](docs/plugins/messaging.md) |
-| **research** | Find precise answers fast with quick search and deep multi-source research | 2 | - | - | [docs](docs/plugins/research.md) |
-| **mobile-development** | Analyze competitor Android apps via ADB with automated screenshots | - | 1 | - | [docs](docs/plugins/mobile-development.md) |
-| **typescript-development** | Write clean TypeScript with coding standards and Knip dead code detection | - | 2 | - | [docs](docs/plugins/typescript-development.md) |
-| **workflows** | Run entire dev workflows with one command -- brainstorm to review to cleanup | - | - | 7 | [docs](docs/plugins/workflows.md) |
-| **app-explorer** | Map any webapp's screens and navigation with Playwright crawling | - | 1 | - | [docs](docs/plugins/app-explorer.md) |
-| **browser-extensions** | Build Firefox extensions with expert Manifest V2/V3 and AMO publishing guidance | - | 1 | - | [docs](docs/plugins/browser-extensions.md) |
-| **obsidian-development** | Pass ObsidianReviewBot on first submission with compliant scaffolding and checks | - | 3 | - | [docs](docs/plugins/obsidian-development.md) |
-| **learning** | Generate mind maps in Obsidian MarkMind Rich format and interactive force-graphs | - | 3 | 1 | [docs](docs/plugins/learning.md) |
-| **marketplace-ops** | Audit, scaffold, create, and manage plugins in the anvil-toolset ecosystem | 1 | 2 | 4 | [docs](docs/plugins/marketplace-ops.md) |
-| **playwright-skill** | General-purpose browser automation with Playwright for testing and interaction | - | 1 | - | [docs](docs/plugins/playwright-skill.md) |
-| **anvil-hooks** | Session hooks -- startup branding, skill awareness, security gate, autocompact, brainstorm gate, review gate | - | - | - | [docs](docs/plugins/anvil-hooks.md) |
-| **prompt-improver** | Intelligent prompt optimization -- enriches vague prompts with research-based clarifying questions | - | 1 | - | [docs](docs/plugins/prompt-improver.md) |
-| **cc-usage** | Analyze Claude Code token usage, costs, and billing from local session data | - | 1 | 1 | [docs](docs/plugins/cc-usage.md) |
-| **codebase-mapper** | Generate human-readable codebase guides with 10 narrative docs and Mermaid diagrams | 10 | 1 | 4 | [docs](docs/plugins/codebase-mapper.md) |
-| **git-worktrees** | Manage parallel development with git worktrees -- create, pause, resume, merge | 1 | 1 | 1 | [docs](docs/plugins/git-worktrees.md) |
-| **rag-development** | Design and audit RAG systems -- chunking, embeddings, vector DBs, advanced patterns | 2 | 1 | 1 | [docs](docs/plugins/rag-development.md) |
-| **react-development** | React 19 performance, state management, bundle optimization, Vercel best practices | 1 | 1 | 1 | [docs](docs/plugins/react-development.md) |
-| **xterm** | Build and debug xterm.js terminal emulators with addon support and PTY wiring | - | 1 | 2 | [docs](docs/plugins/xterm.md) |
+| Plugin | Description | A | S | C |
+|--------|-------------|:-:|:-:|:-:|
+| **[python-development](docs/plugins/python-development.md)** | TDD, refactoring, async patterns, packaging, performance, dead code detection | 1 | 8 | 2 |
+| **[senior-review](docs/plugins/senior-review.md)** | 3 agents review architecture, security, and patterns in parallel | 3 | - | 4 |
+| **[frontend](docs/plugins/frontend.md)** | UI polish, layout design, modern CSS, web strategy, Radix/shadcn/daisyUI | 2 | 6 | 1 |
+| **[codebase-mapper](docs/plugins/codebase-mapper.md)** | Generate 10 narrative docs with Mermaid diagrams from any codebase | 10 | 1 | 4 |
+| **[ai-tooling](docs/plugins/ai-tooling.md)** | Brainstorm, plan, execute, optimize prompts, Agent SDK | 1 | 5 | 1 |
+| **[workflows](docs/plugins/workflows.md)** | End-to-end pipelines: feature dev, frontend redesign, mobile, Tauri, review | - | - | 7 |
+| **[tauri-development](docs/plugins/tauri-development.md)** | Tauri 2 desktop + mobile, Rust backend, IPC optimization | 3 | 1 | - |
+| **[digital-marketing](docs/plugins/digital-marketing.md)** | SEO audits, content strategy, brand naming, domain hunting | 2 | 2 | 3 |
+| **[react-development](docs/plugins/react-development.md)** | React 19 performance, state management, bundle optimization | 1 | 1 | 1 |
+| **[rag-development](docs/plugins/rag-development.md)** | RAG system design -- chunking, embeddings, vector DBs, advanced patterns | 2 | 1 | 1 |
+| **[marketplace-ops](docs/plugins/marketplace-ops.md)** | Audit, scaffold, review, and manage plugins in this ecosystem | 1 | 2 | 3 |
+| **[learning](docs/plugins/learning.md)** | Mind maps in MarkMind format and interactive force-graphs | - | 3 | 1 |
+| **[deep-dive-analysis](docs/plugins/deep-dive-analysis.md)** | 7-phase systematic codebase analysis with pattern detection | - | 1 | 1 |
+| **[git-worktrees](docs/plugins/git-worktrees.md)** | Parallel development with git worktrees -- create, pause, resume, merge | 1 | 1 | 1 |
+| **[business](docs/plugins/business.md)** | Tech law, compliance, privacy docs, contracts, risk management | 2 | - | - |
+| **[stripe](docs/plugins/stripe.md)** | Stripe payments, subscriptions, Connect, revenue optimization | 2 | - | - |
+| **[research](docs/plugins/research.md)** | Quick search and deep multi-source investigation | 2 | - | - |
+| **[project-setup](docs/plugins/project-setup.md)** | Create and maintain CLAUDE.md with ground truth verification | 1 | - | 2 |
+| **[humanize](docs/plugins/humanize.md)** | Make AI-generated code look human-written | 1 | - | 1 |
+| **[app-analyzer](docs/plugins/app-analyzer.md)** | Analyze Android apps via ADB and webapps via Playwright | 1 | - | - |
+| **[xterm](docs/plugins/xterm.md)** | Build and debug xterm.js terminal emulators | - | 1 | 2 |
+| **[obsidian-development](docs/plugins/obsidian-development.md)** | Pass ObsidianReviewBot on first try | - | 3 | - |
+| **[typescript-development](docs/plugins/typescript-development.md)** | TypeScript best practices and Knip dead code detection | - | 2 | - |
+| **[system-utils](docs/plugins/system-utils.md)** | Clean up messy folders, find duplicates | - | 1 | 1 |
+| **[messaging](docs/plugins/messaging.md)** | RabbitMQ queue design and AMQP patterns | 1 | - | - |
+| **[csp](docs/plugins/csp.md)** | Scheduling, routing, assignment with OR-Tools CP-SAT | 1 | - | - |
+| **[browser-extensions](docs/plugins/browser-extensions.md)** | Firefox extensions with Manifest V2/V3 | 1 | 1 | - |
+| **[playwright-skill](docs/plugins/playwright-skill.md)** | General-purpose browser automation with Playwright | - | 1 | - |
+| **[cc-usage](docs/plugins/cc-usage.md)** | Token usage, costs, and billing analysis | - | 1 | 1 |
+| **[prompt-improver](docs/plugins/prompt-improver.md)** | Enrich vague prompts with research-based questions | - | 1 | - |
+| **[anvil-hooks](docs/plugins/anvil-hooks.md)** | Session hooks -- startup branding, skill awareness, security gate | - | - | - |
+| **[docs](docs/plugins/docs.md)** | Craft top-tier README.md files | - | 1 | 1 |
 
-See [Quick Start Workflows](docs/plugins/workflows.md) for end-to-end pipelines like `/feature-e2e`, `/code-review`, `/frontend-redesign`, and more.
+**A** = Agents, **S** = Skills, **C** = Commands
 
 ---
 
 <details>
-<summary><h2>Project Structure</h2></summary>
+<summary><b>How Plugins Work</b></summary>
+
+| Type | What it is | How to use |
+|------|-----------|------------|
+| **Agent** | A specialized AI persona with domain expertise | `Use the python-pro agent to implement rate limiting` |
+| **Skill** | A knowledge module Claude references automatically | Activates when the task matches its trigger keywords |
+| **Command** | A slash command that kicks off a workflow | `/code-review`, `/python-scaffold`, `/feature-e2e` |
+
+Plugins are pure Markdown with optional JS/Python helper scripts. No build step, no runtime framework.
+
+</details>
+
+<details>
+<summary><b>Project Structure</b></summary>
 
 ```
 anvil-toolset/
 ├── .claude-plugin/
-│   └── marketplace.json
-├── docs/
-│   └── plugins/
-│       └── <plugin-name>.md      # one file per plugin
+│   └── marketplace.json       # plugin registry
+├── docs/plugins/              # per-plugin documentation
 ├── plugins/
 │   ├── python-development/
-│   │   ├── agents/
-│   │   ├── skills/
-│   │   └── commands/
+│   │   ├── agents/            # .md files with YAML frontmatter
+│   │   ├── skills/            # SKILL.md + optional references/
+│   │   └── commands/          # slash-command .md files
 │   ├── senior-review/
-│   │   ├── agents/
-│   │   └── commands/
 │   ├── frontend/
-│   │   ├── agents/
-│   │   ├── skills/
-│   │   └── commands/
-│   └── ...                       # 33 plugins total
+│   └── ...                    # 32 plugins total
 ├── LICENSE
 └── README.md
+```
+
+</details>
+
+<details>
+<summary><b>Local Development Install</b></summary>
+
+```bash
+git clone https://github.com/acaprino/anvil-toolset.git
+claude plugin install ./anvil-toolset/plugins/python-development
 ```
 
 </details>
@@ -129,49 +141,49 @@ anvil-toolset/
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Add your agent/skill following the existing structure
-4. Update `marketplace.json` with your additions
-5. Submit a pull request
+2. Add your agent/skill/command following existing patterns
+3. Register it in `marketplace.json`
+4. Submit a pull request
 
-### Agent Template
+<details>
+<summary><b>Agent Template</b></summary>
 
 ```markdown
 ---
 name: agent-name
-description: Brief description of the agent's purpose
+description: When and how to use this agent
 model: opus
 tools: Read, Write, Edit, Bash, Glob, Grep
 color: blue
 ---
 
-Agent instructions and expertise...
+Agent system prompt here...
 ```
 
-### Skill Template
+</details>
+
+<details>
+<summary><b>Skill Template</b></summary>
 
 ```markdown
 ---
 name: skill-name
-description: Brief description of the skill's purpose
+description: When this skill activates
 ---
 
 # Skill Name
 
-## Overview
-...
-
-## When to Use
-...
-
-## How to Use
-...
+Instructions, references, and domain knowledge...
 ```
+
+</details>
 
 ---
 
-## License
+<div align="center">
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License - [LICENSE](LICENSE)
 
-Created and maintained by [Alfio](https://github.com/acaprino).
+Built by [Alfio](https://github.com/acaprino)
+
+</div>
