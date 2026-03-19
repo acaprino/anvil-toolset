@@ -70,7 +70,27 @@ Task:
     Provide a change summary when done.
 ```
 
-## Step 4: Summary
+## Step 4: AI Trace Removal Pass
+
+After the `doc-humanizer` restructures the content, run a second pass with the `text-humanizer` agent to catch remaining AI writing patterns in the prose.
+
+```
+Task:
+  subagent_type: "text-humanizer"
+  description: "Remove AI writing traces from humanized documentation"
+  prompt: |
+    Final polish pass on restructured documentation. Remove any remaining AI
+    writing patterns (AI vocabulary, filler phrases, inflated significance,
+    generic conclusions) while preserving the improved structure, code blocks,
+    and diagrams.
+
+    Do NOT add the self-evaluation pass -- just return the cleaned text.
+
+    Files to process:
+    [list of rewritten files]
+```
+
+## Step 5: Summary
 
 Present before/after summary:
 
@@ -84,6 +104,7 @@ Anti-patterns fixed:
 - Paragraphs restructured: [count]
 - Diagrams split: [count]
 - Progressive disclosure added: [count] files
+- AI writing traces removed: second pass applied
 
 All factual content preserved. Review the changes with git diff.
 ```

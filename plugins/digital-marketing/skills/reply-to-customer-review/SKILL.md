@@ -94,13 +94,32 @@ Craft the response following these rules:
 - Negative (major): 4-6 sentences
 - Abusive: 1-2 sentences max (if responding at all)
 
-### Step 3: Output
+### Step 3: AI Trace Removal
+
+Before presenting the response, run it through the `text-humanizer` agent to remove AI writing traces. The response must sound like a real person wrote it -- not a chatbot template.
+
+```
+Task:
+  subagent_type: "text-humanizer"
+  description: "Remove AI writing traces from review response"
+  prompt: |
+    Humanize this review response. Remove AI patterns (filler phrases, promotional
+    language, sycophantic tone, rule of three, generic positive conclusions) while
+    preserving the empathetic tone and factual content. Keep it short and natural.
+
+    Do NOT add the self-evaluation pass -- just return the cleaned text.
+
+    Text:
+    [generated response]
+```
+
+### Step 4: Output
 
 Present three clearly separated sections:
 
 **RESPONSE**
 
-The ready-to-copy response text, formatted for the review platform. No markdown formatting -- plain text that can be pasted directly.
+The ready-to-copy response text (after AI trace removal), formatted for the review platform. No markdown formatting -- plain text that can be pasted directly.
 
 **ANALYSIS**
 

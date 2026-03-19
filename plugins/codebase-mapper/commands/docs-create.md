@@ -113,7 +113,29 @@ Task:
     Write the documentation as a structured markdown document.
 ```
 
-## Step 4: Review & Write Output
+## Step 4: AI Trace Removal
+
+Before saving, pass the generated documentation through the `text-humanizer` agent to remove AI writing traces (inflated significance, AI vocabulary, filler phrases, promotional language, etc.).
+
+```
+Task:
+  subagent_type: "text-humanizer"
+  description: "Remove AI writing traces from generated documentation"
+  prompt: |
+    Humanize this technical documentation. Remove AI patterns while preserving
+    all factual content, code examples, and technical accuracy. Focus on:
+    - Removing AI vocabulary and filler phrases
+    - Breaking formulaic structures
+    - Making prose sound natural and direct
+    - Keeping code blocks and diagrams unchanged
+
+    Do NOT add the self-evaluation pass -- just return the cleaned text.
+
+    Documentation:
+    [generated documentation]
+```
+
+## Step 5: Review & Write Output
 
 Present a brief summary of the generated documentation:
 
@@ -125,6 +147,7 @@ Documentation generated:
 - Components documented: [count]
 - Architecture diagrams: [count]
 - Total length: ~[X] lines
+- AI trace removal: applied
 
 1. Write to [output path] -- save the documentation
 2. Show full preview -- display before saving
