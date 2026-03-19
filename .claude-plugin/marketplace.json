@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.87.0"
+    "version": "2.88.0"
   },
   "plugins": [
     {
@@ -509,8 +509,8 @@
     {
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
-      "description": "SEO optimization, content marketing, brand naming, and domain hunting -- technical audits, keyword research, content strategy, strategic brand naming with lateral thinking generation (semantic collision, vocabulary shift, invisible hinge, polarization), phonotactic refinement, market saturation analysis, domain checks, trademark screening, weighted scoring, and registrar price comparison with promo code hunting",
-      "version": "1.19.0",
+      "description": "SEO optimization, content marketing, brand naming, domain hunting, and customer review response -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, and professional review reply generation with sentiment analysis",
+      "version": "1.20.0",
       "author": {
         "name": "Alfio"
       },
@@ -530,7 +530,11 @@
         "trademark",
         "domain-hunter",
         "registrar",
-        "domain-price"
+        "domain-price",
+        "review",
+        "review-response",
+        "reputation",
+        "customer-feedback"
       ],
       "category": "marketing",
       "strict": false,
@@ -543,12 +547,14 @@
       ],
       "skills": [
         "./skills/brand-naming",
-        "./skills/domain-hunter"
+        "./skills/domain-hunter",
+        "./skills/reply-to-customer-review"
       ],
       "commands": [
         "./commands/seo-audit.md",
         "./commands/content-strategy.md",
-        "./commands/brand-naming.md"
+        "./commands/brand-naming.md",
+        "./commands/reply-to-customer-review.md"
       ]
     },
     {
