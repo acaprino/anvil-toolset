@@ -133,17 +133,18 @@ If total changed lines exceed 500, batch the files into groups of 3-5 files per 
 
 **Agent tool parameters (use ONLY these):** `description` (required), `prompt` (required), `subagent_type`, `run_in_background`, `model`, `isolation`, `resume`. Do NOT pass any other parameters -- the Agent tool rejects unknown fields.
 
-Run all agents **in parallel** in a single response (Agent F only when UI files are in scope):
+Run all agents **in parallel** in a single response (Agent C only when UI files are in scope):
 
-### Agent A: Architecture & Code Quality
+### Agent A: Code Audit (Architecture + Failure Flow + Pattern Consistency + Scoring)
 
 ```
 Agent tool call:
-  - description: "Architecture review for senior-review command"
-  - subagent_type: "senior-review:architect-review"
+  - description: "Code audit for senior-review command"
+  - subagent_type: "senior-review:code-auditor"
   - run_in_background: true
   - prompt: |
-    Review the following code changes for architectural soundness and code quality.
+    Perform a comprehensive code audit of the following changes covering architecture,
+    failure flow analysis, pattern consistency, and quality scoring.
     You have both the diff AND the full file contents for context.
 
     ## Changed Files
@@ -162,18 +163,33 @@ Agent tool call:
     [paste relevant conventions, or "none found"]
 
     ## Instructions
-    Analyze the CHANGED code in context for:
+    Analyze the CHANGED code in context across all dimensions:
+
+    **Architecture & Code Quality:**
     1. Design concerns -- coupling, broken abstractions, inappropriate patterns
     2. Code quality -- naming, complexity, duplication
     3. Error handling -- missing or incorrect in new/modified code
-    4. Consistency -- do changes follow existing codebase patterns?
-    5. Over/under-engineering -- is the solution appropriately scoped?
-    6. CLAUDE.md compliance -- do changes follow project conventions?
-    7. Flow correctness -- trace modified flows within provided files. If the flow calls external modules not present in context, state "Cannot verify downstream impact in [Module] -- out of scope" rather than guessing.
-    8. Resource lifecycle -- are DB connections, file handles, temp files cleaned up on BOTH success AND error paths (try/finally)? If the process is killed during an async operation, what state is left behind?
-    9. Persisted state validity -- if code writes cache/state files for later resume, is there a validity key to detect stale data? Can a resumed run silently produce wrong results?
+    4. Over/under-engineering -- is the solution appropriately scoped?
+    5. CLAUDE.md compliance -- do changes follow project conventions?
+    6. Flow correctness -- trace modified flows within provided files. If the flow calls external modules not present in context, state "Cannot verify downstream impact in [Module] -- out of scope" rather than guessing.
+
+    **Failure Flow Analysis:**
+    7. Resource lifecycle -- are DB connections, file handles, temp files cleaned up on BOTH success AND error paths (try/finally)? If the process is killed during an async operation, what state is left behind?
+    8. Persisted state validity -- if code writes cache/state files for later resume, is there a validity key to detect stale data? Can a resumed run silently produce wrong results?
+    9. Kill point analysis -- for each await/async operation, simulate termination. What persisted state is left inconsistent?
+    10. Cache invalidation -- can stale cached results be silently mixed with fresh results?
+    11. Concurrency under failure -- if one task fails or parent is killed, what happens to siblings?
+
+    **Pattern Consistency:**
+    12. Identify dominant patterns per file, flag deviations in the diff
+    13. Run the 16-item anti-pattern checklist
+    14. Check CLAUDE.md compliance
+
+    **Scoring:**
+    15. Produce a quantitative Code Quality Score (Security, Performance, Maintainability, Consistency, Resilience, Overall -- each X/10)
 
     For each finding: severity (Critical/High/Medium/Low), file + line, confidence (0-100), concrete fix.
+    Include the full scoring table in your output.
 ```
 
 ### Agent B: Security Assessment
@@ -209,47 +225,7 @@ Agent tool call:
     For each finding: severity, CWE if applicable, file + line, confidence (0-100), attack scenario, concrete fix.
 ```
 
-### Agent C: Pattern Consistency
-
-```
-Agent tool call:
-  - description: "Pattern consistency analysis"
-  - subagent_type: "general-purpose"
-  - run_in_background: true
-  - prompt: |
-    You are a pattern consistency analyst. Analyze code changes for pattern deviations and anti-patterns.
-    You have both the diff AND the full file contents for context.
-
-    ## Changed Files
-    [list of changed code files]
-
-    ## Full File Contents
-    [paste full contents of each changed file]
-
-    ## Diff
-    [paste the git diff output]
-
-    ## Project Conventions (from CLAUDE.md)
-    [paste relevant conventions, or "none found"]
-
-    ## Instructions
-
-    ### Pattern Consistency
-    For each file, identify dominant patterns in the FULL file, then check if the DIFF follows them:
-    - Error handling style, async patterns, naming conventions
-    - Import conventions, null handling, resource management
-
-    ### Anti-patterns
-    Flag: swallowed exceptions, tight coupling, mutable globals, TODO in critical paths,
-    hardcoded magic numbers, duplicated logic, missing type safety.
-
-    ### CLAUDE.md Compliance
-    Check each changed file against project conventions. Flag any deviations.
-
-    For each finding: severity (Critical/High/Medium/Low), file + line, confidence (0-100), concrete fix.
-```
-
-### Agent D: Dead Code Detection
+### Agent B2: Dead Code Detection
 
 ```
 Agent tool call:
@@ -291,62 +267,7 @@ Agent tool call:
     - Recommended action (remove, verify dynamic usage, add to __all__)
 ```
 
-### Agent E: Failure Flow Analysis
-
-```
-Agent tool call:
-  - description: "Failure flow analysis for senior-review command"
-  - subagent_type: "senior-review:failure-flow-tracer"
-  - run_in_background: true
-  - prompt: |
-    Trace failure paths, kill scenarios, and resume/retry correctness in the changed code.
-    You have both the diff AND the full file contents for context.
-
-    ## Changed Files
-    [list of changed code files]
-
-    ## Full File Contents
-    [paste full contents of each changed file]
-
-    ## Diff
-    [paste the git diff output]
-
-    ## Project Conventions (from CLAUDE.md)
-    [paste relevant conventions, or "none found"]
-
-    ## Instructions
-    Analyze the CHANGED code for failure-path bugs:
-
-    1. **Persisted State Map** -- Identify all files/databases/caches written by the changed code.
-       For each: who writes, who reads, what validates it, what could invalidate it.
-
-    2. **Kill Point Analysis** -- For each await/async operation in the diff, simulate process
-       termination at that exact point. What persisted state is left inconsistent? Does the
-       next run handle it?
-
-    3. **Cache Invalidation** -- For every cached/persisted artifact, is there a validity key
-       (hash, version, fingerprint)? If the source data changes between runs, is the cache
-       properly invalidated? Can stale cached results be silently mixed with fresh results?
-
-    4. **Resource Lifecycle** -- Are DB connections, file handles, temp files, subprocesses
-       guaranteed to be cleaned up via try/finally or context managers? Check the ERROR path,
-       not just the happy path.
-
-    5. **Concurrency Under Failure** -- For asyncio.gather, thread pools, or parallel operations:
-       if one task fails or the parent is killed, what happens to sibling tasks? Are side effects
-       (file writes, DB updates) already committed? Is progress reporting accurate during
-       concurrent execution or does it batch/delay?
-
-    6. **Resume Correctness** -- If the code has resume/retry logic, trace the full cycle:
-       start → partial completion → kill → resume. What assumptions does resume make about
-       the environment? What if those assumptions are violated (input file changed, config
-       changed, output dir moved)?
-
-    For each finding: severity (Critical/High/Medium/Low), concrete step-by-step scenario,
-    file + line, confidence (0-100), concrete fix.
-```
-
-### Agent F: UI Race Condition Analysis
+### Agent C: UI Race Condition Analysis
 
 **Only run this agent if the changed files include UI/frontend code** (`.tsx`, `.jsx`, `.vue`, `.svelte`, `.component.ts`, `.qml`, or files containing scroll/focus/layout manipulation).
 
@@ -399,72 +320,12 @@ Agent tool call:
        B being notified?
 
     For each finding: severity (Critical/High/Medium/Low), step-by-step timeline
-    (T0→T1→...→RESULT), file + line, confidence (0-100), concrete fix.
+    (T0->T1->...->RESULT), file + line, confidence (0-100), concrete fix.
 ```
 
-## Step 4: Consolidate Agent Findings
+## Step 4: Consolidate Findings & Extract Score
 
-After all agents complete, collect and organize their findings into a single intermediate summary. Group findings by severity and category. This summary becomes the input for Step 4b.
-
-## Step 4b: Quality Scoring
-
-Run the pattern-quality-scorer agent with ALL findings from Step 4 to produce a calibrated quality score:
-
-```
-Agent tool call:
-  - description: "Quality scoring with all agent findings"
-  - subagent_type: "senior-review:pattern-quality-scorer"
-  - prompt: |
-    Produce a calibrated quality score for the reviewed code changes.
-    You have the consolidated findings from all review agents -- use them to score accurately.
-
-    ## Changed Files
-    [list of changed code files]
-
-    ## Full File Contents
-    [paste full contents of each changed file]
-
-    ## Diff
-    [paste the git diff output]
-
-    ## Agent Findings
-    ### Architecture & Code Quality (Agent A)
-    [paste findings from architect-review]
-
-    ### Security (Agent B)
-    [paste findings from security-auditor]
-
-    ### Pattern Consistency (Agent C)
-    [paste findings from pattern analysis]
-
-    ### Dead Code (Agent D)
-    [paste findings from dead code detection]
-
-    ### Failure Flow (Agent E)
-    [paste findings from failure-flow-tracer]
-
-    ### UI Race Conditions (Agent F) -- if applicable
-    [paste findings from ui-race-auditor, or "N/A -- no UI files in scope"]
-
-    ## Instructions
-    Using ALL agent findings above, produce a quantitative quality score.
-
-    Default score is 10/10. Deduct points based on severity and density of findings. Justify any score below 7 with specific deductions.
-
-    | Category        | Score | Confidence |
-    |-----------------|-------|------------|
-    | Architecture    | X/10  | X%         |
-    | Security        | X/10  | X%         |
-    | Code Quality    | X/10  | X%         |
-    | Consistency     | X/10  | X%         |
-    | Resilience      | X/10  | X%         |
-    | **Overall**     | **X/10** | **X%**  |
-
-    Also provide:
-    - Executive summary (2-3 sentences)
-    - What's done well (positive observations)
-    - Top concerns (most impactful issues across all categories)
-```
+After all agents complete, collect and organize findings. The code-auditor (Agent A) already produces the quality score -- extract it directly. No separate scoring step needed.
 
 ## Step 5: Final Review Output
 
@@ -556,7 +417,7 @@ cat > .full-review/temp_summary_comment.md << 'SUMMARY_EOF'
 [top 3 recommended actions]
 
 ---
-*Reviewed by: architect-review, security-auditor, pattern-quality-scorer, dead-code-detector, failure-flow-tracer*
+*Reviewed by: code-auditor, security-auditor, dead-code-detector, ui-race-auditor*
 SUMMARY_EOF
 
 gh pr comment {number} -F .full-review/temp_summary_comment.md

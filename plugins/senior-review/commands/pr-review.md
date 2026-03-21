@@ -81,7 +81,7 @@ Run both agents **in parallel** in a single response.
 
 ```
 Task:
-  subagent_type: "senior-review:architect-review"
+  subagent_type: "senior-review:code-auditor"
   description: "Architecture and risk assessment for PR"
   prompt: |
     Analyze the following code changes for architectural soundness and risk.

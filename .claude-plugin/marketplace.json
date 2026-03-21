@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "2.99.0"
+    "version": "3.0.0"
   },
   "plugins": [
     {
@@ -575,8 +575,8 @@
     {
       "name": "senior-review",
       "source": "./plugins/senior-review",
-      "description": "Multi-agent code review orchestration with architecture, security, pattern analysis, calibrated quality scoring, multi-language dead code detection, failure flow tracing, and UI race condition auditing",
-      "version": "2.19.0",
+      "description": "Multi-agent code review orchestration with unified code auditing (architecture, failure flow, pattern analysis, scoring), security auditing, UI race condition detection, and multi-language dead code cleanup. Backed by a comprehensive defect taxonomy knowledge base (140+ defect patterns, CWE/OWASP mappings).",
+      "version": "3.0.0",
       "author": {
         "name": "Alfio"
       },
@@ -584,13 +584,14 @@
       "keywords": [
         "senior-review",
         "code-review",
+        "code-audit",
         "architecture",
         "security",
         "patterns",
         "quality",
         "dead-code",
         "ui-race-condition",
-        "failure-flow"
+        "defect-taxonomy"
       ],
       "category": "review",
       "strict": false,
@@ -599,11 +600,12 @@
         "typescript-development"
       ],
       "agents": [
-        "./agents/architect-review.md",
+        "./agents/code-auditor.md",
         "./agents/security-auditor.md",
-        "./agents/pattern-quality-scorer.md",
-        "./agents/failure-flow-tracer.md",
         "./agents/ui-race-auditor.md"
+      ],
+      "skills": [
+        "./skills/defect-taxonomy"
       ],
       "commands": [
         "./commands/full-review.md",
@@ -616,7 +618,7 @@
       "name": "workflows",
       "source": "./plugins/workflows",
       "description": "Cross-plugin orchestration pipelines -- feature development, frontend redesign, UI studio, full code review, mobile intelligence, mobile Tauri, and Tauri desktop review",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "author": {
         "name": "Alfio"
       },

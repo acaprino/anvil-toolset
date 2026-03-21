@@ -27,7 +27,7 @@ This command requires agents and skills from other plugins. Before proceeding, v
 
 **Required plugins:**
 - `ai-tooling` -- brainstorming, writing-plans, executing-plans skills
-- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents
+- `senior-review` -- code-auditor, security-auditor agents
 - `humanize` -- humanize agent (skip Phase 5 if missing)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
@@ -377,8 +377,8 @@ git diff HEAD~[number-of-commits-from-phase-3] -- [code files only]
 
 ```
 Task:
-  subagent_type: "architect-review"
-  description: "Architecture review of feature implementation"
+  subagent_type: "senior-review:code-auditor"
+  description: "Code audit of feature implementation"
   prompt: |
     Review the code changes made during feature implementation.
     Focus on code quality and architectural concerns. Skip documentation.
@@ -435,7 +435,7 @@ Task:
 
 ```
 Task:
-  subagent_type: "pattern-quality-scorer"
+  subagent_type: "senior-review:code-auditor"
   description: "Pattern analysis and quality scoring of feature implementation"
   prompt: |
     Analyze the code changes for pattern consistency and quality score.

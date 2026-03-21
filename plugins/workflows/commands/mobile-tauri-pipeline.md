@@ -31,7 +31,7 @@ This command requires agents and skills from other plugins. Before proceeding, v
 
 **Optional plugins:**
 - `tauri-development` -- tauri-mobile skill, rust-engineer, tauri-desktop agents (Phases 4, 7, 8)
-- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents (Phase 9)
+- `senior-review` -- code-auditor, security-auditor agents (Phase 9)
 - `humanize` -- humanize agent (Phase 10)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
@@ -554,8 +554,8 @@ Run 3 review agents in parallel:
 
 ```
 Task:
-  subagent_type: "senior-review:architect-review"
-  description: "Architecture review of mobile app"
+  subagent_type: "senior-review:code-auditor"
+  description: "Code audit of mobile app"
   prompt: |
     Review the architecture of this Tauri 2 mobile application.
 
@@ -600,7 +600,7 @@ Task:
 
 ```
 Task:
-  subagent_type: "senior-review:pattern-quality-scorer"
+  subagent_type: "senior-review:code-auditor"
   description: "Quality scoring of mobile app"
   prompt: |
     Pattern consistency and quality scoring for this Tauri 2 mobile application.

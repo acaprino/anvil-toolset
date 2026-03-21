@@ -1,33 +1,41 @@
 # Senior Review Plugin
 
-> Catch bugs before they ship. Three specialized agents review architecture, security, and code patterns in parallel -- like having a senior architect, security auditor, and quality engineer on every PR.
+> Catch bugs before they ship. Specialized agents review code quality, security, and UI timing in parallel -- backed by a comprehensive defect taxonomy knowledge base with 140+ defect patterns and CWE/OWASP mappings.
 
 ## Agents
 
-### `architect-review`
+### `code-auditor`
 
-Master software architect specializing in modern architecture patterns, clean architecture, microservices, event-driven systems, and DDD.
+Adversarial code quality auditor combining architecture review, failure flow tracing, pattern consistency analysis, and quantitative scoring.
 
 | | |
 |---|---|
 | **Model** | `opus` |
-| **Use for** | Architecture integrity, scalability review, design pattern assessment |
+| **Use for** | Architecture integrity, failure path analysis, pattern consistency, quality scoring |
 
 **Invocation:**
 ```
-Use the architect-review agent to review [system/design]
+Use the code-auditor agent to review [system/codebase]
 ```
+
+**Methodology:**
+- 4 cognitive frameworks (Boundary Detective, Abstraction Inspector, Chaos Engineer, State Auditor)
+- 6-phase failure flow analysis (persisted state, kill points, resume/retry, cache invalidation, resource lifecycle, async concurrency)
+- 16-item anti-pattern checklist
+- 6 mental models (security engineer, performance engineer, team lead, systems architect, SRE, pattern detective)
+- Quantitative 1-10 Code Quality Score per category (Security, Performance, Maintainability, Consistency, Resilience)
+- References `defect-taxonomy` skill for CWE-mapped detection strategies
 
 ---
 
 ### `security-auditor`
 
-Security auditor specializing in DevSecOps, cybersecurity, and compliance frameworks.
+Security auditor with attacker mindset specializing in vulnerability detection, CWE/OWASP mapping, and attack scenario construction.
 
 | | |
 |---|---|
 | **Model** | `opus` |
-| **Use for** | Security audits, DevSecOps, compliance (OWASP/GDPR), threat modeling |
+| **Use for** | Security audits, vulnerability assessment, OWASP/CWE compliance, threat modeling |
 
 **Invocation:**
 ```
@@ -35,31 +43,46 @@ Use the security-auditor agent to audit [system/codebase]
 ```
 
 **Expertise:**
-- Vulnerability assessment and threat modeling
-- OAuth2/OIDC secure authentication
-- OWASP standards and cloud security
-- Security automation and incident response
+- Input trust boundaries (injection, XSS, path traversal, command injection)
+- Auth/authz (JWT, CSRF, privilege escalation)
+- Secrets and cryptographic misuse
+- API and header security
+- Dependency vulnerabilities
+- References `defect-taxonomy` skill for comprehensive CWE-mapped patterns
 
 ---
 
-### `pattern-quality-scorer`
+### `ui-race-auditor`
 
-Pattern consistency analyzer and quantitative code quality scorer.
+Framework-agnostic UI race condition analyst detecting timing bugs between async data loading, rendering, and event handlers.
 
 | | |
 |---|---|
 | **Model** | `opus` |
-| **Use for** | Pattern deviation detection, anti-pattern checklists, quality scoring |
+| **Use for** | UI timing bugs, scroll races, focus races, stale closures, measurement races |
 
 **Invocation:**
 ```
-Use the pattern-quality-scorer agent to analyze [codebase]
+Use the ui-race-auditor agent to analyze [UI component/codebase]
 ```
 
-**Methodology:**
-- 16-item anti-pattern checklist
-- 6 mental models (security engineer, performance engineer, team lead, systems architect, SRE, pattern detective)
-- 1-10 Code Quality Score per category
+---
+
+## Skills
+
+### `defect-taxonomy`
+
+Comprehensive defect knowledge base with 16 macro-categories and 140+ subcategories of source code defects. Synthesizes MITRE CWE, OWASP Top 10, NASA Power of 10, IBM ODC, IEEE 1044, and Beizer's taxonomy.
+
+**Reference files:**
+- `concurrency-state.md` - Concurrency/parallelism + variable/state errors
+- `logic-types.md` - Comparison/logic + type/conversion errors
+- `memory-resources.md` - Memory management + error handling + performance
+- `security.md` - Security vulnerabilities (14 subcategories)
+- `distributed-integration.md` - API/contract + distributed systems + communication + integration
+- `data-design-ops.md` - Data/persistence + design patterns + build/deploy + testing
+- `detection-matrix.md` - Detection strategy matrix per category
+- `review-frameworks.md` - Cognitive models, failure flow methodology, anti-patterns, scoring
 
 ---
 
@@ -67,7 +90,7 @@ Use the pattern-quality-scorer agent to analyze [codebase]
 
 ### `/full-review`
 
-Run a multi-dimensional code review across all specialized review agents.
+Multi-phase comprehensive code review with checkpoints and persistent sessions. 5 phases: Code Audit, Security & Performance, Testing & Documentation, Best Practices, Consolidated Report.
 
 ```
 /full-review src/features/auth/ --security-focus
@@ -76,6 +99,7 @@ Run a multi-dimensional code review across all specialized review agents.
 **Options:**
 | Flag | Effect |
 |------|--------|
+| `--deep-dive` | Gather structural/semantic context first |
 | `--security-focus` | Prioritize security analysis |
 | `--performance-critical` | Deep performance review |
 | `--strict-mode` | Strictest quality standards |
@@ -85,7 +109,7 @@ Run a multi-dimensional code review across all specialized review agents.
 
 ### `/code-review`
 
-Unified code review that auto-detects scope: uncommitted/staged changes, recent commits, PR number, or branch diff. Fires architecture, security, and pattern analysis agents in parallel with confidence scoring.
+Unified code review that auto-detects scope: uncommitted/staged changes, recent commits, PR number, or branch diff. Fires code-auditor, security-auditor, and dead code agents in parallel.
 
 ```
 /code-review                    # auto-detect: uncommitted changes or branch diff

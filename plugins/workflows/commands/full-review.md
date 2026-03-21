@@ -25,7 +25,7 @@ This command requires agents, skills, and commands from other plugins. Before pr
 
 **Required plugins:**
 - `deep-dive-analysis` -- deep-dive-analysis skill/command (Phase 1)
-- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents (Phase 2)
+- `senior-review` -- code-auditor, security-auditor agents (Phase 2)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
 
@@ -322,14 +322,14 @@ This phase runs the senior-review process enriched with deep dive findings. All 
 
 When deep dive was performed (not skipped), each review agent prompt in Phase 2 gets the relevant deep-dive findings injected:
 
-- For architect-review (2A): structure, interfaces, flows, semantics
+- For code-auditor (2A): structure, interfaces, flows, semantics, risks
 - For security-auditor (2B): flows (data paths), semantics (assumptions), risks
 - For performance agent (2C): structure, flows
 - For test/docs agents (2D, 2E): interfaces, flows, risks
 - For best practices agents (2F): all deep-dive findings
 - For CI/CD agent (2G): structure, risks
 - For dead code agent (2H): structure, interfaces
-- For pattern-quality-scorer (2I): all deep-dive findings
+- For code-auditor (2I -- scoring pass): all deep-dive findings
 
 Use this context to strengthen analysis. Do NOT re-report findings already covered in the deep dive -- instead focus on new issues the deep dive missed or issues that become apparent when combining deep-dive context with the specialized perspective.
 
@@ -341,8 +341,8 @@ Run steps 2A and 2B in parallel using multiple Agent tool calls in a single resp
 
 ```
 Task:
-  subagent_type: "senior-review:architect-review"
-  description: "Architecture review enriched with deep dive context"
+  subagent_type: "senior-review:code-auditor"
+  description: "Code audit enriched with deep dive context"
   prompt: |
     Review the architectural design and structural integrity of the target code.
     You have deep dive analysis context -- use it to go deeper than a surface-level review.
@@ -748,7 +748,7 @@ Read all `.full-review-pipeline/*.md` files for full context. This step runs AFT
 
 ```
 Task:
-  subagent_type: "senior-review:pattern-quality-scorer"
+  subagent_type: "senior-review:code-auditor"
   description: "Code quality scoring enriched with deep dive and all review context"
   prompt: |
     Perform comprehensive code quality review, pattern consistency analysis, and quantitative scoring.

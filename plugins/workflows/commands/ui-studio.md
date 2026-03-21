@@ -57,7 +57,7 @@ This command requires agents and skills from other plugins. Before proceeding, v
 - `react-development` -- react-performance-optimizer agent (Phase 8)
 
 **Optional plugins:**
-- `senior-review` -- architect-review, security-auditor, pattern-quality-scorer agents (Phase 10)
+- `senior-review` -- code-auditor, security-auditor agents (Phase 10)
 - `humanize` -- humanize agent (Phase 11)
 
 Check by looking for the agent/skill files. If a required plugin is missing, STOP and tell the user:
@@ -854,8 +854,8 @@ Run 3 review agents in parallel:
 
 ```
 Task:
-  subagent_type: "senior-review:architect-review"
-  description: "Architecture review of UI implementation"
+  subagent_type: "senior-review:code-auditor"
+  description: "Code audit of UI implementation"
   prompt: |
     Review the UI implementation architecture.
 
@@ -906,8 +906,8 @@ Task:
 
 ```
 Task:
-  subagent_type: "senior-review:pattern-quality-scorer"
-  description: "Quality scoring of UI implementation"
+  subagent_type: "senior-review:code-auditor"
+  description: "Pattern consistency scoring of UI implementation"
   prompt: |
     Pattern consistency and quality scoring of the UI implementation.
 
