@@ -117,7 +117,12 @@ Determine what code to review from `$ARGUMENTS`:
 ## Review Phases
 
 1. Code Audit (Architecture + Failure Flow + Pattern Analysis + Scoring)
-2. Security & Performance
+2. Security, Performance & Specialized Reviews
+   - 2A: Security Vulnerability Assessment
+   - 2B: Performance & Scalability Analysis
+   - 2C: UI Race Condition Analysis (if UI files in scope)
+   - 2D: Distributed Flow Analysis (if multi-service)
+   - 2E: React Performance Review (if React files in scope)
 3. Testing & Documentation
 4. Best Practices & Standards
 5. Consolidated Report
@@ -541,6 +546,43 @@ Agent tool call:
     Write your findings as a structured markdown document.
 ```
 
+### Step 2E: React Performance Review (conditional)
+
+**Only run this agent if the target includes React files** (`.tsx`, `.jsx`, or `package.json` listing `react` as a dependency). Skip entirely for non-React codebases.
+
+```
+Agent tool call:
+  - description: "React performance review for $ARGUMENTS"
+  - subagent_type: "react-development:react-performance-optimizer"
+  - run_in_background: true
+  - prompt: |
+    Audit the React performance, state management, and bundle optimization of the target code.
+
+    ## Review Scope
+    [Insert contents of .full-review/00-scope.md]
+
+    ## Phase 1 Context
+    [Insert contents of .full-review/01-code-audit.md -- focus on component interaction and state management findings]
+
+    ## Instructions
+    Evaluate:
+    1. **External store selector audit (CRITICAL)**: Selectors returning objects/arrays without `useShallow`, selectors with `.filter()`/`.map()`/`.reduce()` creating new references, `useStore()` with no selector
+    2. **React Compiler readiness**: Is `babel-plugin-react-compiler` configured? Identify patterns the compiler can vs cannot auto-optimize
+    3. **useEffect/useCallback infinite loop detection**: Callbacks that update state listed in their own deps, called from effects depending on the callback
+    4. **Stale closure detection**: State/props captured in `useEffect(..., [])` closures without ref indirection
+    5. **useEffect cleanup audit**: Missing AbortController, unclosed WebSocket/Channel, missing clearInterval/removeEventListener
+    6. **React 19 API adoption**: use(), useOptimistic(), useDeferredValue(), useFormStatus(), useActionState()
+    7. **State management patterns**: Zustand/Jotai/Redux selector patterns, prop drilling, state duplication, useEffect chains
+    8. **Bundle optimization**: Heavy imports, missing code splitting, lazy loading opportunities, tree-shaking blockers
+    9. **Virtualization**: Large lists/tables not using TanStack Virtual or similar
+    10. **Re-render prevention**: Children as props pattern, component splitting for isolation
+
+    For each finding: severity (Critical/High/Medium/Low), file + line, issue description, specific fix with code example.
+    Note what's done well.
+
+    Write your findings as a structured markdown document.
+```
+
 After all agents complete, consolidate into `.full-review/02-security-performance.md`:
 
 ```markdown
@@ -561,6 +603,10 @@ After all agents complete, consolidate into `.full-review/02-security-performanc
 ## Distributed Flow Findings (if applicable)
 
 [Summary from 2D, organized by severity, or "N/A -- single-module scope"]
+
+## React Performance Findings (if applicable)
+
+[Summary from 2E, organized by severity, or "N/A -- no React files in scope"]
 
 ## Critical Issues for Phase 3 Context
 
@@ -908,6 +954,7 @@ Read all `.full-review/*.md` files (01 through 04). Generate the final consolida
 - **Best Practices**: [count] findings ([breakdown by severity])
 - **CI/CD & DevOps**: [count] findings ([breakdown by severity])
 - **UI Race Conditions**: [count] findings ([breakdown by severity])
+- **React Performance**: [count] findings ([breakdown by severity])
 - **Distributed Integration**: [count] findings ([breakdown by severity])
 - **Dead Code**: [count] findings ([breakdown by severity])
 

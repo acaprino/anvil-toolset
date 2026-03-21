@@ -119,6 +119,7 @@ Determine what code to review from `$ARGUMENTS`:
    - 2B: Security Vulnerability Assessment
    - 2C: Performance Analysis
    - 2D: Test Coverage Analysis
+   - 2E-react: React Performance Review (if React files in scope)
    - 2E: Documentation & API Review
    - 2F: Framework & Language Best Practices
    - 2G: CI/CD & DevOps Practices
@@ -514,7 +515,50 @@ Task:
     Write your findings as a structured markdown document.
 ```
 
-### Step 2E: Documentation & API Review (parallel with 2C and 2D)
+### Step 2E-react: React Performance Review (conditional, parallel with 2C, 2D, and 2E)
+
+**Only run this agent if the target includes React files** (`.tsx`, `.jsx`, or `package.json` listing `react` as a dependency). Skip entirely for non-React codebases.
+
+```
+Task:
+  subagent_type: "react-development:react-performance-optimizer"
+  description: "React performance review enriched with deep dive context"
+  prompt: |
+    Audit the React performance, state management, and bundle optimization of the target code.
+    You have deep dive context -- use it to identify component-level issues.
+
+    ## Review Scope
+    [Insert contents of .full-review-pipeline/00-scope.md]
+
+    ## Deep Dive Context
+    [Insert key findings from .full-review-pipeline/dd-01-structure.md and dd-03-flows-semantics.md]
+
+    ## Prior Phase Context
+    [Insert critical/high findings from .full-review-pipeline/02-architecture-security.md]
+
+    ## Instructions
+    Evaluate:
+    1. **External store selector audit (CRITICAL)**: Selectors returning objects/arrays without `useShallow`, selectors with `.filter()`/`.map()`/`.reduce()` creating new references, `useStore()` with no selector
+    2. **React Compiler readiness**: Is `babel-plugin-react-compiler` configured? Identify patterns the compiler can vs cannot auto-optimize
+    3. **useEffect/useCallback infinite loop detection**: Callbacks that update state listed in their own deps, called from effects depending on the callback
+    4. **Stale closure detection**: State/props captured in `useEffect(..., [])` closures without ref indirection
+    5. **useEffect cleanup audit**: Missing AbortController, unclosed WebSocket/Channel, missing clearInterval/removeEventListener
+    6. **React 19 API adoption**: use(), useOptimistic(), useDeferredValue(), useFormStatus(), useActionState()
+    7. **State management patterns**: Zustand/Jotai/Redux selector patterns, prop drilling, state duplication, useEffect chains
+    8. **Bundle optimization**: Heavy imports, missing code splitting, lazy loading opportunities, tree-shaking blockers
+    9. **Virtualization**: Large lists/tables not using TanStack Virtual or similar
+    10. **Re-render prevention**: Children as props pattern, component splitting for isolation
+
+    Do NOT re-report performance issues already covered in prior phases. Focus on
+    React-specific patterns and optimizations.
+
+    For each finding: severity (Critical/High/Medium/Low), file + line, issue description, specific fix with code example.
+    Note what's done well.
+
+    Write your findings as a structured markdown document.
+```
+
+### Step 2E: Documentation & API Review (parallel with 2C, 2D, and 2E-react)
 
 ```
 Task:
@@ -550,10 +594,10 @@ Task:
     Write your findings as a structured markdown document.
 ```
 
-After 2C, 2D, and 2E complete, consolidate into `.full-review-pipeline/03-performance-testing-docs.md`:
+After 2C, 2D, 2E, and 2E-react complete, consolidate into `.full-review-pipeline/03-performance-testing-docs.md`:
 
 ```markdown
-# Phase 2C-2E: Performance, Testing & Documentation Review
+# Phase 2C-2E: Performance, Testing, Documentation & React Review
 
 ## Performance Findings
 
@@ -566,6 +610,10 @@ After 2C, 2D, and 2E complete, consolidate into `.full-review-pipeline/03-perfor
 ## Documentation Findings
 
 [Summary from 2E, organized by severity]
+
+## React Performance Findings (if applicable)
+
+[Summary from 2E-react, organized by severity, or "N/A -- no React files in scope"]
 
 ## Critical Issues for Subsequent Steps
 
@@ -939,6 +987,7 @@ and the concrete problems found during review.]
 - **Pattern Consistency**: [count] findings ([breakdown by severity])
 - **Testing**: [count] findings ([breakdown by severity])
 - **Documentation**: [count] findings ([breakdown by severity])
+- **React Performance**: [count] findings ([breakdown by severity])
 - **Best Practices**: [count] findings ([breakdown by severity])
 - **CI/CD & DevOps**: [count] findings ([breakdown by severity])
 - **Dead Code**: [count] findings ([breakdown by severity])
