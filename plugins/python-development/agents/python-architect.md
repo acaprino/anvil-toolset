@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the user is asking for simple bug fixes, writing tests, or isolated refactoring.
 tools: Read, Write, Edit, Bash, Glob
 model: opus
-color: blue
+color: green
 ---
 
 # ROLE

@@ -5,7 +5,7 @@ description: >
   TRIGGER WHEN: the user requires assistance with UI race conditions, scroll bugs, layout shift issues, focus timing problems, or async rendering bugs.
   DO NOT TRIGGER WHEN: the task involves pure backend logic, API design, or database operations with no UI component.
 model: opus
-color: yellow
+color: purple
 ---
 
 # UI Race Condition Auditor

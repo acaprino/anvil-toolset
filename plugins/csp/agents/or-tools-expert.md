@@ -5,7 +5,7 @@ description: >
   TRIGGER WHEN: the user requires assistance with tasks related to this domain.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 model: opus
-color: cyan
+color: blue
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch
 ---
 

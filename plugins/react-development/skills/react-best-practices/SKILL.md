@@ -1,4 +1,3 @@
-<!-- upstream: vercel-labs/agent-skills - skills/react-best-practices/SKILL.md -->
 ---
 name: react-best-practices
 description: >

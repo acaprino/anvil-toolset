@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the user is asking for a simple CSS fix or a highly specific bug fix that a specialized agent can handle directly.
 tools: Read, Write, Edit, Bash, Glob
 model: opus
-color: blue
+color: purple
 ---
 
 # Frontend Architect (Orchestrator)

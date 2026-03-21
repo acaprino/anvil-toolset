@@ -10,7 +10,7 @@ description: >
   (use privacy-doc-generator), or tactical marketing execution (use digital-marketing agents).
 tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch, Agent
 model: opus
-color: green
+color: yellow
 ---
 
 # Role

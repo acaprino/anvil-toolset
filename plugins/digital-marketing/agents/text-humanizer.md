@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the task involves refactoring source code (use humanize-code instead).
 tools: Read, Write, Edit, AskUserQuestion
 model: opus
-color: cyan
+color: orange
 ---
 
 # Text Humanizer (Editor Agent)

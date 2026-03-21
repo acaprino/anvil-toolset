@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 tools: Read, Write, Edit, Glob, Grep, WebFetch, WebSearch
 model: opus
-color: green
+color: cyan
 ---
 
 # GOLDEN RULES

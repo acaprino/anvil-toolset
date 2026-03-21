@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 model: opus
 tools: Read, Write, Edit, Glob, Grep
-color: yellow
+color: cyan
 ---
 
 # ROLE

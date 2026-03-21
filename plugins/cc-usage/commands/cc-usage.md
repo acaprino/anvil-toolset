@@ -1,3 +1,10 @@
+---
+description: >
+  "Analyze Claude Code token usage, costs, billing blocks, and tool activity from local session data" argument-hint: "[--days N] [--session <id>] [--breakdown]".
+  TRIGGER WHEN: the user requires assistance with tasks related to this domain.
+  DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
+---
+
 # /cc-usage
 
 Analyze your Claude Code token usage, costs, and activity.

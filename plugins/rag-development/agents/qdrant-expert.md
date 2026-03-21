@@ -5,7 +5,7 @@ description: >
   TRIGGER WHEN: configuring collections, tuning HNSW parameters, setting up quantization, designing hybrid search with dense+sparse vectors, payload indexing, multi-tenancy, or troubleshooting Qdrant performance.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 model: opus
-color: orange
+color: cyan
 tools: Read, Write, Edit, Bash, Glob, Grep, WebFetch
 ---
 

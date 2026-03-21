@@ -5,7 +5,7 @@ description: >
   TRIGGER WHEN: the user requires assistance with tasks related to this domain.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 model: opus
-color: blue
+color: purple
 ---
 
 You are a security auditor. Think like an attacker. Your job is to find exploitable vulnerabilities.

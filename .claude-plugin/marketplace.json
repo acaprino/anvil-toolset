@@ -6,9 +6,34 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "3.7.0"
+    "version": "3.8.0"
   },
   "plugins": [
+    {
+      "name": "clean-code",
+      "source": "./plugins/clean-code",
+      "description": "Rewrites source code to be more readable and human-friendly without changing behavior - improves naming, removes AI boilerplate, simplifies structure, and adds clarity comments",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "clean-code",
+        "readability",
+        "naming",
+        "refactor",
+        "cleanup"
+      ],
+      "category": "review",
+      "strict": false,
+      "agents": [
+        "./agents/clean-code-agent.md"
+      ],
+      "commands": [
+        "./commands/clean-code.md"
+      ]
+    },
     {
       "name": "deep-dive-analysis",
       "source": "./plugins/deep-dive-analysis",
@@ -68,7 +93,7 @@
       "name": "frontend",
       "source": "./plugins/frontend",
       "description": "UI polishing, UX design, comprehensive CSS (BEM, CSS Modules, SASS, accessibility, cross-browser), layout design, daisyUI components, Radix UI primitives and themes, and premium web consulting",
-      "version": "3.6.0",
+      "version": "3.7.0",
       "author": {
         "name": "Alfio"
       },
@@ -97,16 +122,15 @@
       "strict": false,
       "agents": [
         "./agents/web-designer.md",
-        "./agents/ui-layout-designer.md"
+        "./agents/ui-layout-designer.md",
+        "./agents/frontend-architect.md"
       ],
       "skills": [
         "./skills/frontend",
         "./skills/premium-web-consultant",
-        "./skills/frontend-design",
         "./skills/shadcn-ui",
         "./skills/daisyui",
-        "./skills/radix-ui",
-        "./skills/design-an-interface"
+        "./skills/radix-ui"
       ],
       "commands": [
         "./commands/review-design.md"
@@ -116,7 +140,7 @@
       "name": "react-development",
       "source": "./plugins/react-development",
       "description": "React performance optimization, React 19 API adoption, state management audit, bundle analysis, re-render detection, and Vercel best practices checklist",
-      "version": "1.4.0",
+      "version": "1.5.0",
       "author": {
         "name": "Alfio"
       },
@@ -211,7 +235,7 @@
       "name": "python-development",
       "source": "./plugins/python-development",
       "description": "Python development toolkit -- TDD with pytest, code refactoring with complexity metrics, performance profiling, async patterns, uv package management, dead code detection, comment auditing, and project scaffolding",
-      "version": "1.14.0",
+      "version": "1.15.0",
       "author": {
         "name": "Alfio"
       },
@@ -230,7 +254,9 @@
       "category": "development",
       "strict": false,
       "agents": [
-        "./agents/python-pro.md"
+        "./agents/python-architect.md",
+        "./agents/python-refactor-agent.md",
+        "./agents/python-test-engineer.md"
       ],
       "skills": [
         "./skills/python-refactor",
@@ -494,7 +520,7 @@
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
       "description": "SEO optimization, content marketing, brand naming, domain hunting, text humanization, and customer review response -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, AI text rewriting, and professional review reply generation with sentiment analysis",
-      "version": "1.24.0",
+      "version": "1.25.0",
       "author": {
         "name": "Alfio"
       },
@@ -537,7 +563,7 @@
         "./skills/brand-naming",
         "./skills/domain-hunter",
         "./skills/reply-to-customer-review",
-        "./skills/text-humanizer"
+        "./skills/anti-ai-writing-patterns"
       ],
       "commands": [
         "./commands/seo-audit.md",
@@ -627,7 +653,7 @@
         "git-worktrees"
       ],
       "optionalDependencies": [
-        "humanize"
+        "clean-code"
       ],
       "commands": [
         "./commands/develop-feature.md",
@@ -849,7 +875,7 @@
       "name": "cc-usage",
       "source": "./plugins/cc-usage",
       "description": "Claude Code usage analyzer -- token tracking, cost estimates, billing block monitoring, tool usage stats, and per-project breakdowns from local JSONL session data",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Alfio"
       },
@@ -1022,7 +1048,7 @@
       "name": "testing",
       "source": "./plugins/testing",
       "description": "Language-agnostic testing toolkit -- TDD methodology with red-green-refactor loop, and a test-writer agent that generates behavior-driven test suites or guides interactive TDD for any language",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "Alfio"
       },

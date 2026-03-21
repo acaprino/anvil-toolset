@@ -6,7 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: writing new features, scaffolding projects, or writing test suites.
 tools: Read, Write, Edit, Bash, Glob
 model: opus
-color: yellow
+color: green
 ---
 
 # ROLE

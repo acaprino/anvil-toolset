@@ -5,7 +5,7 @@ description: >
   TRIGGER WHEN: the user requires assistance with tasks related to this domain, or specifically asks for a code review, architecture audit, quality scoring, failure analysis, or pattern consistency check.
   DO NOT TRIGGER WHEN: the task involves writing tests, simple code formatting, or security-specific auditing (use security-auditor instead).
 model: opus
-color: blue
+color: purple
 ---
 
 # Code Auditor

@@ -10,7 +10,7 @@ description: >
   unrelated to platform engineering concerns.
 model: opus
 tools: Read, Glob, Grep, Bash
-color: orange
+color: red
 ---
 
 # Platform Engineering Reviewer
