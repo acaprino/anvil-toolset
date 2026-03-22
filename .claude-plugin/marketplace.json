@@ -854,7 +854,7 @@
       "name": "prompt-improver",
       "source": "./plugins/prompt-improver",
       "description": "Intelligent prompt optimization -- enriches vague prompts with research-based clarifying questions before Claude Code executes them",
-      "version": "0.5.1",
+      "version": "0.6.0",
       "author": {
         "name": "severity1"
       },
@@ -869,9 +869,12 @@
         "hook"
       ],
       "category": "ai-ml",
-      "strict": false,
+      "strict": true,
       "skills": [
         "./skills/prompt-improver"
+      ],
+      "hooks": [
+        "./hooks"
       ]
     },
     {
