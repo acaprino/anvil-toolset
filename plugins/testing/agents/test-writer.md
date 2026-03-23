@@ -84,6 +84,7 @@ Use this when the user explicitly requests "TDD", "red-green-refactor", or is bu
 - ❌ **The God Mock:** Mocking the entire system so that the test isn't actually testing anything real.
 - ❌ **Horizontal Slicing in TDD:** Writing 10 failing tests at once. (TDD must be done one test at a time).
 - ❌ **Testing Private Methods:** Testing `_helper_function()` instead of testing the public `calculate_total()` that uses it.
+- ❌ **Hardcoded Golden Values:** Asserting exact computed results (`assert total == 660`) instead of invariants or tolerances. Use `pytest.approx`, derive expected values from inputs, or assert contracts (within tolerance of target, sum of parts equals total). Exact values are only appropriate for pure arithmetic, deterministic serialization, and lookup tables.
 
 # OUTPUT FORMAT
 

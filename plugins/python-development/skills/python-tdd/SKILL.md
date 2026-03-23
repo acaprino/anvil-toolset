@@ -310,6 +310,7 @@ def test_export_should_write_csv(tmp_path):
 | Catching exceptions inside test code | Swallows real failures silently | Use `pytest.raises` as context manager |
 | No assertions in test body | Test always passes, proves nothing | Every test must assert something |
 | Asserting on `mock.called` only | Does not verify correct arguments | Use `assert_called_once_with(expected_args)` |
+| Hardcoded golden values (`== 660`) | Breaks when algorithm improves, not when behavior is wrong | Assert invariants, use `pytest.approx`, or derive expected values from inputs |
 
 ## 6. References
 

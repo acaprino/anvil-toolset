@@ -179,6 +179,46 @@ High coverage does not equal good tests. Watch for these traps:
 
 Measure coverage to find gaps, not to prove quality.
 
+## Hardcoded Golden Values
+
+Asserting exact computed results (`assert result.total_kcal == 660`) is one of the most common sources of brittle tests. The algorithm produces a slightly different number after a legitimate improvement, and the test fails -- not because behavior is wrong, but because the "golden" value is stale.
+
+### What to Do Instead
+
+**Assert invariants and contracts** -- properties that must hold regardless of algorithm tuning:
+
+```python
+# BAD - breaks when algorithm changes rounding
+assert result.total_kcal == 660
+
+# GOOD - assert the contract
+assert abs(result.total_kcal - target_kcal) <= target_kcal * 0.05  # within 5%
+assert result.total_kcal == sum(
+    item["kcal"] for meal in result.meals for item in meal["items"]
+)
+assert result.total_protein >= min_protein
+```
+
+**Use `pytest.approx` for acceptable ranges:**
+
+```python
+assert result.total_kcal == pytest.approx(660, abs=30)  # within 30 kcal
+```
+
+**Derive expected values from inputs** rather than hardcoding:
+
+```python
+expected_kcal = sum(item["kcal"] * scale_factor for item in input_items)
+assert result.total_kcal == expected_kcal
+```
+
+### When Exact Values ARE Appropriate
+
+- Pure functions with no rounding or scaling (e.g., `2 + 2 == 4`)
+- Deterministic serialization (JSON output, string formatting)
+- Lookup tables and enum mappings
+- Database record counts after known inserts
+
 ## Anti-Patterns
 
 | Anti-Pattern | Why It Is Bad | Do This Instead |
@@ -193,3 +233,4 @@ Measure coverage to find gaps, not to prove quality.
 | Asserting too many things | Unclear which assertion failed and why | One logical assertion per test |
 | Copy-pasting test setup | Maintenance burden, inconsistent setup | Use `@pytest.fixture` or factory functions |
 | Skipping RED phase | No proof the test catches regressions | Always see the test fail first |
+| Hardcoded golden values | Breaks on algorithm improvement, not on real bugs | Assert invariants, tolerances, or derived values |
