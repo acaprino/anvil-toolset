@@ -41,10 +41,10 @@ Missing required plugin(s): [list]
 
 This workflow command depends on agents and skills from other figs plugins.
 Install them with:
-  claude plugin marketplace add acaprino/figs --plugin <name>
+  claude plugin marketplace add acaprino/figtree-plugins --plugin <name>
 
 Or install the full marketplace:
-  claude plugin marketplace add acaprino/figs
+  claude plugin marketplace add acaprino/figtree-plugins
 ```
 
 If only optional plugins are missing, warn but continue (skip their phases).

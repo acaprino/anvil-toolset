@@ -27,7 +27,7 @@
 
 ```bash
 # Add the marketplace
-claude plugin marketplace add acaprino/figs
+claude plugin marketplace add acaprino/figtree-plugins
 
 # Install the plugins you need
 claude plugin install python-development@figs
@@ -131,7 +131,7 @@ figs/
 <summary><b>Local Development Install</b></summary>
 
 ```bash
-git clone https://github.com/acaprino/figs.git
+git clone https://github.com/acaprino/figtree-plugins.git
 claude plugin install ./figs/plugins/python-development
 ```
 

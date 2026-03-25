@@ -2,7 +2,7 @@
 
 Custom Claude Code plugin marketplace. Agents, skills, and commands for development workflows, code quality, AI tooling, and more.
 
-**Install:** `claude plugin marketplace add acaprino/figs`
+**Install:** `claude plugin marketplace add acaprino/figtree-plugins`
 
 ## Plugin Index
 

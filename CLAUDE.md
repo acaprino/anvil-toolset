@@ -1,6 +1,6 @@
 # figs
 
-Custom Claude Code plugin marketplace. Contains agents, skills, and commands for development workflows, code quality, AI tooling, and more. Remote: `acaprino/figs` on GitHub.
+Custom Claude Code plugin marketplace. Contains agents, skills, and commands for development workflows, code quality, AI tooling, and more. Remote: `acaprino/figtree-plugins` on GitHub.
 
 ## Project structure
 
@@ -55,7 +55,7 @@ When changes modify plugins (agents, skills, commands), update the marketplace *
 Key fields in `.claude-plugin/marketplace.json`:
 - `metadata.version`: overall marketplace version
 - `plugins[].version`: per-plugin version
-- Install command: `claude plugin marketplace add acaprino/figs`
+- Install command: `claude plugin marketplace add acaprino/figtree-plugins`
 
 ## Adding a new plugin
 
