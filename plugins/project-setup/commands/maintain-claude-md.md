@@ -156,7 +156,8 @@ The agent verifies:
 - **Architecture**: Validates architectural claims against actual structure
 - **Uncertainty**: Flags claims that cannot be verified from codebase alone
 - **Gaps**: Identifies undocumented commands, dependencies, configs, and patterns
-- **Best practices**: Assesses conciseness, progressive disclosure, instruction economy
+- **Project structure completeness**: Verifies all significant directories and files are mapped with descriptions
+- **Best practices**: Assesses proportional sizing, progressive disclosure, structure detail
 
 ## Improvement Categories
 
@@ -167,10 +168,10 @@ The agent verifies:
 - Obsolete dependencies
 
 ### High Priority (Usually Should Fix)
-- Excessive length (>300 lines)
+- Excessive length without substance (padding, duplication, pasted code snippets)
 - Code duplication
 - Missing important context
-- Over-instruction (>200 directives)
+- Incomplete project structure map (missing file/directory descriptions)
 
 ### Medium Priority (Consider Based on Goals)
 - Organizational improvements

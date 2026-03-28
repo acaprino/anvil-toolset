@@ -65,22 +65,24 @@ Agent: Done! Created CLAUDE.md (87 lines, all claims verified)
 ## Output
 
 You'll receive:
-- New `CLAUDE.md` file (<300 lines, typically <100)
+- New `CLAUDE.md` file sized to project complexity (simple <100, medium <300, complex 500+)
+- Detailed project structure with file/directory purpose annotations
 - Tailored to your specific project and preferences
 - All claims verified against codebase
 - Verification commands to confirm accuracy
 - Follows WHAT/WHY/HOW structure
-- Uses progressive disclosure (references docs instead of duplicating)
+- Single entry point -- references existing docs/ for deep dives, but no satellite structure files
 
 ## Best Practices Built In
 
 Your new CLAUDE.md will:
-- ✅ Be concise and focused
+- ✅ Include detailed project structure mapping files/directories to their purpose
+- ✅ Scale length to project complexity (no arbitrary cap)
 - ✅ Reference files instead of duplicating code
 - ✅ Delegate style enforcement to linters
 - ✅ Include only universally applicable guidance
-- ✅ Respect the ~150-200 instruction budget
 - ✅ Be grounded in actual codebase reality
+- ✅ Be self-contained -- no satellite files needed
 - ✅ Mark unverifiable claims with `[UNVERIFIED]` and resolve before finalizing
 - ✅ Use regular hyphens `-` or `--`, never em dashes
 

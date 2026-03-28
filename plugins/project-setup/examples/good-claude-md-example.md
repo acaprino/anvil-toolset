@@ -4,9 +4,10 @@ This is an example of a well-structured `CLAUDE.md` file following best practice
 
 ## Key Characteristics
 
-- **Concise**: 87 lines (under 300 target)
+- **Single entry point**: Structure and overview in one file, references existing docs for deep dives
+- **Detailed structure**: File-by-file mapping so Claude knows where to look
 - **Grounded**: All claims verifiable in codebase
-- **Progressive disclosure**: References docs instead of embedding
+- **Proportional**: Length scales with project complexity (this example: ~120 lines)
 - **Pointers not copies**: References files, doesn't duplicate code
 - **Universal applicability**: Only always-relevant guidance
 
@@ -30,15 +31,41 @@ This is a React 18 + TypeScript web application for task management.
 
 ```
 src/
-├── components/     # React components (functional + hooks pattern)
-├── hooks/          # Custom hooks (ALWAYS follow patterns here)
-├── store/          # Zustand state slices
-├── api/            # API client and endpoints
-├── types/          # TypeScript type definitions
-└── utils/          # Shared utilities
+  components/               # React components (functional + hooks)
+    TaskList.tsx             # Main task list with drag-and-drop reordering
+    TaskCard.tsx             # Individual task card component
+    TaskForm.tsx             # Create/edit task modal form
+    Layout.tsx               # App shell - sidebar nav, header, content area
+    ErrorBoundary.tsx        # Top-level error boundary wrapper
+  hooks/                    # Custom hooks (ALWAYS follow patterns here)
+    useApi.ts                # React Query wrapper for all API calls
+    useAuth.ts               # Auth state, login/logout actions
+    useTasks.ts              # Task CRUD operations via React Query
+    useDebounce.ts           # Debounce hook for search input
+  store/                    # Zustand state slices
+    tasks.ts                 # Task filters, sorting, selected task
+    ui.ts                    # Sidebar open/closed, active modal, theme
+  api/                      # API client and endpoints
+    client.ts                # Axios instance with auth interceptors
+    endpoints.ts             # All REST endpoint definitions
+  types/                    # TypeScript type definitions
+    task.ts                  # Task, TaskStatus, TaskFilter, TaskSort
+    user.ts                  # User, AuthState, LoginCredentials
+    api.ts                   # ApiResponse<T>, PaginatedResponse<T>
+  utils/                    # Shared utilities
+    date.ts                  # Date formatting and relative time helpers
+    validation.ts            # Zod schemas for form validation
+tests/
+  e2e/                      # Playwright E2E tests (user flows)
+  unit/                     # Vitest unit tests (components + hooks)
+public/                     # Static assets
+docs/
+  architecture.md           # Architecture decisions and rationale
+  testing-guide.md          # Testing patterns and conventions
+  api-patterns.md           # API integration patterns
+  components.md             # Component guidelines
+  deployment.md             # Environment variables and deploy config
 ```
-
-See `docs/architecture.md` for detailed architecture decisions.
 
 ## Development Workflow
 
@@ -133,10 +160,10 @@ See `docs/deployment.md` for environment variables and configuration.
 
 ### ✅ Best Practices Applied
 
-1. **Concise (87 lines)**
-   - Under 300 line target
-   - No unnecessary verbosity
-   - Progressive disclosure to docs/
+1. **Detailed Structure as Single Entry Point**
+   - File-by-file mapping lets Claude navigate directly to relevant code
+   - References existing docs/ for deep dives on complex topics
+   - Length (~120 lines) is proportional to project complexity, not artificially capped
 
 2. **Grounded in Reality**
    - "React 18.2" → verifiable in package.json:12-13
@@ -182,11 +209,11 @@ See `docs/deployment.md` for environment variables and configuration.
 
 ### 📊 Metrics
 
-- **Lines:** 87 (target: <300, ideal: <100) ✅
-- **Instructions:** ~40-50 (leaves room in ~150-200 budget) ✅
+- **Lines:** ~120 (proportional to project complexity - no hard cap) ✅
+- **Structure detail:** Every significant file/directory mapped with purpose ✅
 - **File references:** All verified to exist ✅
 - **Commands:** All verified in package.json ✅
-- **Progressive disclosure:** 5 doc references ✅
+- **Single entry point:** References existing docs for depth ✅
 - **Code duplication:** None ✅
 
 ## Contrast: Bad CLAUDE.md Example
@@ -252,7 +279,8 @@ We plan to use Jest for testing
 
 Before accepting a CLAUDE.md, verify:
 
-- [ ] Under 300 lines (ideally <100)
+- [ ] Length proportional to project complexity (no padding or duplication)
+- [ ] Project structure maps all significant directories and files with descriptions
 - [ ] All file paths exist
 - [ ] All commands work
 - [ ] All dependencies are accurate
