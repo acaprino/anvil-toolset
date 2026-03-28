@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "3.15.0"
+    "version": "3.18.0"
   },
   "plugins": [
     {
@@ -140,7 +140,7 @@
       "name": "react-development",
       "source": "./plugins/react-development",
       "description": "React performance optimization, React 19 API adoption, state management audit, bundle analysis, re-render detection, and Vercel best practices checklist",
-      "version": "1.5.0",
+      "version": "1.6.0",
       "author": {
         "name": "Alfio"
       },
@@ -198,7 +198,7 @@
       "name": "ai-tooling",
       "source": "./plugins/ai-tooling",
       "description": "AI development workflow -- prompt engineering and optimization, structured brainstorming with design approval gates, implementation planning with TDD execution, and Claude Agent SDK integration guide",
-      "version": "2.5.0",
+      "version": "2.6.0",
       "author": {
         "name": "Alfio"
       },
@@ -796,7 +796,7 @@
       "name": "playwright-skill",
       "source": "./plugins/playwright-skill",
       "description": "General-purpose browser automation with Playwright -- auto-detects dev servers, writes clean test scripts, supports responsive testing, login flows, form filling, link checking, and any browser task with visible or headless execution",
-      "version": "1.1.0",
+      "version": "1.2.0",
       "author": {
         "name": "lackeyjb"
       },

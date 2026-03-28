@@ -95,7 +95,6 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `digital-marketing` (domain-hunter) | `ReScienceLab/opc-skills` - `skills/domain-hunter/` | `plugins/digital-marketing/skills/domain-hunter/SKILL.md`, `plugins/digital-marketing/skills/domain-hunter/references/registrars.md`, `plugins/digital-marketing/skills/domain-hunter/references/spaceship-api.md` |
 | `prompt-improver` | `severity1/claude-code-prompt-improver` | `plugins/prompt-improver/skills/prompt-improver/SKILL.md`, `plugins/prompt-improver/skills/prompt-improver/references/*.md`, `plugins/prompt-improver/hooks/handlers/improve-prompt.js` |
 | `testing` (tdd) | `mattpocock/skills` - `tdd/` | `plugins/testing/skills/tdd/SKILL.md`, `plugins/testing/skills/tdd/references/tests.md`, `plugins/testing/skills/tdd/references/deep-modules.md`, `plugins/testing/skills/tdd/references/mocking.md`, `plugins/testing/skills/tdd/references/interface-design.md`, `plugins/testing/skills/tdd/references/refactoring.md` |
-| `humanize` (text-humanizer) | `blader/humanizer` - `SKILL.md` | `plugins/humanize/skills/text-humanizer/SKILL.md` |
 
 ### How to sync a plugin
 
@@ -168,10 +167,6 @@ gh api repos/mattpocock/skills/contents/tdd/mocking.md \
 gh api repos/mattpocock/skills/contents/tdd/interface-design.md \
   --jq '.content' | base64 -d
 gh api repos/mattpocock/skills/contents/tdd/refactoring.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest text-humanizer SKILL.md from upstream (blader/humanizer example)
-gh api repos/blader/humanizer/contents/SKILL.md \
   --jq '.content' | base64 -d
 ```
 
