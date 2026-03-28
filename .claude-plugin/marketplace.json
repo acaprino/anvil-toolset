@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "3.20.0"
+    "version": "3.21.0"
   },
   "plugins": [
     {
@@ -1050,8 +1050,8 @@
     {
       "name": "testing",
       "source": "./plugins/testing",
-      "description": "Language-agnostic testing toolkit -- TDD methodology with red-green-refactor loop, and a test-writer agent that generates behavior-driven test suites or guides interactive TDD for any language",
-      "version": "1.1.1",
+      "description": "Language-agnostic testing toolkit -- TDD methodology with red-green-refactor loop, E2E testing patterns with Playwright and Cypress, and a test-writer agent that generates behavior-driven test suites",
+      "version": "1.2.0",
       "author": {
         "name": "Alfio"
       },
@@ -1059,11 +1059,16 @@
       "keywords": [
         "testing",
         "tdd",
+        "e2e",
+        "playwright",
+        "cypress",
         "unit-tests",
         "integration-tests",
         "test-generation",
         "red-green-refactor",
-        "behavior-driven"
+        "behavior-driven",
+        "visual-regression",
+        "accessibility"
       ],
       "category": "testing",
       "strict": false,
@@ -1071,7 +1076,8 @@
         "./agents/test-writer.md"
       ],
       "skills": [
-        "./skills/tdd"
+        "./skills/tdd",
+        "./skills/e2e-testing-patterns"
       ]
     },
     {

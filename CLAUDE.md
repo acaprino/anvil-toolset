@@ -96,6 +96,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `prompt-improver` | `severity1/claude-code-prompt-improver` | `plugins/prompt-improver/skills/prompt-improver/SKILL.md`, `plugins/prompt-improver/skills/prompt-improver/references/*.md`, `plugins/prompt-improver/hooks/handlers/improve-prompt.js` |
 | `testing` (tdd) | `mattpocock/skills` - `tdd/` | `plugins/testing/skills/tdd/SKILL.md`, `plugins/testing/skills/tdd/references/tests.md`, `plugins/testing/skills/tdd/references/deep-modules.md`, `plugins/testing/skills/tdd/references/mocking.md`, `plugins/testing/skills/tdd/references/interface-design.md`, `plugins/testing/skills/tdd/references/refactoring.md` |
 | `docker` (multi-stage-dockerfile) | `github/awesome-copilot` - `skills/multi-stage-dockerfile/SKILL.md` | `plugins/docker/skills/multi-stage-dockerfile/SKILL.md` |
+| `testing` (e2e-testing-patterns) | `wshobson/agents` - `plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md` | `plugins/testing/skills/e2e-testing-patterns/SKILL.md` |
 
 ### How to sync a plugin
 
@@ -172,6 +173,10 @@ gh api repos/mattpocock/skills/contents/tdd/refactoring.md \
 
 # Fetch latest multi-stage-dockerfile SKILL.md from upstream (github/awesome-copilot example)
 gh api repos/github/awesome-copilot/contents/skills/multi-stage-dockerfile/SKILL.md \
+  --jq '.content' | base64 -d
+
+# Fetch latest e2e-testing-patterns SKILL.md from upstream (wshobson/agents example)
+gh api repos/wshobson/agents/contents/plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md \
   --jq '.content' | base64 -d
 ```
 
