@@ -25,20 +25,40 @@ From `$ARGUMENTS`, determine files to clean:
 
 List the files to be cleaned and their language.
 
-## Step 2: Establish Test Baseline
+## Step 2: Establish Validation Baseline
 
-Detect the test runner by inspecting project files (e.g. `package.json` -> `npm test`, `pyproject.toml`/`setup.py` -> `pytest`, `Cargo.toml` -> `cargo test`, `go.mod` -> `go test`, `Makefile` with test target -> `make test`). Run the detected command and capture both stdout and stderr -- do NOT suppress stderr.
+Detect available validation tools by inspecting project files:
 
-Record passing/failing tests. If no tests exist, warn the user:
+**Type checker** (detect first -- catches rename regressions tests may miss):
+- `tsconfig.json` -> `tsc --noEmit`
+- `pyproject.toml` with mypy/pyright config, or `mypy.ini`, `pyrightconfig.json` -> `mypy .` or `pyright`
+- `Cargo.toml` -> `cargo check`
+- `go.mod` -> `go vet ./...`
+
+**Test runner:**
+- `package.json` -> `npm test`
+- `pyproject.toml`/`setup.py` -> `pytest`
+- `Cargo.toml` -> `cargo test`
+- `go.mod` -> `go test ./...`
+- `Makefile` with test target -> `make test`
+
+**Linter:**
+- `ruff.toml` or `pyproject.toml` with ruff config -> `ruff check`
+- `.eslintrc*` or `eslint.config.*` -> `eslint`
+- `Cargo.toml` -> `cargo clippy`
+
+Run all detected tools and capture both stdout and stderr. Record the baseline.
+
+**Hard gate:** if NO tests AND NO type checker are found, do NOT proceed. Tell the user:
 
 ```
-No tests found. Clean code changes can't be automatically validated.
+No tests or type checker found. Cannot validate that changes are safe.
 
-1. Proceed anyway -- I'll be extra careful
-2. Cancel -- set up tests first
+1. Cancel -- set up tests or type checking first (recommended)
+2. Proceed with --force -- I'll be careful but regressions may go undetected
 ```
 
-If `--yes` flag is provided, proceed automatically (option 1).
+If `--yes` flag is provided without `--force`, still block. Only `--force` bypasses this gate.
 
 ## Step 3: Preview Changes (always for --dry-run, ask otherwise)
 
@@ -114,9 +134,12 @@ Task:
 
 ## Step 5: Validate & Report
 
-After changes, re-run the same test command detected in Step 2. Capture both stdout and stderr.
+After changes, re-run ALL validation tools detected in Step 2, in this order:
 
-If any test that was passing in the baseline now fails: immediately revert the changes using `git restore <file>` and report which file caused the regression.
+1. **Type checker** -- catches rename-induced type errors. If it fails on a file that passed in baseline, immediately `git restore <file>`.
+2. **Tests** -- catches behavioral regressions. If any test that was passing in baseline now fails, immediately `git restore <file>`.
+3. **Linter** -- catches syntax/style errors introduced by changes. If new errors appear, fix or revert.
+4. **Non-code grep** -- for every renamed symbol, search `.json`, `.yaml`, `.yml`, `.toml`, `.env`, `.cfg`, `.ini`, `.xml`, `.html`, `.md` files for the OLD name. Report any matches as warnings -- these may be config references, serialization keys, or documentation that now refers to a stale name.
 
 Present summary:
 
@@ -130,7 +153,14 @@ Changes made:
 - Comments added: [count]
 - Structural simplifications: [count]
 
-Tests: [all passing / X failures -- reverted problematic changes]
+Validation:
+  Type check: [passed / N errors -- reverted] or [not available]
+  Tests: [all passing / X failures -- reverted] or [not available]
+  Linter: [passed / N new warnings] or [not available]
+
+Stale references found in non-code files:
+  - [config.json:12] -- still references old name `data`
+  - [README.md:45] -- documents old function name `proc`
 
 Review the changes with: git diff
 ```

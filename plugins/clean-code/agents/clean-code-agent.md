@@ -121,10 +121,12 @@ For each file, apply these transformations:
 
 After transforming each file:
 
-1. **Run tests** if a test runner is available -- `npm test`, `pytest`, `cargo test`, `go test`, etc.
-2. If tests fail, **immediately revert the file** (`git checkout -- <file>`) and report the failure
-3. If no test runner is available, warn the user: "No automated tests found -- manual verification recommended"
-4. **Run linter** if available -- check for syntax errors introduced by changes
+1. **Run type checker** if available -- `tsc --noEmit` (TS/JS), `mypy` or `pyright` (Python), `cargo check` (Rust), `go vet` (Go). Type errors from a rename are a regression. If the type checker fails, **immediately revert the file**.
+2. **Run tests** if a test runner is available -- `npm test`, `pytest`, `cargo test`, `go test`, etc.
+3. If tests fail, **immediately revert the file** (`git checkout -- <file>`) and report the failure
+4. **Run linter** if available -- `ruff check` (Python), `eslint` (JS/TS), `clippy` (Rust). Check for errors introduced by changes.
+5. **Grep renamed symbols in non-code files** -- search `.json`, `.yaml`, `.yml`, `.toml`, `.env`, `.cfg`, `.ini`, `.xml`, `.html`, `.md` for the old name. If found, warn the user: the rename may break config, serialization, or documentation references. Do not auto-rename in non-code files -- flag them in the report.
+6. **If no tests AND no type checker available** -- do NOT proceed unless the user passes `--force`. Tell the user: "No tests or type checker found. Use `--force` to proceed, or set up validation first." This is a hard gate, not a suggestion.
 
 ## Phase 6 -- Commit
 
@@ -166,7 +168,8 @@ Report suggestions as **recommendations**, not as changes made.
 7. **One commit per logical unit** -- stage specific files only
 8. **When in doubt, don't change it** -- flag it in the report instead
 9. If the user says `--dry-run`, show the plan with before/after only -- don't modify anything
-10. **Validate after every file** -- run tests if available
+10. **Validate after every file** -- type check + tests + linter + non-code grep
+11. **Hard gate on zero validation** -- if no tests AND no type checker, require `--force`
 
 ## Related tools -- when to use what
 
