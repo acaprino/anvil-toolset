@@ -66,8 +66,7 @@ Before responding to ANY user message, run this check:
        frontend:premium-web-consultant, workflows:frontend-redesign
 
 6. Is this a code review request?
-   --> Check: senior-review:code-review, senior-review:full-review,
-       workflows:full-review (deep-dive + review)
+   --> Check: senior-review:code-review, senior-review:full-review
 
 7. Is this Python work?
    --> Check: python-development skills (python-tdd, python-refactor, etc.)
@@ -123,7 +122,7 @@ These workflow commands chain multiple skills automatically. Prefer them for com
 |------|----------|
 | Build a new feature end-to-end | `/workflows:feature-e2e` |
 | Build a new UI from scratch | `/workflows:ui-studio` |
-| Full codebase review (deep-dive + review) | `/workflows:full-review` |
+| Full codebase review (deep-dive + review) | `/senior-review:full-review` |
 | Frontend redesign | `/workflows:frontend-redesign` |
 | Mobile app from competitor analysis | `/workflows:mobile-intel` |
 | Mobile app with Tauri build + review | `/workflows:mobile-tauri-pipeline` |

@@ -1,6 +1,6 @@
 ---
 description: >
-  "Orchestrate comprehensive multi-dimensional code review using specialized review agents. Optionally enriched with deep-dive structural and semantic analysis for deeper context. Supports multi-service distributed flow analysis with cross-boundary contract verification, timeout chain validation, and resilience pattern auditing." argument-hint: "<target path(s) or description> [--deep-dive] [--distributed] [--security-focus] [--performance-critical] [--strict-mode] [--framework react|spring|django|rails]".
+  "Orchestrate comprehensive multi-dimensional code review using specialized review agents. Includes deep-dive structural and semantic analysis by default for deeper context. Supports multi-service distributed flow analysis with cross-boundary contract verification, timeout chain validation, and resilience pattern auditing." argument-hint: "<target path(s) or description> [--skip-deep-dive] [--distributed] [--security-focus] [--performance-critical] [--strict-mode] [--framework react|spring|django|rails]".
   TRIGGER WHEN: the user requires assistance with tasks related to this domain.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 ---
@@ -12,7 +12,7 @@ description: >
 You MUST follow these rules exactly. Violating any of them is a failure.
 
 1. **Execute phases in order.** Do NOT skip ahead, reorder, or merge phases.
-2. **Write output files.** Each phase MUST produce its output file in `.full-review/` before the next phase begins. Read from prior phase files -- do NOT rely on context window memory.
+2. **Write output files.** Each phase MUST produce its output file in `$SESSION_DIR/` before the next phase begins. Read from prior phase files -- do NOT rely on context window memory.
 3. **Stop at checkpoints.** When you reach a `PHASE CHECKPOINT`, you MUST stop and wait for explicit user approval before continuing. Use the AskUserQuestion tool with clear options.
 4. **Halt on failure.** If any step fails (agent error, missing files, access issues), STOP immediately. Present the error and ask the user how to proceed. Do NOT silently continue.
 5. **Use only local agents.** All `subagent_type` references use agents bundled with this plugin or `general-purpose`. No cross-plugin dependencies.
@@ -64,7 +64,7 @@ Create `$SESSION_DIR` directory and `state.json`:
   "target": "$ARGUMENTS",
   "status": "in_progress",
   "flags": {
-    "deep_dive": false,
+    "skip_deep_dive": false,
     "security_focus": false,
     "performance_critical": false,
     "strict_mode": false,
@@ -72,7 +72,7 @@ Create `$SESSION_DIR` directory and `state.json`:
     "framework": null
   },
   "current_step": 1,
-  "current_phase": 1,
+  "current_phase": 0,
   "completed_steps": [],
   "files_created": [],
   "started_at": "ISO_TIMESTAMP",
@@ -80,7 +80,7 @@ Create `$SESSION_DIR` directory and `state.json`:
 }
 ```
 
-Parse `$ARGUMENTS` for `--deep-dive`, `--security-focus`, `--performance-critical`, `--strict-mode`, `--distributed`, and `--framework` flags. Update the flags object accordingly.
+Parse `$ARGUMENTS` for `--skip-deep-dive`, `--security-focus`, `--performance-critical`, `--strict-mode`, `--distributed`, and `--framework` flags. Update the flags object accordingly.
 
 Multiple target paths are supported (e.g., `/full-review services/payment services/order`). Store all paths in a `"targets"` array in `state.json`. If a single directory is given with `--distributed`, auto-discover sub-services within it (look for nested `package.json`, `go.mod`, `pom.xml`, `pyproject.toml`, `Dockerfile` at depth 2+).
 
@@ -107,7 +107,7 @@ Determine what code to review from `$ARGUMENTS`:
 
 ## Flags
 
-- Deep Dive: [yes/no]
+- Skip Deep Dive: [yes/no]
 - Security Focus: [yes/no]
 - Performance Critical: [yes/no]
 - Strict Mode: [yes/no]
@@ -116,7 +116,8 @@ Determine what code to review from `$ARGUMENTS`:
 
 ## Review Phases
 
-1. Code Audit (Architecture + Failure Flow + Pattern Analysis + Scoring)
+0. Deep Dive Context Gathering (structural + semantic analysis)
+1. Code Audit (Architecture + Failure Flow + Pattern Analysis)
 2. Security, Performance & Specialized Reviews
    - 2A: Security Vulnerability Assessment
    - 2B: Performance & Scalability Analysis
@@ -124,8 +125,9 @@ Determine what code to review from `$ARGUMENTS`:
    - 2D: Distributed Flow Analysis (if multi-service)
    - 2E: React Performance Review (if React files in scope)
 3. Testing & Documentation
-4. Best Practices & Standards
-5. Consolidated Report
+4. Best Practices, CI/CD & Dead Code
+5. Quality Scoring (calibrated with all prior findings)
+6. Consolidated Report
 ```
 
 ### 5. Distributed system auto-detection
@@ -157,13 +159,11 @@ Update `state.json`: add `"00-scope.md"` to `files_created`, add step 0 to `comp
 
 ---
 
-## Phase 0: Deep Dive Context Gathering (if --deep-dive)
+## Phase 0: Deep Dive Context Gathering
 
-Skip this phase entirely if `--deep-dive` flag is not set.
+**Skip this phase entirely if `--skip-deep-dive` flag is set.** If skipped, proceed directly to Phase 1.
 
-**Note:** This phase does NOT require the `deep-dive-analysis` plugin -- it uses `general-purpose` agents to perform its own structural analysis. The `deep-dive-analysis` plugin is a separate, standalone tool.
-
-When `--deep-dive` is active, run deep-dive analysis on the target path to gather structural and semantic context that strengthens all subsequent review phases.
+Run deep-dive analysis on the target path to gather structural and semantic context that strengthens all subsequent review phases.
 
 **Agent tool parameters (use ONLY these):** `description` (required), `prompt` (required), `subagent_type`, `run_in_background`, `model`, `isolation`, `resume`. Do NOT pass any other parameters -- the Agent tool rejects unknown fields.
 
@@ -217,10 +217,12 @@ Agent tool call:
 
     ## Phase 3: Flow Tracing
     Trace critical execution paths:
-    - Request lifecycle (entry -> processing -> response)
+    - Request lifecycle (entry -> middleware -> processing -> response)
     - Data transformation pipelines
-    - Error propagation paths
+    - Error propagation paths and recovery mechanisms
     - State mutation flows and side effects
+    - Authentication/authorization flow
+    - Background job and queue processing flows
 
     Write to `.full-review/dd-03-flows.md`
 
@@ -230,6 +232,7 @@ Agent tool call:
     - Design decisions and trade-offs
     - Assumptions embedded in the code
     - Implicit contracts not documented anywhere
+    - Domain model and bounded contexts
 
     Write to `.full-review/dd-04-semantics.md`
 ```
@@ -249,10 +252,17 @@ Agent tool call:
 
     ## Phase 5: Pattern & Risk Detection
     Scan for:
-    - Anti-patterns: god objects, spaghetti code, shotgun surgery, feature envy
-    - Red flags: swallowed exceptions, hardcoded credentials, race conditions, N+1 queries
-    - Technical debt: TODO/FIXME comments, deprecated APIs, outdated patterns
-    - Failure modes: what breaks under load, edge cases, missing error handling
+    - Anti-patterns: god objects, spaghetti code, shotgun surgery, feature envy, primitive obsession
+    - Red flags: swallowed exceptions, hardcoded credentials, race conditions, N+1 queries, unbounded loops
+    - Technical debt: TODO/FIXME comments, deprecated APIs, outdated patterns, dead code
+    - Failure modes: what breaks under load, edge cases, missing error handling, cascading failures
+    - Dependency risks: outdated packages, known CVEs, unnecessary dependencies, version pinning issues
+
+    For each finding, provide:
+    - Location (file + line)
+    - Severity (Critical/High/Medium/Low)
+    - Impact description
+    - Recommended fix
 
     Write to `.full-review/dd-05-risks.md`
 ```
@@ -263,9 +273,38 @@ Update `state.json`: add `"phase_0"` to `completed_steps`.
 
 ---
 
+## PHASE CHECKPOINT 0 -- User Approval Required (if deep dive was run)
+
+Display a summary of deep dive findings:
+
+```
+Phase 0 complete: Deep dive analysis done.
+
+Summary:
+- Files analyzed: [count]
+- Modules identified: [count]
+- Risks detected: [X critical, Y high, Z medium]
+- Key areas flagged for review: [count]
+
+Please review:
+- $SESSION_DIR/00-deep-dive-context.md (summary)
+- $SESSION_DIR/dd-01-structure.md (structure)
+- $SESSION_DIR/dd-02-interfaces.md (interfaces)
+- $SESSION_DIR/dd-03-flows.md (flows)
+- $SESSION_DIR/dd-04-semantics.md (semantics)
+- $SESSION_DIR/dd-05-risks.md (risks)
+
+1. Continue -- proceed to code review (enriched with deep dive context)
+2. Pause -- save progress and stop here
+```
+
+Do NOT proceed to Phase 1 until the user approves.
+
+---
+
 ## Deep Dive Context Injection
 
-When `--deep-dive` flag is active, each review agent prompt in Phases 1-5 gets this additional section inserted after the existing context sections:
+When deep dive was performed (not skipped), each review agent prompt in Phases 1-5 gets this additional section inserted after the existing context sections:
 
 ```
 ## Deep Dive Context
@@ -277,7 +316,8 @@ When `--deep-dive` flag is active, each review agent prompt in Phases 1-5 gets t
 - For ui-race-auditor (Phase 2C): structure (component hierarchy), flows (render/layout/event timing), semantics (state management assumptions)
 - For test/docs agents (Phase 3): interfaces, flows, risks
 - For distributed-flow-auditor (Phase 2D): structure (service boundaries), flows (cross-service calls), semantics (business transaction assumptions)
-- For best practices agents (Phase 4): all deep-dive findings]
+- For best practices agents (Phase 4): all deep-dive findings
+- For quality scoring (Phase 5): all deep-dive findings]
 
 Use this context to strengthen your analysis. Do NOT re-report findings already
 covered in the deep dive -- instead focus on new issues the deep dive missed or
@@ -289,7 +329,7 @@ specialized perspective.
 
 ## Phase 1: Code Audit (Step 1A)
 
-### Step 1A: Architecture, Failure Flow, Pattern Analysis & Scoring
+### Step 1A: Architecture, Failure Flow & Pattern Analysis
 
 ```
 Agent tool call:
@@ -297,7 +337,7 @@ Agent tool call:
   - subagent_type: "senior-review:code-auditor"
   - prompt: |
     Perform a comprehensive code audit of the target code covering architecture, failure flow
-    analysis, pattern consistency, and quality scoring.
+    analysis, and pattern consistency.
 
     ## Review Scope
     [Insert contents of .full-review/00-scope.md]
@@ -326,11 +366,7 @@ Agent tool call:
     14. Run 16-item anti-pattern checklist
     15. Consistency anti-patterns (mixed error handling, inline constructs bypassing patterns)
 
-    **Quality Scoring:**
-    16. Produce Code Quality Score (Security, Performance, Maintainability, Consistency, Resilience, Overall -- each X/10)
-
     For each finding: severity (Critical/High/Medium/Low), file + line, confidence (0-100), fix.
-    Include the full scoring table and persisted state map (if applicable) in your output.
 
     Write your findings as a structured markdown document.
 ```
@@ -356,17 +392,6 @@ After completing, write to `.full-review/01-code-audit.md`:
 
 [Pattern deviations, anti-patterns]
 
-## Code Quality Score
-
-| Category        | Score |
-|-----------------|-------|
-| Security        | X/10  |
-| Performance     | X/10  |
-| Maintainability | X/10  |
-| Consistency     | X/10  |
-| Resilience      | X/10  |
-| **Overall**     | **X/10** |
-
 ## Critical Issues for Phase 2 Context
 
 [List any findings that should inform security or performance review]
@@ -389,11 +414,37 @@ Update `state.json`: set `current_step` to 2, `current_phase` to 2, add step 1A 
 
 ---
 
-## Phase 2: Security & Performance Review (Steps 2A-2C)
+## PHASE CHECKPOINT 1 -- User Approval Required
+
+Display a summary of findings from Phase 1 and ask:
+
+```
+Phase 1 complete: Code Audit (Architecture + Failure Flow + Patterns) done.
+
+Summary:
+- Architecture: [X critical, Y high, Z medium findings]
+- Failure Flow: [X critical, Y high, Z medium findings]
+- Pattern Consistency: [X deviations found]
+
+Please review:
+- $SESSION_DIR/01-code-audit.md
+
+1. Continue -- proceed to Security & Performance review
+2. Fix critical issues first -- I'll address findings before continuing
+3. Pause -- save progress and stop here
+```
+
+If `--strict-mode` flag is set and there are Critical findings, recommend option 2.
+
+Do NOT proceed to Phase 2 until the user approves.
+
+---
+
+## Phase 2: Security & Performance Review (Steps 2A-2E)
 
 Read `.full-review/01-code-audit.md` for context from Phase 1.
 
-Run all agents in parallel using multiple Task tool calls in a single response (Step 2C only when UI files are in scope).
+Run all agents in parallel using multiple Task tool calls in a single response (Steps 2C, 2D, 2E only when applicable).
 
 ### Step 2A: Security Vulnerability Assessment
 
@@ -615,28 +666,28 @@ After all agents complete, consolidate into `.full-review/02-security-performanc
 
 Include `<machine_summary>` blocks at the end of `.full-review/02-security-performance.md` (same format as Phase 1).
 
-Update `state.json`: set `current_step` to "checkpoint-1", add steps 2A and 2B to `completed_steps`.
+Update `state.json`: set `current_step` to "checkpoint-2", add steps 2A-2E to `completed_steps`.
 
 ---
 
-## PHASE CHECKPOINT 1 -- User Approval Required
+## PHASE CHECKPOINT 2 -- User Approval Required
 
-Display a summary of findings from Phase 1 and Phase 2 and ask:
+Display a summary of findings from Phase 2 and ask:
 
 ```
-Phases 1-2 complete: Code Audit, Security, and Performance reviews done.
+Phase 2 complete: Security, Performance & Specialized reviews done.
 
 Summary:
-- Code Audit (Architecture + Failure Flow + Patterns): [X critical, Y high, Z medium findings]
 - Security: [X critical, Y high, Z medium findings]
 - Performance: [X critical, Y high, Z medium findings]
-- Code Quality Score: [X/10]
+- UI Race Conditions: [X findings or N/A]
+- Distributed Flow: [X findings or N/A]
+- React Performance: [X findings or N/A]
 
 Please review:
-- .full-review/01-code-audit.md
-- .full-review/02-security-performance.md
+- $SESSION_DIR/02-security-performance.md
 
-1. Continue -- proceed to Testing & Documentation review
+1. Continue -- proceed to Testing, Documentation & Best Practices review
 2. Fix critical issues first -- I'll address findings before continuing
 3. Pause -- save progress and stop here
 ```
@@ -678,6 +729,7 @@ Agent tool call:
     5. **Test maintainability**: Test isolation, mock usage, flaky test indicators
     6. **Security test gaps**: Are security-critical paths tested? Auth, input validation, etc.
     7. **Performance test gaps**: Are performance-critical paths tested? Load testing?
+    8. **Integration gaps**: Are interface contracts validated by tests?
 
     For each finding, provide:
     - Severity (Critical / High / Medium / Low)
@@ -711,6 +763,7 @@ Agent tool call:
     4. **README completeness**: Setup instructions, development workflow, deployment guide
     5. **Accuracy**: Does documentation match the actual implementation?
     6. **Changelog/migration guides**: Are breaking changes documented?
+    7. **Onboarding**: Could a new developer understand the codebase from the docs alone?
 
     For each finding, provide:
     - Severity (Critical / High / Medium / Low)
@@ -740,7 +793,7 @@ Update `state.json`: set `current_step` to 4, `current_phase` to 4, add steps 3A
 
 ---
 
-## Phase 4: Best Practices & Standards (Steps 4A-4B)
+## Phase 4: Best Practices & Standards (Steps 4A-4C)
 
 Read all previous `.full-review/*.md` files for full context.
 
@@ -765,11 +818,12 @@ Agent tool call:
     ## Instructions
     Check for:
     1. **Language idioms**: Is the code idiomatic for its language? Modern syntax and features?
-    2. **Framework patterns**: Does it follow the framework's recommended patterns? (e.g., React hooks, Django views, Spring beans)
+    2. **Framework patterns**: Does it follow the framework's recommended patterns? (e.g., React hooks, Django views, Spring beans, Tauri commands)
     3. **Deprecated APIs**: Are any deprecated functions/libraries/patterns used?
     4. **Modernization opportunities**: Where could modern language/framework features simplify code?
-    5. **Package management**: Are dependencies up-to-date? Unnecessary dependencies?
+    5. **Package management**: Are dependencies up-to-date? Unnecessary dependencies? Proper lockfile?
     6. **Build configuration**: Is the build optimized? Development vs production settings?
+    7. **Type safety**: Are type annotations used where available? Any unsafe type casts?
 
     For each finding, provide:
     - Severity (Critical / High / Medium / Low)
@@ -797,12 +851,13 @@ Agent tool call:
 
     ## Instructions
     Evaluate:
-    1. **CI/CD pipeline**: Build automation, test gates, deployment stages, security scanning
-    2. **Deployment strategy**: Blue-green, canary, rollback capabilities
+    1. **CI/CD pipeline**: Build automation, test gates, deployment stages, security scanning, linting gates
+    2. **Deployment strategy**: Blue-green, canary, rollback capabilities, zero-downtime deployment
     3. **Infrastructure as Code**: Are infrastructure configs version-controlled and reviewed?
-    4. **Monitoring & observability**: Logging, metrics, alerting, dashboards
-    5. **Incident response**: Runbooks, on-call procedures, rollback plans
+    4. **Monitoring & observability**: Logging, metrics, alerting, dashboards, distributed tracing
+    5. **Incident response**: Runbooks, on-call procedures, rollback plans, post-mortem process
     6. **Environment management**: Config separation, secret management, parity between environments
+    7. **Container/runtime**: Dockerfile best practices, image scanning, resource limits
 
     For each finding, provide:
     - Severity (Critical / High / Medium / Low)
@@ -834,16 +889,16 @@ Agent tool call:
     Account for framework conventions before flagging:
     - Django: views in urls.py, signal handlers, admin classes, management commands
     - FastAPI/Flask: route handlers, dependency injection, event handlers
-    - React/Next.js: page components, API routes, middleware
+    - React/Next.js: page components, API routes, middleware, dynamic imports
     - pytest: fixtures, conftest, parametrize, plugin hooks
-    - General: __all__ exports, dunder methods, getattr/importlib dynamic access, decorators
+    - General: __all__ exports, dunder methods, getattr/importlib dynamic access, decorators, re-exports
 
     For each finding, provide:
     - Severity (High / Medium / Low)
     - File and line location
-    - Category (unused import, unused function, unused variable, unused constant/module-level definition, unused export, unreachable code, unused file)
+    - Category (unused import, unused function, unused variable, unused constant/module-level definition, unused export, unreachable code, unused file, unused dependency)
     - Confidence (0-100) -- how certain this is truly dead code
-    - Recommended action
+    - Recommended action (remove, verify, defer)
 
     Write your findings as a structured markdown document.
 ```
@@ -872,13 +927,104 @@ Update `state.json`: set `current_step` to 5, `current_phase` to 5, add steps 4A
 
 ---
 
+## Phase 5: Quality Scoring (Step 5)
+
+Read all `.full-review/*.md` files for full context. This phase runs AFTER all prior review phases because it needs all findings for calibrated scoring.
+
+```
+Agent tool call:
+  - description: "Code quality scoring for $ARGUMENTS"
+  - subagent_type: "senior-review:code-auditor"
+  - prompt: |
+    Perform quantitative code quality scoring and pattern analysis.
+    You have deep dive analysis (if performed) AND all prior review phase findings -- use all of them for calibrated scoring.
+
+    ## Review Scope
+    [Insert contents of .full-review/00-scope.md]
+
+    ## All Prior Review Findings
+    [Insert summaries from:
+     - .full-review/01-code-audit.md
+     - .full-review/02-security-performance.md
+     - .full-review/03-testing-documentation.md
+     - .full-review/04-best-practices.md]
+
+    ## Instructions
+
+    ### Context Assessment
+    Determine the code's scope, maturity stage (prototype/production/legacy). Use prior phase findings
+    to calibrate focus areas -- don't duplicate what's already been covered in detail.
+
+    ### Code Quality Analysis
+    1. **Code complexity**: Cyclomatic/cognitive complexity, deeply nested logic
+    2. **Maintainability**: Naming conventions, function/method length, class cohesion
+    3. **Code duplication**: Copy-pasted logic, missed abstraction opportunities
+    4. **Clean Code principles**: SOLID violations, code smells, anti-patterns
+    5. **Technical debt**: Areas that will become increasingly costly to change
+    6. **Error handling**: Missing error handling, swallowed exceptions, unclear error messages
+
+    ### Mental Models (all six perspectives)
+    - **Security Engineer**: Assume all input is malicious
+    - **Performance Engineer**: What's the Big-O? What's the I/O pattern?
+    - **Team Lead**: Maintainable in 6 months? Can juniors understand it?
+    - **Systems Architect**: How does this fail? Blast radius?
+    - **SRE**: What breaks at 3 AM?
+    - **Pattern Detective**: Dominant patterns per file, then scan for violations
+
+    ### Quantitative Code Quality Score
+    Rate each category using ALL findings from deep dive + all review phases combined:
+    - **9-10**: Excellent -- production-ready, exemplary patterns
+    - **7-8**: Good -- minor issues, safe to deploy
+    - **5-6**: Adequate -- notable issues, fix before deploy
+    - **3-4**: Poor -- significant issues, needs rework
+    - **1-2**: Critical -- fundamental problems, unsafe
+
+    Provide scores for: Security, Performance, Architecture, Maintainability, Testing, Documentation, Resilience, and Overall.
+
+    Write findings as structured markdown with Executive Summary, Code Quality Findings,
+    What's Done Well, and the Code Quality Score table.
+```
+
+Write to `.full-review/05-quality-scoring.md`:
+
+```markdown
+# Phase 5: Code Quality Scoring
+
+## Executive Summary
+
+[2-3 sentence overview of code quality]
+
+## Code Quality Findings
+
+[Any new findings not covered in prior phases, organized by severity]
+
+## What's Done Well
+
+[Positive observations]
+
+## Code Quality Score
+
+| Category        | Score |
+|-----------------|-------|
+| Security        | X/10  |
+| Performance     | X/10  |
+| Architecture    | X/10  |
+| Maintainability | X/10  |
+| Testing         | X/10  |
+| Documentation   | X/10  |
+| Resilience      | X/10  |
+| **Overall**     | **X/10** |
+```
+
+Update `state.json`: set `current_step` to 6, `current_phase` to 6, add step 5 to `completed_steps`.
+
 ---
 
-## Phase 5: Consolidated Report (Step 5)
+## Phase 6: Consolidated Report (Step 6)
 
-Read all `.full-review/*.md` files (01 through 04). Generate the final consolidated report. Use the Code Quality Score from Phase 1's code-auditor output (`.full-review/01-code-audit.md`).
+Read all `.full-review/*.md` files (01 through 05). Generate the final consolidated report. Use the Code Quality Score from Phase 5's scoring output (`.full-review/05-quality-scoring.md`).
 
-**Output file:** `.full-review/05-final-report.md`
+**Output file:** `.full-review/06-final-report.md`
 
 ```markdown
 # Comprehensive Code Review Report
@@ -889,20 +1035,31 @@ Read all `.full-review/*.md` files (01 through 04). Generate the final consolida
 
 ## Executive Summary
 
-[2-3 sentence overview of overall code health and key concerns]
+[3-4 sentence overview combining deep dive insights (if performed) with review findings.
+Highlight the relationship between structural issues found in deep dive and the concrete
+problems found during review.]
 
 ## Code Quality Score
 
-[From Phase 1 code-auditor analysis]
+[From Phase 5 quality scoring]
 
 | Category        | Score |
 |-----------------|-------|
 | Security        | X/10  |
 | Performance     | X/10  |
+| Architecture    | X/10  |
 | Maintainability | X/10  |
-| Resilience      | X/10  |
 | Testing         | X/10  |
+| Documentation   | X/10  |
+| Resilience      | X/10  |
 | **Overall**     | **X/10** |
+
+## Deep Dive Insights (if applicable)
+
+[Key structural and semantic findings that informed the review.
+Analysis of how deep dive findings correlated with review findings.
+Did the structural analysis accurately predict the review issues?
+Were there surprises the deep dive missed?]
 
 ## Findings by Priority
 
@@ -969,9 +1126,10 @@ Read all `.full-review/*.md` files (01 through 04). Generate the final consolida
 - Review date: [timestamp]
 - Phases completed: [list]
 - Flags applied: [list active flags]
+- Deep dive: [yes/no]
 ```
 
-Update `state.json`: set `current_step` to 6, add step 5 to `completed_steps`, set `status` to `"complete"`, `last_updated` to current timestamp.
+Update `state.json`: set `current_step` to 7, add step 6 to `completed_steps`, set `status` to `"complete"`, `last_updated` to current timestamp.
 
 ---
 
@@ -994,11 +1152,13 @@ Comprehensive code review complete for: $ARGUMENTS
 
 ## Review Output Files
 - Scope: $SESSION_DIR/00-scope.md
+- Deep Dive Context: $SESSION_DIR/00-deep-dive-context.md (if performed)
 - Code Audit: $SESSION_DIR/01-code-audit.md
 - Security & Performance: $SESSION_DIR/02-security-performance.md
 - Testing & Documentation: $SESSION_DIR/03-testing-documentation.md
 - Best Practices: $SESSION_DIR/04-best-practices.md
-- Final Report: $SESSION_DIR/05-final-report.md
+- Quality Scoring: $SESSION_DIR/05-quality-scoring.md
+- Final Report: $SESSION_DIR/06-final-report.md
 
 ## Summary
 - Total findings: [count]
@@ -1006,7 +1166,7 @@ Comprehensive code review complete for: $ARGUMENTS
 - Code Quality Score: [X/10]
 
 ## Next Steps
-1. Review the full report at $SESSION_DIR/05-final-report.md
+1. Review the full report at $SESSION_DIR/06-final-report.md
 2. Address Critical (P0) issues immediately
 3. Plan High (P1) fixes for current sprint
 4. Add Medium (P2) and Low (P3) items to backlog
@@ -1023,5 +1183,5 @@ After presenting the summary, ask:
 **Cleanup behavior by option:**
 
 - **Option 1:** No action. All files remain in `$SESSION_DIR/`.
-- **Option 2:** Delete intermediate files (`00-scope.md`, `01-code-audit.md`, `02-security-performance.md`, `03-testing-documentation.md`, `04-best-practices.md`, `state.json`, and any `dd-*.md` deep-dive files). Keep only `05-final-report.md`. Move it to project root as `full-review-report-<label>.md`, then remove the empty `$SESSION_DIR/` directory.
+- **Option 2:** Delete intermediate files (`00-scope.md`, `00-deep-dive-context.md`, `01-code-audit.md`, `02-security-performance.md`, `03-testing-documentation.md`, `04-best-practices.md`, `05-quality-scoring.md`, `state.json`, and any `dd-*.md` deep-dive files). Keep only `06-final-report.md`. Move it to project root as `full-review-report-<label>.md`, then remove the empty `$SESSION_DIR/` directory.
 - **Option 3:** Delete the entire `$SESSION_DIR/` directory and all its contents.

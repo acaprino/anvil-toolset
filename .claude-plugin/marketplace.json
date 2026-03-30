@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "4.2.0"
+    "version": "4.3.0"
   },
   "plugins": [
     {
@@ -577,7 +577,7 @@
       "name": "senior-review",
       "source": "./plugins/senior-review",
       "description": "Multi-agent code review orchestration with unified code auditing (architecture, failure flow, pattern analysis, scoring), security auditing, UI race condition detection, React performance review, distributed flow analysis (cross-service contracts, timeout chains, saga validation), automated lint-based dead code and unused parameter detection (ruff, vulture, knip), and multi-language dead code cleanup. Backed by a comprehensive defect taxonomy knowledge base (140+ defect patterns, CWE/OWASP mappings).",
-      "version": "4.4.0",
+      "version": "4.5.0",
       "author": {
         "name": "Alfio"
       },
@@ -626,7 +626,7 @@
       "name": "workflows",
       "source": "./plugins/workflows",
       "description": "Cross-plugin orchestration pipelines -- feature development with UI-aware stack routing, frontend redesign, UI studio, full code review, mobile intelligence, mobile Tauri, and Tauri desktop review",
-      "version": "2.14.0",
+      "version": "2.15.0",
       "author": {
         "name": "Alfio"
       },
@@ -663,7 +663,6 @@
         "./commands/frontend-redesign.md",
         "./commands/mobile-intel.md",
         "./commands/tauri-pipeline.md",
-        "./commands/full-review.md",
         "./commands/mobile-tauri-pipeline.md",
         "./commands/ui-studio.md",
         "./commands/python-pipeline.md"
