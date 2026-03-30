@@ -1,12 +1,12 @@
 <div align="center">
 
-# ACP
+# ACP - Alfio Caprino Claude Code Plugins
 
-**38 specialized plugins for Claude Code -- so you spend less time prompting and more time shipping.**
+**39 specialized plugins for Claude Code -- so you spend less time prompting and more time shipping.**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat)](LICENSE)
 [![Marketplace](https://img.shields.io/badge/marketplace-v4.2.0-green?style=flat)](.claude-plugin/marketplace.json)
-[![Plugins](https://img.shields.io/badge/plugins-38-orange?style=flat)](#plugins)
+[![Plugins](https://img.shields.io/badge/plugins-39-orange?style=flat)](#plugins)
 [![Agents](https://img.shields.io/badge/agents-50-purple?style=flat)](#plugins)
 [![Skills](https://img.shields.io/badge/skills-54-teal?style=flat)](#plugins)
 [![Commands](https://img.shields.io/badge/commands-43-red?style=flat)](#plugins)
@@ -92,6 +92,7 @@ That's it. Plugins activate automatically when relevant -- or invoke them direct
 | **[mt5-trading](docs/plugins/mt5-trading.md)** | MetaTrader 5 Python algotrading -- API, polling events, order execution | 1 | 1 | 1 |
 | **[opentelemetry](docs/plugins/opentelemetry.md)** | OpenTelemetry Python -- distributed tracing, context propagation, exporters | 1 | 1 | - |
 | **[docker](docs/plugins/docker.md)** | Optimized multi-stage Dockerfiles for any language or framework | - | 1 | - |
+| **[grabber-development](docs/plugins/grabber-development.md)** | Python web scraping -- stealth automation, anti-bot bypass, proxy architecture | 1 | 1 | - |
 
 **A** = Agents, **S** = Skills, **C** = Commands
 

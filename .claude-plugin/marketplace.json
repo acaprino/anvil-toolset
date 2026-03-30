@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "4.5.0"
+    "version": "4.6.0"
   },
   "plugins": [
     {
@@ -1237,6 +1237,36 @@
       "strict": false,
       "skills": [
         "./skills/multi-stage-dockerfile"
+      ]
+    },
+    {
+      "name": "grabber-development",
+      "source": "./plugins/grabber-development",
+      "description": "Expert Python web scraping -- target assessment, stealth browser automation, TLS fingerprint impersonation, anti-bot bypass, proxy architecture, API discovery, DOM extraction, and production observability",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "scraping",
+        "web-scraping",
+        "crawler",
+        "anti-bot",
+        "stealth",
+        "proxy",
+        "captcha",
+        "extraction",
+        "playwright",
+        "curl-cffi"
+      ],
+      "category": "development",
+      "strict": false,
+      "agents": [
+        "./agents/grabber-architect.md"
+      ],
+      "skills": [
+        "./skills/grabber-development"
       ]
     }
   ]
