@@ -11,6 +11,8 @@ Debug complex issues using the Analysis of Competing Hypotheses (ACH) methodolog
 
 Before starting, invoke these skills to inform the debugging process:
 - `agent-teams:parallel-debugging` -- hypothesis generation framework, evidence standards, arbitration protocol
+- `senior-review:defect-taxonomy` -- defect classification with CWE mappings for categorizing findings
+- `deep-dive-analysis:deep-dive-analysis` -- systematic codebase analysis for initial triage
 - `agent-teams:team-communication-protocols` -- message type selection, shutdown protocol
 
 ## Pre-flight Checks

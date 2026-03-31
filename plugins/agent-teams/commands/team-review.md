@@ -11,6 +11,7 @@ Orchestrate a multi-reviewer parallel code review where each reviewer focuses on
 
 Before starting, invoke these skills to inform the review process:
 - `agent-teams:multi-reviewer-patterns` -- dimension allocation, deduplication rules, severity calibration
+- `senior-review:defect-taxonomy` -- 140+ defect subcategories with CWE/OWASP mappings
 - `agent-teams:team-communication-protocols` -- message type selection, shutdown protocol
 
 ## Pre-flight Checks
@@ -33,9 +34,17 @@ Before starting, invoke these skills to inform the review process:
 ## Phase 2: Team Spawn
 
 1. Use `Teammate` tool with `operation: "spawnTeam"`, team name: `review-{timestamp}`
-2. For each requested dimension, use `Task` tool to spawn a teammate:
+2. For each requested dimension, use `Task` tool to spawn a teammate using the **most specialized agent**:
+   - Security: `subagent_type: "senior-review:security-auditor"`
+   - Architecture: `subagent_type: "senior-review:code-auditor"`
+   - Performance (React): `subagent_type: "react-development:react-performance-optimizer"`
+   - Performance (general): `subagent_type: "agent-teams:team-reviewer"`
+   - Testing: `subagent_type: "agent-teams:team-reviewer"`
+   - Accessibility: `subagent_type: "agent-teams:team-reviewer"`
+   - Distributed: `subagent_type: "senior-review:distributed-flow-auditor"`
+   - UI races: `subagent_type: "senior-review:ui-race-auditor"`
+   - Platform: `subagent_type: "platform-engineering:platform-reviewer"`
    - `name`: `{dimension}-reviewer` (e.g., "security-reviewer")
-   - `subagent_type`: "agent-teams:team-reviewer"
    - `prompt`: Include the dimension assignment, target files, and diff content
 3. Use `TaskCreate` for each reviewer's task:
    - Subject: "Review {target} for {dimension} issues"

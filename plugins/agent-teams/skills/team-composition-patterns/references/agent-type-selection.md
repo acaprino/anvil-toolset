@@ -6,19 +6,29 @@ Decision matrix for choosing the right `subagent_type` when spawning teammates.
 
 ```
 Does the teammate need to modify files?
-|-- YES -> Does it need a specialized role?
-|          |-- YES -> Which role?
-|          |         |-- Code review -> agent-teams:team-reviewer
-|          |         |-- Bug investigation -> agent-teams:team-debugger
-|          |         |-- Feature building -> agent-teams:team-implementer
-|          |         +-- Team coordination -> agent-teams:team-lead
-|          +-- NO -> general-purpose
+|-- YES -> Does a marketplace specialist exist for this domain?
+|          |-- YES -> Use the specialist (see table below)
+|          |         Examples:
+|          |         |-- Python code -> python-development:python-architect
+|          |         |-- Security review -> senior-review:security-auditor
+|          |         |-- React frontend -> frontend:frontend-architect
+|          |         |-- Rust code -> tauri-development:rust-engineer
+|          |         +-- Tests -> testing:test-writer
+|          +-- NO -> Does it need a generic team role?
+|                    |-- Code review -> agent-teams:team-reviewer
+|                    |-- Bug investigation -> agent-teams:team-debugger
+|                    |-- Feature building -> agent-teams:team-implementer
+|                    +-- Team coordination -> agent-teams:team-lead
 +-- NO -> Does it need deep codebase exploration?
-          |-- YES -> Explore
+          |-- YES -> Explore (or codebase-mapper:codebase-explorer)
           +-- NO -> Plan (for architecture/design tasks)
+
+RULE: Always prefer a marketplace specialist over a generic team agent.
 ```
 
 ## Agent Type Comparison
+
+### Generic Team Agents (fallbacks)
 
 | Agent Type                   | Can Read | Can Write | Can Edit | Can Bash | Specialized        |
 | ---------------------------- | -------- | --------- | -------- | -------- | ------------------ |
@@ -29,6 +39,29 @@ Does the teammate need to modify files?
 | agent-teams:team-reviewer    | Yes      | Yes       | Yes      | Yes      | Code review        |
 | agent-teams:team-debugger    | Yes      | Yes       | Yes      | Yes      | Bug investigation  |
 | agent-teams:team-implementer | Yes      | Yes       | Yes      | Yes      | Feature building   |
+
+### Specialized Marketplace Agents (preferred)
+
+| Agent Type | Replaces | Domain |
+| --- | --- | --- |
+| `senior-review:security-auditor` | team-reviewer (security) | Adversarial security review |
+| `senior-review:code-auditor` | team-reviewer (architecture) | Architecture + quality scoring |
+| `senior-review:distributed-flow-auditor` | team-reviewer (distributed) | Cross-service flow analysis |
+| `senior-review:ui-race-auditor` | team-reviewer (UI races) | Async rendering timing bugs |
+| `platform-engineering:platform-reviewer` | team-reviewer (platform) | Cross-platform compliance |
+| `react-development:react-performance-optimizer` | team-reviewer (React perf) | React 19 optimization |
+| `python-development:python-architect` | team-implementer (Python) | Python architecture + orchestration |
+| `python-development:python-test-engineer` | team-implementer (Python tests) | pytest TDD |
+| `tauri-development:rust-engineer` | team-implementer (Rust) | Rust ownership, async, FFI |
+| `frontend:frontend-architect` | team-implementer (frontend) | Frontend orchestration |
+| `frontend:web-designer` | team-implementer (CSS/UI) | Styling, animations, design |
+| `tauri-development:tauri-desktop` | team-implementer (Tauri) | Tauri IPC, WebView, bundling |
+| `tauri-development:tauri-mobile` | team-implementer (mobile) | Tauri mobile plugins, signing |
+| `testing:test-writer` | team-implementer (tests) | Language-agnostic test generation |
+| `research:deep-researcher` | general-purpose (research) | Multi-source deep investigation |
+| `codebase-mapper:codebase-explorer` | general-purpose (exploration) | Project understanding |
+| `codebase-mapper:documentation-engineer` | general-purpose (docs) | Technical documentation |
+| `app-analyzer:app-analyzer` | general-purpose (app analysis) | Android/web app navigation + UX |
 
 ## Common Mistakes
 

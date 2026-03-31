@@ -1,5 +1,5 @@
 ---
-description: "Spawn an agent team using presets (review, debug, feature, fullstack, research, security, migration) or custom composition"
+description: "Spawn an agent team using presets (review, debug, feature, fullstack, research, security, migration, docs, app-analysis, tauri) or custom composition"
 argument-hint: "<preset|custom> [--name team-name] [--members N] [--delegate]"
 ---
 
@@ -25,41 +25,87 @@ Spawn a multi-agent team using preset configurations or custom composition. Hand
 
 If a preset is specified, use these configurations:
 
-**`review`** -- Multi-dimensional code review (default: 3 members)
+**`review`** -- Multi-dimensional code review using specialized reviewers (default: 3 members)
 
-- Spawn 3 `team-reviewer` agents with dimensions: security, performance, architecture
+- Spawn specialized agents per dimension (prefer marketplace experts over generic team-reviewer):
+  - Security: `senior-review:security-auditor`
+  - Architecture: `senior-review:code-auditor`
+  - Performance: `react-development:react-performance-optimizer` (React) or `agent-teams:team-reviewer` (general)
 - Team name default: `review-team`
 
 **`debug`** -- Competing hypotheses debugging (default: 3 members)
 
-- Spawn 3 `team-debugger` agents, each assigned a different hypothesis
+- Spawn 3 `agent-teams:team-debugger` agents, each assigned a different hypothesis
+- Each debugger can sub-delegate to `research:deep-researcher` for evidence gathering
 - Team name default: `debug-team`
 
 **`feature`** -- Parallel feature development (default: 3 members)
 
-- Spawn 1 `team-lead` agent + 2 `team-implementer` agents
+- Spawn 1 `agent-teams:team-lead` + 2 specialized implementers
+- Lead auto-selects implementer agents based on codebase context:
+  - Python: `python-development:python-architect`
+  - React/frontend: `frontend:frontend-architect`
+  - Rust: `tauri-development:rust-engineer`
+  - General: `agent-teams:team-implementer`
 - Team name default: `feature-team`
 
-**`fullstack`** -- Full-stack development (default: 4 members)
+**`fullstack`** -- Full-stack development with specialized layer agents (default: 4 members)
 
-- Spawn 1 `team-implementer` (frontend), 1 `team-implementer` (backend), 1 `team-implementer` (tests), 1 `team-lead`
+- Spawn 1 `agent-teams:team-lead` + 3 layer-specific agents:
+  - Frontend: `frontend:frontend-architect` or `frontend:web-designer`
+  - Backend: `python-development:python-architect` or `agent-teams:team-implementer`
+  - Tests: `testing:test-writer` or `python-development:python-test-engineer`
 - Team name default: `fullstack-team`
 
 **`research`** -- Parallel codebase, web, and documentation research (default: 3 members)
 
-- Spawn 3 `general-purpose` agents, each assigned a different research question or area
-- Agents have access to codebase search (Grep, Glob, Read) and web search (WebSearch, WebFetch)
+- Spawn specialized researchers:
+  - Codebase: `research:deep-researcher` (multi-source investigation)
+  - Web: `research:quick-searcher` (fast lookups) or `general-purpose`
+  - Docs: `codebase-mapper:codebase-explorer` (project understanding)
 - Team name default: `research-team`
 
-**`security`** -- Comprehensive security audit (default: 4 members)
+**`security`** -- Comprehensive security audit using specialized agents (default: 4 members)
 
-- Spawn 1 `team-reviewer` (OWASP/vulnerabilities), 1 `team-reviewer` (auth/access control), 1 `team-reviewer` (dependencies/supply chain), 1 `team-reviewer` (secrets/configuration)
+- Spawn specialized security reviewers:
+  - OWASP/vulnerabilities: `senior-review:security-auditor`
+  - Platform compliance: `platform-engineering:platform-reviewer`
+  - Distributed flows: `senior-review:distributed-flow-auditor`
+  - Auth/secrets: `senior-review:security-auditor` (second instance, different scope)
+- Load `senior-review:defect-taxonomy` skill for CWE/OWASP classification
 - Team name default: `security-team`
 
 **`migration`** -- Codebase migration or large refactor (default: 4 members)
 
-- Spawn 1 `team-lead` (coordination + migration plan), 2 `team-implementer` (parallel migration streams), 1 `team-reviewer` (verify migration correctness)
+- Spawn 1 `agent-teams:team-lead` (coordination + migration plan)
+- 2 specialized implementers (auto-selected by codebase language)
+- 1 `senior-review:code-auditor` (verify migration correctness)
 - Team name default: `migration-team`
+
+**`docs`** -- Parallel documentation generation (default: 3 members)
+
+- Spawn documentation specialists:
+  - Explorer: `codebase-mapper:codebase-explorer` (build context brief)
+  - Tech writer: `codebase-mapper:documentation-engineer` (write docs)
+  - Reviewer: `senior-review:code-auditor` (verify accuracy)
+- Team name default: `docs-team`
+
+**`app-analysis`** -- Competitive app analysis (default: 3 members)
+
+- Spawn analysis specialists:
+  - App mapper: `app-analyzer:app-analyzer` (navigation + UX audit)
+  - Researcher: `research:deep-researcher` (competitive intelligence)
+  - Designer: `frontend:web-designer` (design system extraction)
+- Team name default: `app-analysis-team`
+
+**`tauri`** -- Tauri desktop/mobile development (default: 4 members)
+
+- Spawn Tauri specialists:
+  - Lead: `agent-teams:team-lead`
+  - Rust backend: `tauri-development:rust-engineer`
+  - Frontend: `frontend:frontend-architect` or `react-development:react-performance-optimizer`
+  - Platform: `tauri-development:tauri-desktop` or `tauri-development:tauri-mobile`
+- Team name default: `tauri-team`
 
 ### Custom Composition
 
@@ -75,13 +121,16 @@ Before spawning, invoke the relevant skills for the preset to inform team config
 
 | Preset | Skills to reference |
 |--------|-------------------|
-| review | `agent-teams:team-composition-patterns`, `agent-teams:multi-reviewer-patterns` |
-| debug | `agent-teams:team-composition-patterns`, `agent-teams:parallel-debugging` |
-| feature | `agent-teams:team-composition-patterns`, `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies` |
-| fullstack | `agent-teams:team-composition-patterns`, `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies` |
+| review | `agent-teams:multi-reviewer-patterns`, `senior-review:defect-taxonomy` |
+| debug | `agent-teams:parallel-debugging`, `deep-dive-analysis:deep-dive-analysis` |
+| feature | `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies`, `ai-tooling:writing-plans` |
+| fullstack | `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies`, `ai-tooling:writing-plans` |
 | research | `agent-teams:team-composition-patterns` |
-| security | `agent-teams:team-composition-patterns`, `agent-teams:multi-reviewer-patterns` |
-| migration | `agent-teams:team-composition-patterns`, `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies` |
+| security | `agent-teams:multi-reviewer-patterns`, `senior-review:defect-taxonomy`, `platform-engineering:platform-engineering` |
+| migration | `agent-teams:parallel-feature-development`, `agent-teams:task-coordination-strategies`, `ai-tooling:writing-plans` |
+| docs | `codebase-mapper:codebase-mapper`, `agent-teams:team-composition-patterns` |
+| app-analysis | `agent-teams:team-composition-patterns` |
+| tauri | `agent-teams:parallel-feature-development`, `tauri-development:tauri`, `agent-teams:task-coordination-strategies` |
 
 ## Phase 2: Team Creation
 
@@ -94,19 +143,37 @@ Before spawning, invoke the relevant skills for the preset to inform team config
 
 ### Subagent Types by Preset
 
-| Preset | Role | subagent_type |
-|--------|------|---------------|
-| review | reviewer | `agent-teams:team-reviewer` |
-| debug | investigator | `agent-teams:team-debugger` |
-| feature | lead | `agent-teams:team-lead` |
-| feature | implementer | `agent-teams:team-implementer` |
-| fullstack | lead | `agent-teams:team-lead` |
-| fullstack | implementer | `agent-teams:team-implementer` |
-| research | researcher | `general-purpose` |
-| security | reviewer | `agent-teams:team-reviewer` |
-| migration | lead | `agent-teams:team-lead` |
-| migration | implementer | `agent-teams:team-implementer` |
-| migration | verifier | `agent-teams:team-reviewer` |
+Use the **most specialized agent** available. The team-lead's Ecosystem Integration section has the full mapping. Key defaults:
+
+| Preset | Role | Default subagent_type | Preferred specialist (when applicable) |
+|--------|------|-----------------------|----------------------------------------|
+| review | security | `agent-teams:team-reviewer` | `senior-review:security-auditor` |
+| review | architecture | `agent-teams:team-reviewer` | `senior-review:code-auditor` |
+| review | performance | `agent-teams:team-reviewer` | `react-development:react-performance-optimizer` (React) |
+| debug | investigator | `agent-teams:team-debugger` | -- |
+| feature | lead | `agent-teams:team-lead` | -- |
+| feature | implementer | `agent-teams:team-implementer` | `python-development:python-architect`, `frontend:frontend-architect`, `tauri-development:rust-engineer` |
+| fullstack | lead | `agent-teams:team-lead` | -- |
+| fullstack | frontend | `agent-teams:team-implementer` | `frontend:frontend-architect` |
+| fullstack | backend | `agent-teams:team-implementer` | `python-development:python-architect` |
+| fullstack | tests | `agent-teams:team-implementer` | `testing:test-writer` |
+| research | researcher | `general-purpose` | `research:deep-researcher`, `codebase-mapper:codebase-explorer` |
+| security | OWASP | `agent-teams:team-reviewer` | `senior-review:security-auditor` |
+| security | platform | `agent-teams:team-reviewer` | `platform-engineering:platform-reviewer` |
+| security | distributed | `agent-teams:team-reviewer` | `senior-review:distributed-flow-auditor` |
+| migration | lead | `agent-teams:team-lead` | -- |
+| migration | implementer | `agent-teams:team-implementer` | Auto-detect from codebase |
+| migration | verifier | `agent-teams:team-reviewer` | `senior-review:code-auditor` |
+| docs | explorer | -- | `codebase-mapper:codebase-explorer` |
+| docs | writer | -- | `codebase-mapper:documentation-engineer` |
+| docs | verifier | -- | `senior-review:code-auditor` |
+| app-analysis | mapper | -- | `app-analyzer:app-analyzer` |
+| app-analysis | researcher | -- | `research:deep-researcher` |
+| app-analysis | designer | -- | `frontend:web-designer` |
+| tauri | lead | `agent-teams:team-lead` | -- |
+| tauri | rust | -- | `tauri-development:rust-engineer` |
+| tauri | frontend | -- | `frontend:frontend-architect` |
+| tauri | platform | -- | `tauri-development:tauri-desktop` or `tauri-development:tauri-mobile` |
 
 ## Phase 3: Initial Setup
 

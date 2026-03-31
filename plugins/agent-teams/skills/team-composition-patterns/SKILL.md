@@ -83,6 +83,24 @@ Best practices for composing multi-agent teams, selecting team sizes, choosing a
 - **Agents**: 1x `team-lead` + 2x `team-implementer` + 1x `team-reviewer`
 - **Use when**: Large codebase migration (framework upgrade, language port, API version bump) requiring parallel work with correctness verification
 
+### Docs Team
+
+- **Size**: 3 (explorer + writer + verifier)
+- **Agents**: 1x `codebase-mapper:codebase-explorer` + 1x `codebase-mapper:documentation-engineer` + 1x `senior-review:code-auditor`
+- **Use when**: Creating or overhauling project documentation from code analysis
+
+### App Analysis Team
+
+- **Size**: 3 (mapper + researcher + designer)
+- **Agents**: 1x `app-analyzer:app-analyzer` + 1x `research:deep-researcher` + 1x `frontend:web-designer`
+- **Use when**: Competitive app analysis, navigation mapping, design system extraction
+
+### Tauri Team
+
+- **Size**: 4 (1 lead + 3 specialists)
+- **Agents**: 1x `team-lead` + 1x `tauri-development:rust-engineer` + 1x `frontend:frontend-architect` + 1x `tauri-development:tauri-desktop`
+- **Use when**: Building or optimizing Tauri v2 desktop/mobile applications
+
 ## Agent Type Selection
 
 When spawning teammates with the Task tool, choose `subagent_type` based on what tools the teammate needs:

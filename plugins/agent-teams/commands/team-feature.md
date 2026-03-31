@@ -10,6 +10,8 @@ Orchestrate parallel feature development with multiple implementer agents. Decom
 ## Skills to Load
 
 Before starting, invoke these skills to inform the feature development process:
+- `ai-tooling:brainstorming` -- explore requirements and design before decomposition
+- `ai-tooling:writing-plans` -- create bite-sized implementation plans
 - `agent-teams:parallel-feature-development` -- file ownership strategies, conflict avoidance, integration patterns
 - `agent-teams:task-coordination-strategies` -- task decomposition, dependency graphs, workload monitoring
 - `agent-teams:team-communication-protocols` -- message type selection, plan approval workflow, shutdown protocol
@@ -71,9 +73,14 @@ Before starting, invoke these skills to inform the feature development process:
    ```
 2. Use `Teammate` tool with `operation: "spawnTeam"`, team name: `feature-{timestamp}`
 3. Spawn a `team-lead` agent to coordinate
-4. For each work stream, use `Task` tool to spawn a `team-implementer`:
+4. For each work stream, use `Task` tool to spawn the **most specialized agent** for the context:
+   - Detect codebase language/framework from files in scope
+   - Python code: `subagent_type: "python-development:python-architect"`
+   - React/frontend: `subagent_type: "frontend:frontend-architect"`
+   - Rust code: `subagent_type: "tauri-development:rust-engineer"`
+   - Tests: `subagent_type: "testing:test-writer"`
+   - General/mixed: `subagent_type: "agent-teams:team-implementer"`
    - `name`: `implementer-{n}`
-   - `subagent_type`: "agent-teams:team-implementer"
    - `prompt`: Include owned files, interface contracts, and implementation requirements
 
 ## Phase 4: Task Creation

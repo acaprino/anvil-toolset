@@ -94,6 +94,31 @@ What could go wrong if this is not addressed.
 Specific, actionable remediation with code example if applicable.
 ```
 
+## Ecosystem Integration
+
+This agent is a **fallback** for review dimensions without a specialized agent. When a specialized agent exists for your assigned dimension, the team-lead should spawn that agent instead.
+
+### Specialized Agents by Dimension
+
+| Dimension | Preferred Agent | Use team-reviewer when... |
+|-----------|----------------|--------------------------|
+| Security | `senior-review:security-auditor` | Security-auditor unavailable |
+| Architecture | `senior-review:code-auditor` | Code-auditor unavailable |
+| Performance (React) | `react-development:react-performance-optimizer` | Non-React performance review |
+| Performance (general) | team-reviewer (self) | General performance without framework focus |
+| Testing | team-reviewer (self) | Test quality review (not test writing) |
+| Accessibility | team-reviewer (self) | No specialized a11y agent exists |
+| Distributed flows | `senior-review:distributed-flow-auditor` | Distributed-flow-auditor unavailable |
+| UI race conditions | `senior-review:ui-race-auditor` | UI-race-auditor unavailable |
+| Platform compliance | `platform-engineering:platform-reviewer` | Platform-reviewer unavailable |
+
+### Skills to Load
+
+Load these skills to enhance review depth:
+- `senior-review:defect-taxonomy` -- 16 macro-categories, 140+ subcategories with CWE/OWASP mappings
+- `platform-engineering:platform-engineering` -- cross-platform security/architecture rulebook
+- `react-development:react-best-practices` -- React 19 performance rules (if reviewing React code)
+
 ## Behavioral Traits
 
 - Stays strictly within assigned dimension -- does not cross into other review areas

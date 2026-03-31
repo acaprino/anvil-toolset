@@ -263,3 +263,72 @@ migration-lead (plan) -> migrator-1 --+
 - API version bumps (REST v1 -> v2, GraphQL schema changes)
 - Database migrations (ORM changes, schema restructuring)
 - Build system changes (Webpack -> Vite, CRA -> Next.js)
+
+## Docs Team Preset
+
+**Command**: `/team-spawn docs`
+
+### Configuration
+
+- **Team Size**: 3
+- **Agent Types**: `codebase-mapper:codebase-explorer` + `codebase-mapper:documentation-engineer` + `senior-review:code-auditor`
+- **Display Mode**: tmux recommended
+
+### Members
+
+| Name           | Role                | Responsibility                               |
+| -------------- | ------------------- | -------------------------------------------- |
+| explorer       | codebase-explorer   | Build context brief from project analysis    |
+| tech-writer    | documentation-engineer | Write documentation from context brief    |
+| doc-verifier   | code-auditor        | Verify docs match actual code behavior       |
+
+### Dependency Pattern
+
+```
+explorer (context brief) -> tech-writer (docs) -> doc-verifier (accuracy check)
+```
+
+## App Analysis Team Preset
+
+**Command**: `/team-spawn app-analysis`
+
+### Configuration
+
+- **Team Size**: 3
+- **Agent Types**: `app-analyzer:app-analyzer` + `research:deep-researcher` + `frontend:web-designer`
+- **Display Mode**: tmux recommended
+
+### Members
+
+| Name           | Role              | Responsibility                                |
+| -------------- | ----------------- | --------------------------------------------- |
+| app-mapper     | app-analyzer      | Navigation mapping + UX audit via ADB/browser |
+| intel-researcher | deep-researcher | Competitive intelligence + market research    |
+| design-analyst | web-designer      | Design system extraction + UI pattern catalog |
+
+## Tauri Team Preset
+
+**Command**: `/team-spawn tauri`
+
+### Configuration
+
+- **Team Size**: 4 (1 lead + 3 specialists)
+- **Agent Types**: `agent-teams:team-lead` + `tauri-development:rust-engineer` + `frontend:frontend-architect` + `tauri-development:tauri-desktop`
+- **Display Mode**: tmux recommended
+
+### Members
+
+| Name            | Role              | Responsibility                                 |
+| --------------- | ----------------- | ---------------------------------------------- |
+| tauri-lead      | team-lead         | Coordination, IPC contract design, integration |
+| rust-backend    | rust-engineer     | Rust commands, state management, plugins       |
+| frontend-dev    | frontend-architect | React UI, components, performance             |
+| platform-expert | tauri-desktop     | WebView tuning, window management, bundling    |
+
+### Dependency Pattern
+
+```
+tauri-lead (IPC contracts) -> rust-backend --+
+                           -> frontend-dev --+--> integration verification
+                           -> platform-expert -+
+```
