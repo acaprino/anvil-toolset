@@ -44,6 +44,29 @@ TDD methodology knowledge base ported from [mattpocock/skills](https://github.co
 | `interface-design.md` | Designing testable interfaces |
 | `refactoring.md` | Safe refactoring patterns with test coverage |
 
+### `e2e-testing-patterns`
+
+End-to-end testing patterns with Playwright and Cypress. Covers test philosophy, page object model, fixtures, waiting strategies, network mocking, visual regression, parallel sharding, and accessibility testing.
+
+| | |
+|---|---|
+| **Trigger** | Implementing E2E tests, debugging flaky tests, establishing testing standards, setting up Playwright or Cypress |
+| **Source** | Upstream-synced with wshobson/agents |
+
+**Patterns covered:**
+
+| Pattern | Framework | Description |
+|---------|-----------|-------------|
+| Page Object Model | Playwright | Encapsulate page logic in reusable classes |
+| Fixtures for Test Data | Playwright | Typed fixtures with setup/teardown |
+| Waiting Strategies | Playwright | Auto-waiting assertions, network response waits |
+| Network Mocking | Playwright | API mocking, request interception, third-party service stubs |
+| Custom Commands | Cypress | Reusable typed commands with `Chainable` |
+| Intercept | Cypress | Response mocking, modification, simulated slow network |
+| Visual Regression | Playwright | Screenshot comparison with pixel diff thresholds |
+| Parallel Sharding | Playwright | Test sharding for CI parallelism |
+| Accessibility | Playwright | axe-core integration for WCAG compliance |
+
 ---
 
-**Related:** [python-development](python-development.md) (Python-specific TDD with pytest) | [senior-review](senior-review.md) (code review with test assessment)
+**Related:** [python-development](python-development.md) (Python-specific TDD with pytest) | [senior-review](senior-review.md) (code review with test assessment) | [playwright-skill](playwright-skill.md) (browser automation with Playwright)

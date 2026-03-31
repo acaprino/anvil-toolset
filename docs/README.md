@@ -10,6 +10,7 @@ Custom Claude Code plugin marketplace. Agents, skills, and commands for developm
 |--------|----------|-------------|------|
 | [ai-tooling](plugins/ai-tooling.md) | ai-ml | Prompt engineering, brainstorming, planning, execution, Claude Agent SDK | 1 agent, 5 skills, 1 command |
 | [acp-hooks](plugins/acp-hooks.md) | security | Session hooks -- startup logo, skill awareness, security gate, autocompact, brainstorm gate, review gate | hooks only |
+| [agent-teams](plugins/agent-teams.md) | development | Orchestrate multi-agent teams for parallel code review, debugging, and coordinated feature development | 4 agents, 6 skills, 9 commands |
 | [app-analyzer](plugins/app-analyzer.md) | analysis | Android app analysis via ADB and webapp exploration via Playwright | 1 agent |
 | [browser-extensions](plugins/browser-extensions.md) | development | Firefox WebExtension development -- Manifest V2/V3, browser.* APIs, AMO publishing | 1 agent, 1 skill |
 | [business](plugins/business.md) | business | Legal advisory, privacy policies, GDPR/ePrivacy/CCPA compliance, SaaS business planning | 3 agents, 1 skill |
@@ -23,9 +24,10 @@ Custom Claude Code plugin marketplace. Agents, skills, and commands for developm
 | [docs](plugins/docs.md) | documentation | Craft top-tier README.md files with progressive disclosure, badges, quick start | 1 skill, 1 command |
 | [frontend](plugins/frontend.md) | frontend | UI polish, UX design, CSS, layout, web consulting, Radix/shadcn/daisyUI | 3 agents, 5 skills, 1 command |
 | [git-worktrees](plugins/git-worktrees.md) | development-tools | Git worktree management -- create, pause, resume, merge parallel branches | 1 agent, 1 skill, 1 command |
+| [grabber-development](plugins/grabber-development.md) | development | Expert Python web scraping -- stealth browsers, TLS impersonation, anti-bot bypass, proxy architecture, AI extraction | 1 agent, 1 skill |
 | [ibkr-trading](plugins/ibkr-trading.md) | algotrading | Interactive Brokers algotrading -- TWS API, ib_async, order execution | 1 agent, 1 skill, 1 command |
 | [learning](plugins/learning.md) | productivity | Mind maps, Obsidian MarkMind export, interactive force-graph visualization | 3 skills, 1 command |
-| [marketplace-ops](plugins/marketplace-ops.md) | utilities | Plugin management -- auditing, validation, upstream sync, scaffolding | 1 agent, 2 skills, 3 commands |
+| [marketplace-ops](plugins/marketplace-ops.md) | utilities | Plugin management -- auditing, validation, upstream sync, scaffolding | 1 agent, 2 skills, 4 commands |
 | [messaging](plugins/messaging.md) | infrastructure | RabbitMQ and AMQP -- queue design, clustering, high availability | 1 agent |
 | [mt5-trading](plugins/mt5-trading.md) | algotrading | MetaTrader 5 Python algotrading -- API, polling events, order execution | 1 agent, 1 skill, 1 command |
 | [obsidian-development](plugins/obsidian-development.md) | development | Obsidian community plugin development with ReviewBot compliance | 3 skills |

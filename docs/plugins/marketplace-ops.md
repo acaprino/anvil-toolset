@@ -81,6 +81,28 @@ Scaffold a new plugin with proper directory structure, starter files, and market
 
 AI-powered quality review of plugin descriptions, trigger keywords, agent prompts, skill instructions, and command definitions.
 
+### `/skills-validate`
+
+Deterministic activation-quality checks plus AI-powered body review for all skills and agents.
+
+```
+/skills-validate my-plugin
+/skills-validate --all
+/skills-validate my-plugin --skip-ai
+```
+
+**Deterministic checks (script):**
+- Directive voice, TRIGGER WHEN / DO NOT TRIGGER WHEN clauses
+- Passive pattern detection, description length (hard limit 1024 chars)
+- Token budget (total description chars vs 15,000 char budget)
+- SKILL.md body size (warn >300 lines, flag >500 lines)
+- Agent body size (flag >800 lines)
+- Em dash detection, example tags, context: fork, allowed-tools
+
+**AI review dimensions (optional, skip with `--skip-ai`):**
+- Structure, Clarity, Redundancy, Progressive disclosure, Tool restrictions, Isolation needs
+- Each scored 1-5 with specific fix recommendations
+
 ---
 
 **Related:** [acp-hooks](acp-hooks.md) (session lifecycle hooks) | [project-setup](project-setup.md) (CLAUDE.md management)
