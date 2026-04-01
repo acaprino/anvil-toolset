@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "5.9.0"
+    "version": "5.10.0"
   },
   "plugins": [
     {
@@ -778,8 +778,8 @@
     {
       "name": "acp-hooks",
       "source": "./plugins/acp-hooks",
-      "description": "ACP session hooks -- ASCII logo on startup, skill awareness injection, security gate for hardcoded secrets, autocompact when context is high, cleanup of duplicate built-in plugins, brainstorm gate for creative/building prompts, review gate for PR/merge operations, and docs gate for documentation auditing",
-      "version": "2.1.0",
+      "description": "ACP session hooks -- ASCII logo on startup, skill awareness injection, security gate for hardcoded secrets, autocompact when context is high, cleanup of duplicate built-in plugins, brainstorm gate for creative/building prompts, review gate for PR/merge operations, docs gate for documentation auditing, and team spawn gate for auto-suggesting agent teams",
+      "version": "2.2.0",
       "author": {
         "name": "Alfio"
       },
@@ -798,14 +798,18 @@
         "review",
         "docs",
         "pr",
-        "merge"
+        "merge",
+        "team",
+        "spawn",
+        "auto-team"
       ],
       "category": "security",
       "strict": false,
       "optionalDependencies": [
         "ai-tooling",
         "git-worktrees",
-        "senior-review"
+        "senior-review",
+        "agent-teams"
       ]
     },
     {
