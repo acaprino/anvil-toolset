@@ -98,6 +98,7 @@ Some plugins are ported from external repositories and should be kept in sync wi
 | `docker` (multi-stage-dockerfile) | `github/awesome-copilot` - `skills/multi-stage-dockerfile/SKILL.md` | `plugins/docker/skills/multi-stage-dockerfile/SKILL.md` |
 | `testing` (e2e-testing-patterns) | `wshobson/agents` - `plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md` | `plugins/testing/skills/e2e-testing-patterns/SKILL.md` |
 | `agent-teams` | `wshobson/agents` - `plugins/agent-teams/` | `plugins/agent-teams/agents/*.md`, `plugins/agent-teams/commands/*.md`, `plugins/agent-teams/skills/*/SKILL.md`, `plugins/agent-teams/skills/*/references/*.md` |
+| `typescript-development` (mastering-typescript) | `SpillwaveSolutions/mastering-typescript-skill` - `mastering-typescript/` | `plugins/typescript-development/skills/mastering-typescript/SKILL.md`, `plugins/typescript-development/skills/mastering-typescript/references/*.md`, `plugins/typescript-development/skills/mastering-typescript/scripts/validate-setup.sh`, `plugins/typescript-development/skills/mastering-typescript/assets/tsconfig-template.json`, `plugins/typescript-development/skills/mastering-typescript/assets/eslint-template.js` |
 
 ### How to sync a plugin
 
@@ -202,6 +203,23 @@ for skill in multi-reviewer-patterns parallel-debugging parallel-feature-develop
       --jq '.content' | base64 -d
   done
 done
+
+# Fetch latest mastering-typescript files from upstream (SpillwaveSolutions/mastering-typescript-skill example)
+# Local target: plugins/typescript-development/skills/mastering-typescript/
+gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/SKILL.md \
+  --jq '.content' | base64 -d
+# References
+for ref in type-system generics enterprise-patterns react-integration nestjs-integration toolchain; do
+  gh api "repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/references/$ref.md" \
+    --jq '.content' | base64 -d
+done
+# Scripts and assets
+gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/scripts/validate-setup.sh \
+  --jq '.content' | base64 -d
+gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/assets/tsconfig-template.json \
+  --jq '.content' | base64 -d
+gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/assets/eslint-template.js \
+  --jq '.content' | base64 -d
 ```
 
 Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file, plus any plugin-specific sections like Typography Reference or Isolated Prompting for frontend-design in `plugins/frontend/skills/frontend-design/`), bump the plugin version, bump `metadata.version`, and commit + push.

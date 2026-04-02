@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "5.10.0"
+    "version": "5.11.0"
   },
   "plugins": [
     {
@@ -468,8 +468,8 @@
     {
       "name": "typescript-development",
       "source": "./plugins/typescript-development",
-      "description": "TypeScript and JavaScript development best practices with dead code detection via Knip and coding standards enforcement",
-      "version": "1.4.0",
+      "description": "TypeScript and JavaScript development best practices with dead code detection via Knip, coding standards enforcement, and enterprise-grade TypeScript mastery (type system, generics, React/NestJS integration, Zod validation, modern toolchain)",
+      "version": "1.5.0",
       "author": {
         "name": "Alfio"
       },
@@ -481,13 +481,22 @@
         "frontend",
         "knip",
         "dead-code",
-        "unused-exports"
+        "unused-exports",
+        "generics",
+        "type-safety",
+        "zod",
+        "nestjs",
+        "vite",
+        "vitest",
+        "pnpm",
+        "eslint"
       ],
       "category": "development",
       "strict": false,
       "skills": [
         "./skills/typescript-write",
-        "./skills/knip"
+        "./skills/knip",
+        "./skills/mastering-typescript"
       ]
     },
     {
