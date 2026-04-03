@@ -40,7 +40,7 @@ const PRESETS = [
       "revisiona il codice", "revisione completa"
     ],
     keywords: ["review", "audit", "revisiona", "revisione"],
-    minWords: 15,
+    minWords: 8,
     scopeBoost: ["comprehensive", "full", "thorough", "deep", "completa", "completo"]
   },
   {
@@ -67,7 +67,7 @@ const PRESETS = [
       "ipotesi concorrenti", "cause multiple"
     ],
     keywords: ["debug", "investigate", "trace"],
-    minWords: 25,
+    minWords: 10,
     scopeBoost: ["hypotheses", "causes", "parallel", "competing", "ipotesi"]
   },
   {
@@ -80,7 +80,7 @@ const PRESETS = [
       "sviluppa in parallelo", "implementa in parallelo"
     ],
     keywords: ["build", "implement", "create", "develop", "costruisci", "implementa"],
-    minWords: 30,
+    minWords: 12,
     scopeBoost: ["parallel", "multiple files", "across", "end to end", "from scratch",
                   "da zero", "completo", "parallelo"]
   },
@@ -107,7 +107,7 @@ const PRESETS = [
       "ricerca approfondita", "ricerca sistematica"
     ],
     keywords: ["research", "investigate", "ricerca"],
-    minWords: 20,
+    minWords: 10,
     scopeBoost: ["deep", "thorough", "comprehensive", "systematic", "approfondita"]
   },
   {
@@ -119,7 +119,7 @@ const PRESETS = [
       "parallel research"
     ],
     keywords: [],
-    minWords: 25,
+    minWords: 12,
     scopeBoost: ["parallel", "multiple sources", "codebase and web"]
   },
   {
@@ -254,9 +254,6 @@ process.stdin.on("end", () => {
     // Bypass: explicit --no-team flag
     if (prompt.includes("--no-team")) process.exit(0);
 
-    // Bypass: questions (ends with ?)
-    if (prompt.trimEnd().endsWith("?")) process.exit(0);
-
     const matched = matchPreset(prompt);
     if (!matched) process.exit(0);
 
@@ -264,18 +261,17 @@ process.stdin.on("end", () => {
       `<IMPORTANT>`,
       `[Team Spawn Gate] This prompt matches the "${matched.name}" team preset.`,
       ``,
-      `The user's request appears complex enough to benefit from a multi-agent team.`,
-      `Suggested command: ${matched.command}`,
+      `This request benefits from a multi-agent team. Use the team unless the user explicitly asked for a single-agent approach.`,
+      ``,
+      `Command: ${matched.command}`,
       `What it does: ${matched.desc}`,
       ``,
-      `You should:`,
-      `1. Inform the user that their request could benefit from a team of parallel agents`,
-      `2. Briefly explain what the "${matched.name}" team preset does`,
-      `3. Ask if they want to proceed with the team, or handle it as a single-agent task`,
-      `4. If they agree, invoke the team-spawn command: ${matched.command}`,
+      `Action:`,
+      `1. Tell the user you're launching the "${matched.name}" team (one sentence)`,
+      `2. Invoke the skill: ${matched.command}`,
       ``,
-      `If the user has already explicitly requested a specific approach, follow their instruction.`,
-      `The user can add --no-team to any prompt to suppress this suggestion.`,
+      `Do NOT ask for confirmation -- just launch the team. The user expects proactive team usage.`,
+      `If the user added --no-team to their prompt, skip this and work as a single agent.`,
       `</IMPORTANT>`
     ].join("\n");
 
