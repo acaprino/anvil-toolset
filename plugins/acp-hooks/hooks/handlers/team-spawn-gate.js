@@ -1,5 +1,6 @@
 // Team Spawn Gate - UserPromptSubmit hook (advisory, not blocking)
-// Detects team-worthy requests and suggests the matching team preset.
+// Detects team-worthy requests: matches presets first, then falls back to
+// complexity detection so Claude can freely compose a custom team.
 // Toggle: set "teamSpawnGate" to false in ~/.claude/acp-config.json to disable
 
 const fs = require("fs");
@@ -231,6 +232,113 @@ function matchPreset(prompt) {
   return null;
 }
 
+// --- Tier 3: free-form complexity detection ---
+// When no preset matches, detect whether the prompt is complex enough
+// that Claude should compose a custom team from available agents.
+
+const ACTION_VERBS = [
+  "build", "implement", "create", "develop", "add", "write", "design",
+  "refactor", "rewrite", "restructure", "optimize", "fix", "integrate",
+  "set up", "setup", "configure", "deploy", "migrate", "convert",
+  // Italian
+  "costruisci", "implementa", "crea", "sviluppa", "aggiungi", "scrivi",
+  "progetta", "rifattorizza", "riscrivi", "ottimizza", "sistema",
+  "integra", "configura", "distribuisci"
+];
+
+const SCOPE_WORDS = [
+  "entire", "whole", "full", "complete", "all", "across", "multiple",
+  "end to end", "end-to-end", "from scratch", "comprehensive",
+  // Italian
+  "intero", "tutto", "completo", "completa", "multipli", "da zero"
+];
+
+const DOMAIN_KEYWORDS = [
+  "frontend", "backend", "database", "api", "auth", "ui", "ux",
+  "css", "react", "python", "rust", "tauri", "test", "tests",
+  "deploy", "ci", "docker", "websocket", "graphql", "rest",
+  "queue", "cache", "redis", "postgres", "mongo", "stripe"
+];
+
+const AGENT_CATALOG = [
+  "python-development:python-engineer -- Python implementation",
+  "python-development:python-test-engineer -- Python tests",
+  "python-development:python-refactor-agent -- Python refactoring",
+  "frontend:frontend-engineer -- Frontend/React implementation",
+  "frontend:web-designer -- Web design, CSS, aesthetics",
+  "frontend:ui-layout-designer -- Layout, grid, responsive",
+  "tauri-development:rust-engineer -- Rust implementation",
+  "tauri-development:tauri-desktop -- Tauri desktop apps",
+  "tauri-development:tauri-mobile -- Tauri mobile apps",
+  "testing:test-writer -- Test suites (any language)",
+  "research:deep-researcher -- Multi-source investigation",
+  "research:quick-searcher -- Fast fact-finding",
+  "senior-review:security-auditor -- Security review",
+  "senior-review:code-auditor -- Architecture/quality review",
+  "senior-review:distributed-flow-auditor -- Cross-service flows",
+  "senior-review:ui-race-auditor -- UI race conditions",
+  "senior-review:chicken-egg-detector -- Circular dependencies",
+  "platform-engineering:platform-reviewer -- Cross-platform compliance",
+  "react-development:react-performance-optimizer -- React performance",
+  "codebase-mapper:codebase-explorer -- Codebase understanding",
+  "codebase-mapper:documentation-engineer -- Documentation writing",
+  "app-analyzer:app-analyzer -- App navigation/UX analysis",
+  "agent-teams:team-lead -- Team coordination",
+  "agent-teams:team-implementer -- General implementation",
+  "agent-teams:team-reviewer -- General review",
+  "agent-teams:team-debugger -- Hypothesis-driven debugging",
+].join("\n  ");
+
+function detectComplexity(prompt) {
+  const lower = prompt.toLowerCase();
+  const words = countWords(prompt);
+
+  // Too short to be complex
+  if (words < 10) return false;
+
+  // Must have at least one action verb
+  const hasAction = ACTION_VERBS.some(v => lower.includes(v));
+  if (!hasAction) return false;
+
+  // Score complexity signals
+  let score = 0;
+
+  // Word count contributes
+  if (words >= 20) score += 2;
+  else if (words >= 15) score += 1;
+
+  // Scope words (entire, full, from scratch, etc.)
+  const scopeCount = SCOPE_WORDS.filter(s => lower.includes(s)).length;
+  score += scopeCount * 2;
+
+  // Multiple domain keywords (cross-domain work)
+  const domainCount = DOMAIN_KEYWORDS.filter(d => {
+    const re = new RegExp("\\b" + d + "\\b", "i");
+    return re.test(lower);
+  }).length;
+  if (domainCount >= 3) score += 3;
+  else if (domainCount >= 2) score += 2;
+
+  // Multiple action verbs (multi-step work)
+  const actionCount = ACTION_VERBS.filter(v => lower.includes(v)).length;
+  if (actionCount >= 3) score += 2;
+  else if (actionCount >= 2) score += 1;
+
+  // Explicit multi-step language
+  const multiStepPhrases = [
+    "and then", "after that", "also need", "plus",
+    "e poi", "dopo", "inoltre", "anche"
+  ];
+  if (multiStepPhrases.some(p => lower.includes(p))) score += 2;
+
+  // Listing patterns (1., 2., bullet points, commas separating tasks)
+  if (/\d\.\s/.test(prompt)) score += 2;
+  if ((prompt.match(/,/g) || []).length >= 3) score += 1;
+
+  // Threshold: need score >= 3 to suggest a custom team
+  return score >= 3;
+}
+
 // --- Main ---
 
 let input = "";
@@ -255,25 +363,57 @@ process.stdin.on("end", () => {
     if (prompt.includes("--no-team")) process.exit(0);
 
     const matched = matchPreset(prompt);
-    if (!matched) process.exit(0);
+    let context;
 
-    const context = [
-      `<IMPORTANT>`,
-      `[Team Spawn Gate] This prompt matches the "${matched.name}" team preset.`,
-      ``,
-      `This request benefits from a multi-agent team. Use the team unless the user explicitly asked for a single-agent approach.`,
-      ``,
-      `Command: ${matched.command}`,
-      `What it does: ${matched.desc}`,
-      ``,
-      `Action:`,
-      `1. Tell the user you're launching the "${matched.name}" team (one sentence)`,
-      `2. Invoke the skill: ${matched.command}`,
-      ``,
-      `Do NOT ask for confirmation -- just launch the team. The user expects proactive team usage.`,
-      `If the user added --no-team to their prompt, skip this and work as a single agent.`,
-      `</IMPORTANT>`
-    ].join("\n");
+    if (matched) {
+      // Tier 1/2: preset matched -- use the predefined team
+      context = [
+        `<IMPORTANT>`,
+        `[Team Spawn Gate] This prompt matches the "${matched.name}" team preset.`,
+        ``,
+        `This request benefits from a multi-agent team. Use the team unless the user explicitly asked for a single-agent approach.`,
+        ``,
+        `Command: ${matched.command}`,
+        `What it does: ${matched.desc}`,
+        ``,
+        `Action:`,
+        `1. Tell the user you're launching the "${matched.name}" team (one sentence)`,
+        `2. Invoke the skill: ${matched.command}`,
+        ``,
+        `Do NOT ask for confirmation -- just launch the team. The user expects proactive team usage.`,
+        `If the user added --no-team to their prompt, skip this and work as a single agent.`,
+        `</IMPORTANT>`
+      ].join("\n");
+    } else if (detectComplexity(prompt)) {
+      // Tier 3: no preset matched, but the request is complex enough for a custom team
+      context = [
+        `<IMPORTANT>`,
+        `[Team Spawn Gate] No preset matched, but this request is complex enough for a multi-agent team.`,
+        ``,
+        `You have freedom to compose a custom team. Analyze the request and select 2-5 agents from the catalog below.`,
+        `Use the Agent tool to spawn each teammate with the appropriate subagent_type.`,
+        ``,
+        `Available specialist agents:`,
+        `  ${AGENT_CATALOG}`,
+        ``,
+        `Guidelines:`,
+        `- Pick only agents relevant to the actual task (don't over-staff)`,
+        `- If the task spans multiple domains (e.g. frontend + backend), pick one agent per domain`,
+        `- Always include a team-lead if spawning 3+ agents`,
+        `- Launch independent agents in parallel for speed`,
+        `- Give each agent a clear, scoped task description`,
+        ``,
+        `Action:`,
+        `1. Tell the user you're assembling a custom team and list the agents you chose (2-3 sentences max)`,
+        `2. Spawn the agents using the Agent tool with the chosen subagent_type values`,
+        ``,
+        `Do NOT ask for confirmation -- compose and launch the team directly.`,
+        `If the user added --no-team to their prompt, skip this and work as a single agent.`,
+        `</IMPORTANT>`
+      ].join("\n");
+    } else {
+      process.exit(0);
+    }
 
     const output = {
       hookSpecificOutput: {
