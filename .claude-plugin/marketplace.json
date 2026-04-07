@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "5.15.0"
+    "version": "5.16.0"
   },
   "plugins": [
     {
@@ -528,8 +528,8 @@
     {
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
-      "description": "SEO optimization, content marketing, brand naming, domain hunting, text humanization, and customer review response -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, AI text rewriting, and professional review reply generation with sentiment analysis",
-      "version": "1.26.0",
+      "description": "SEO optimization, content marketing, brand naming, domain hunting, text humanization, customer review response, and GA4/GTM analytics implementation -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, AI text rewriting, professional review reply generation with sentiment analysis, and Google Analytics 4 + Google Tag Manager deployment with EU/GDPR Consent Mode v2 compliance",
+      "version": "1.27.0",
       "author": {
         "name": "Alfio"
       },
@@ -556,7 +556,17 @@
         "customer-feedback",
         "ai-writing",
         "text-humanization",
-        "humanize"
+        "humanize",
+        "ga4",
+        "google-analytics",
+        "gtm",
+        "google-tag-manager",
+        "consent-mode",
+        "gdpr",
+        "cookie-banner",
+        "conversion-tracking",
+        "remarketing",
+        "web-analytics"
       ],
       "category": "marketing",
       "strict": false,
@@ -566,13 +576,15 @@
       "agents": [
         "./agents/seo-specialist.md",
         "./agents/content-marketer.md",
-        "./agents/text-humanizer.md"
+        "./agents/text-humanizer.md",
+        "./agents/ga4-implementation-expert.md"
       ],
       "skills": [
         "./skills/brand-naming",
         "./skills/domain-hunter",
         "./skills/reply-to-customer-review",
-        "./skills/anti-ai-writing-patterns"
+        "./skills/anti-ai-writing-patterns",
+        "./skills/ga4-implementation"
       ],
       "commands": [
         "./commands/seo-audit.md",
