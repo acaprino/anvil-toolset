@@ -111,7 +111,32 @@ def add_context(chunk: str, document: str) -> str:
 ### Cross-Encoders
 Score (query, document) pairs jointly. More accurate than bi-encoders but O(n) per query.
 
-### Cohere Rerank
+### Modern Reranker Matrix (2025-2026)
+
+| Reranker | Released | Context | Pricing | Notes |
+|----------|----------|---------|---------|-------|
+| Jina Reranker v3 | 2025 | 131,072 tokens (query + all docs) | See vendor | 0.6B listwise; 61.94 nDCG@10 BEIR; highest evaluated quality |
+| Jina Reranker v2 (base-multilingual) | 2024-06-25 | 1024 (auto-chunked) | $0.02 / 1M input + $0.02 / 1M output | 100+ languages, code search, function-calling |
+| Voyage rerank-2.5 | 2025-08-11 | 32,000 tokens | $0.05 / 1M | Instruction-following; 8x Cohere v3.5 context |
+| Voyage rerank-2.5-lite | 2025-08-11 | 32,000 tokens | $0.02 / 1M | Cheapest high-context commercial reranker |
+| Cohere Rerank 3.5 (rerank-v3.5) | 2024-12 | ~4K tokens | See vendor | 100+ languages; strong reasoning |
+| BAAI bge-reranker-v2-m3 | 2024-03 | ~8K | Open (self-host) | Multilingual baseline, slim |
+| BAAI bge-reranker-v2-gemma | 2024-03 | [UNVERIFIED] | Open | Higher quality open-source (Gemma-2B base) |
+| BAAI bge-reranker-v2.5-gemma2-lightweight | 2024 | [UNVERIFIED] | Open | BAAI's latest, claims SOTA BEIR + MIRACL |
+| Mixedbread mxbai-rerank-large-v2 | 2025 | 8K tokens | Apache 2.0 | 57.49 nDCG@10 BEIR; 1.5B Qwen-2.5 base, GRPO trained |
+| Mixedbread mxbai-rerank-base-v2 | 2025 | 8K tokens | Apache 2.0 | 55.57 nDCG@10 BEIR at 0.5B params; excellent speed/quality |
+| cross-encoder ms-marco-MiniLM-L-12-v2 | 2021 | 512 | Open | Legacy; outclassed by v2 rerankers above -- use only when resource-starved |
+
+### Selection Guide
+
+- **Commercial, long docs, multilingual** -> Voyage rerank-2.5 or Cohere Rerank 3.5 (Voyage wins on context and price)
+- **Self-hosted production** -> mxbai-rerank-base-v2 (small / fast) or mxbai-rerank-large-v2 (higher quality)
+- **Highest retrieval quality** -> Jina Reranker v3 (listwise, 131K context)
+- **Open-source multilingual baseline** -> bge-reranker-v2-m3 or bge-reranker-v2.5-gemma2-lightweight
+- **Legacy maintenance** -> keep MS MARCO cross-encoders only for existing pipelines that haven't been retrained
+
+### Example: Cohere Rerank 3.5
+
 ```python
 import cohere
 co = cohere.Client("API_KEY")
@@ -123,13 +148,30 @@ reranked = co.rerank(
 )
 ```
 
-### ColBERT Late Interaction
-Token-level matching with MaxSim. Better than cross-encoders for longer documents.
+### Example: Voyage rerank-2.5
+
+```python
+import voyageai
+vo = voyageai.Client()
+reranked = vo.rerank(
+    model="rerank-2.5",
+    query="query",
+    documents=retrieved_docs,
+    top_k=5,
+    # rerank-2.5 accepts natural-language instructions to steer ranking
+    instruction="Prefer documents that cite primary sources.",
+)
+```
+
+### ColBERT / ColBERTv2 Late Interaction
+Token-level matching with MaxSim. Better than bi-encoders for longer documents; use via RAGatouille for training on custom data. Still relevant in 2026 for zero-shot cross-domain.
 
 ### Two-Stage Pattern
-1. Retrieve top-50 with fast vector search
-2. Re-rank to top-5 with cross-encoder or Cohere Rerank
+1. Retrieve top-50-100 with fast vector search (dense + sparse fusion preferred)
+2. Rerank to top-5-10 with a modern reranker (Voyage / Cohere / mxbai / Jina)
 3. Pass top-5 to LLM for generation
+
+Total latency target: < 200ms for retrieve + rerank + top-k fetch.
 
 ## Self-Query / Metadata Filtering
 

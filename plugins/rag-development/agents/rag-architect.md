@@ -38,18 +38,26 @@ Master RAG engineer -- pipeline design, chunking strategy, embedding selection, 
 
 ### Embedding Models (2025-2026)
 
+See `skills/rag-development/references/embedding-models.md` for full matrix, MTEB snapshots, and sources. Headline picks:
+
 **Commercial:**
-- Google gemini-embedding-001 -- #1 MTEB, 768/3072 dim, 8192 tokens
-- Cohere embed-v4 -- 65.2 MTEB, 1024 dim, best commercial API
-- OpenAI text-embedding-3-large -- 64.6 MTEB, 3072 dim, Matryoshka support
-- OpenAI text-embedding-3-small -- ~62 MTEB, 1536 dim, best value
-- Voyage voyage-3-large -- ~65 MTEB, 1024 dim, 32k context
+- Voyage voyage-4-large / voyage-4 / voyage-4-lite (2026-01-15) -- 1024 dim (Matryoshka 256/512/1024/2048), 32K context; flagship accuracy
+- Voyage voyage-3.5 ($0.06/1M) and voyage-3.5-lite ($0.02/1M) -- cost/quality sweet spot
+- Voyage voyage-code-3 ($0.22/1M) -- code retrieval; +13.8% vs OpenAI v3-large on 238 code datasets
+- Cohere embed-v4 (2025-04-15) -- 256/512/1024/1536 dim, 128K context, multimodal text+image ($0.12/1M text)
+- OpenAI text-embedding-3-large -- 3072 dim, 8191 tokens ($0.13/1M). **text-embedding-4 does not exist.**
+- OpenAI text-embedding-3-small -- 1536 dim, cheapest OpenAI option ($0.02/1M)
+- Google gemini-embedding-001 -- 3072 dim MRL-truncatable, 2048 context ($0.15/1M, $0.075 batch)
+- Google gemini-embedding-2-preview -- first multimodal Gemini embedding (text + image + audio + video)
 
 **Open-Source:**
-- NV-Embed-v2 -- 72.3 MTEB, 4096 dim, beats all commercial on English
-- BGE-M3 -- 63.0 MTEB, 1024 dim, excellent multilingual
-- Jina-embeddings-v3 -- ~63 MTEB, 1024 dim, late chunking support
-- Nomic-embed-text-v1.5 -- ~62 MTEB, 768 dim, Matryoshka support
+- NV-Embed-v2 -- 4096 dim, 32K context, MTEB 72.31 (Aug 2024). **License: CC-BY-NC-4.0 -- not commercial-safe; use NVIDIA NeMo NIMs for commercial.**
+- BGE-M3 -- 1024 dim, 8K context, produces dense + sparse + ColBERT outputs from one model, 100+ languages
+- gte-Qwen2-7B-instruct (Alibaba) -- 7.6B params, MTEB 70.72 (#1 EN+ZH June 2024)
+- stella_en_1.5B_v5 -- 1.5B params, MTEB 69.43, compact English-only
+- Mixedbread mxbai-embed-large-v1 -- 1024 dim, Apache 2.0 (commercial-safe), Matryoshka
+- Nomic embed v2 (MoE) -- 768 dim MRL, multilingual 100+ langs
+- Jina embeddings v3 -- 1024 dim Matryoshka, 8K context, task-specific LoRA adapters (CC-BY-NC)
 
 ### Embedding Types
 - **Dense** -- single vector per chunk; semantic meaning; standard approach
@@ -68,19 +76,32 @@ Master RAG engineer -- pipeline design, chunking strategy, embedding selection, 
 - **MMR (Maximal Marginal Relevance)** -- balance relevance and diversity; lambda 0.5-0.7
 
 ### Re-Ranking
-- **Cross-encoders** -- score (query, doc) pairs jointly; more accurate than bi-encoders
-- **Cohere Rerank** -- rerank-v3.5, rerank-multilingual-v3.0; easy API integration
-- **ColBERT late interaction** -- token-level matching; better for longer documents
-- **Two-stage pattern** -- retrieve top-50 with vectors, re-rank to top-5 with cross-encoder
+See `skills/rag-development/references/retrieval-patterns.md` for the full reranker matrix. Headline picks:
+- **Voyage rerank-2.5** (32K context, $0.05/1M, instruction-following) -- best commercial for long docs
+- **Voyage rerank-2.5-lite** ($0.02/1M) -- cheapest high-context commercial reranker
+- **Cohere Rerank 3.5 (rerank-v3.5)** -- ~4K context, 100+ languages, strong reasoning
+- **Jina Reranker v3** -- 131K listwise context, highest quality on BEIR (61.94 nDCG@10); 0.6B params
+- **Mixedbread mxbai-rerank-large-v2 / base-v2** (Apache 2.0, self-hosted) -- 8K context, SOTA open-source (57.49 / 55.57 nDCG@10)
+- **BAAI bge-reranker-v2-m3** / **bge-reranker-v2.5-gemma2-lightweight** -- open-source multilingual baselines
+- **MS MARCO cross-encoders** (ms-marco-MiniLM) -- legacy; outclassed by v2 rerankers
+- **Two-stage pattern** -- retrieve top-50-100 with hybrid, rerank to top-5-10; target < 200ms end-to-end
 
 ### Advanced RAG Patterns
-- **Agentic RAG** -- agent orchestrates retrieval dynamically; decides when/where to retrieve, reflects on results
-- **Graph RAG (Microsoft)** -- knowledge graph extraction, community detection, hierarchical summaries
+- **Agentic RAG** -- agent orchestrates retrieval dynamically (LangGraph state machines); decides when/where to retrieve, reflects on results
+- **LongRAG** -- pair long retriever (4K-token grouped units) with long-context LLM; minimal retriever complexity
+- **HippoRAG / HippoRAG 2** -- hippocampus-inspired memory; KG + Personalized PageRank; strong on multi-hop and continual learning (NeurIPS'24, ICML'25)
+- **LightRAG** -- HKU/BUPT dual-level (entity + concept) retrieval with graph indexing and incremental updates
+- **Graph RAG (Microsoft) / LazyGraphRAG** -- KG + Leiden community detection + hierarchical summaries; benchmark vs hybrid+rerank first (2025 studies show GraphRAG often underperforms on real-world tasks)
 - **RAPTOR** -- recursive tree of summaries from chunks to root; multi-level retrieval
 - **Corrective RAG (CRAG)** -- evaluator grades retrieved docs; re-retrieves or falls back to web search
 - **Self-RAG** -- model decides when to retrieve, self-critiques for factuality
 - **Modular RAG** -- router, retriever, evaluator, generator, refiner as interchangeable modules
 - **Multi-modal RAG** -- images via CLIP/SigLIP or vision LLMs; tables as HTML; ColPali for page images
+
+### Evaluation (2026 stack)
+- **RAGAS** -- design-time reference-free metrics (Context Precision/Recall, Faithfulness, Answer Relevance)
+- **DeepEval** -- pytest-style assertions for CI/CD gates
+- **TruLens** or **Langfuse** -- production observability and live feedback
 
 ### Vector Databases
 
