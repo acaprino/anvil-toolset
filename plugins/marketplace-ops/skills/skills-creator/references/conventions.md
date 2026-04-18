@@ -1,4 +1,6 @@
-# ACP Conventions Reference
+# Claude Code Plugin Conventions Reference
+
+This reference documents the standard conventions used across Claude Code plugin marketplaces. Individual marketplaces may extend or restrict these conventions in their own `CLAUDE.md` -- always read the target project's CLAUDE.md first.
 
 ## Agent Color Palette
 
@@ -14,7 +16,9 @@ All agents within a plugin should use the same color. Avoid reusing a color acro
 
 ## Plugin Categories
 
-Valid categories: `review`, `development`, `frontend`, `ai-ml`, `utilities`, `infrastructure`, `research`, `business`, `documentation`, `mobile`, `optimization`, `marketing`, `payments`, `workflow`, `productivity`
+Plugin categories are marketplace-specific. Read the existing `marketplace.json` to learn the local taxonomy before choosing one; if proposing a new category, confirm with the user.
+
+Common categories observed across marketplaces: `review`, `development`, `frontend`, `ai-ml`, `utilities`, `infrastructure`, `research`, `business`, `documentation`, `mobile`, `optimization`, `marketing`, `payments`, `workflow`, `productivity`, `testing`, `analysis`, `security`, `algotrading`.
 
 ## Agent Tools
 

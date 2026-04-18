@@ -1,25 +1,26 @@
 ---
 description: >
-  Scaffold a new plugin with proper directory structure, starter files, and marketplace.json registration.
+  Scaffold a new plugin for any Claude Code plugin marketplace with proper directory structure, starter files, and marketplace.json registration.
   TRIGGER WHEN: the user asks to create a new plugin, bootstrap plugin structure, or add a new entry to marketplace.json.
   DO NOT TRIGGER WHEN: adding a skill or agent to an existing plugin (use skills-creator) or reviewing existing plugins.
-argument-hint: "<plugin-name> [--with-agent] [--with-skill] [--with-command] [--category <cat>]"
+argument-hint: "<plugin-name> [--with-agent] [--with-skill] [--with-command] [--category <cat>] [--author <name>]"
 ---
 
 # Scaffold New Plugin
 
-Create a new plugin following ACP conventions.
+Create a new plugin following the standard Claude Code plugin conventions (works against any marketplace with a `.claude-plugin/marketplace.json` registry).
 
 ## Procedure
 
 ### 1. Parse arguments
 
 - `plugin-name`: required, kebab-case
-- `--with-agent`: create an agent .md starter
-- `--with-skill`: create a skill directory with SKILL.md starter
-- `--with-command`: create a command .md starter
-- `--category`: plugin category (default: "utilities")
-- If no --with flags, ask the user what components they want
+- `--with-agent`: create an agent `.md` starter
+- `--with-skill`: create a skill directory with `SKILL.md` starter
+- `--with-command`: create a command `.md` starter
+- `--category`: plugin category; if omitted, read existing `marketplace.json` to list current categories and ask the user to pick or propose a new one
+- `--author`: plugin author; if omitted, read the first plugin's author from `marketplace.json` and use it (or ask the user if the marketplace is empty)
+- If no `--with-*` flags are provided, ask the user what components they want
 
 ### 2. Create directory structure
 
@@ -30,47 +31,65 @@ plugins/<plugin-name>/
   commands/        (if --with-command)
 ```
 
+Do NOT create empty subdirectories.
+
 ### 3. Create starter files
+
+Starters are minimal and use real content. They show the required frontmatter shape and leave clearly labelled `{{PLACEHOLDER}}` fields for the user to fill. They are NOT registered until the user confirms the content.
 
 **Agent starter** (`agents/<plugin-name>.md`):
 ```markdown
 ---
 name: <plugin-name>
 description: >
-  [FILL: When/how to use this agent]
+  {{ONE_SENTENCE_ROLE}}
+  TRIGGER WHEN: {{concrete triggers, comma-separated}}
+  DO NOT TRIGGER WHEN: {{sibling-conflict exclusions}}
 model: opus
-color: [FILL: pick from red, blue, green, yellow, purple, orange, pink, cyan]
+color: {{red | blue | green | yellow | purple | orange | pink | cyan}}
 ---
 
 # ROLE
-[FILL: Agent purpose]
+{{Agent purpose in 1-3 sentences}}
 
 # CAPABILITIES
-[FILL: What this agent does]
+{{Bulleted list of what this agent does}}
+
+# CONVENTIONS
+{{Any non-obvious conventions the agent must follow}}
+
+# OUTPUT FORMAT
+{{How findings/results should be structured}}
 ```
 
 **Skill starter** (`skills/<skill-name>/SKILL.md`):
 ```markdown
 ---
 name: <skill-name>
-description: "[FILL: When/how to use this skill]"
+description: >
+  {{ONE_SENTENCE_ROLE}}
+  TRIGGER WHEN: {{concrete triggers}}
+  DO NOT TRIGGER WHEN: {{sibling-conflict exclusions}}
 ---
 
-# [Skill Title]
+# {{Skill Title}}
 
-[FILL: Skill instructions]
+{{Skill instructions -- teach what Claude does not already know}}
 ```
 
 **Command starter** (`commands/<command-name>.md`):
 ```markdown
 ---
-description: "[FILL: What this command does]"
-argument-hint: "[FILL: expected arguments]"
+description: >
+  {{ONE_SENTENCE_ROLE}}
+  TRIGGER WHEN: {{concrete triggers}}
+  DO NOT TRIGGER WHEN: {{sibling-conflict exclusions}}
+argument-hint: "{{expected arguments}}"
 ---
 
-# [Command Title]
+# {{Command Title}}
 
-[FILL: Command procedure]
+{{Command procedure}}
 ```
 
 ### 4. Register in marketplace.json
@@ -80,23 +99,34 @@ Add entry to `plugins[]` array:
 {
   "name": "<plugin-name>",
   "source": "./plugins/<plugin-name>",
-  "description": "[FILL]",
+  "description": "{{one-sentence description}}",
   "version": "1.0.0",
-  "author": { "name": "Alfio" },
-  "license": "MIT",
+  "author": { "name": "<author-from-step-1>" },
+  "license": "{{license from existing plugins, often MIT}}",
   "keywords": ["<plugin-name>"],
-  "category": "<category>",
+  "category": "<category-from-step-1>",
   "strict": false,
-  "agents": [...],
-  "skills": [...],
-  "commands": [...]
+  "agents": [],
+  "skills": [],
+  "commands": []
 }
 ```
 
+Populate `agents` / `skills` / `commands` arrays with the relative paths of files just created. Omit empty arrays.
+
 ### 5. Bump metadata.version
 
-Increment the marketplace metadata.version.
+Increment the marketplace `metadata.version` (typically minor for a new plugin).
 
 ### 6. Report
 
-Show created files and remind user to fill [FILL] placeholders.
+Show:
+- Created files with paths
+- Updated marketplace.json entry
+- Next actions: fill placeholders in the starter files, add real keywords, then run `/marketplace-ops:marketplace-health` to validate
+
+## Notes
+
+- Marketplace-agnostic: respects whatever author, license, and category conventions already exist in the target marketplace.
+- Never hardcodes an author -- reads from existing plugins or asks the user.
+- Never hardcodes a license -- reads from existing plugins or asks.

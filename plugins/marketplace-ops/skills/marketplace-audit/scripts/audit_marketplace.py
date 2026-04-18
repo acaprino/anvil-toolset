@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Marketplace Audit Script for ACP.
+Marketplace Audit Script for Claude Code plugin marketplaces.
 
 Validates marketplace.json consistency, checks file references,
 validates frontmatter, detects orphaned files, and reports issues.
+Works against any project with the standard .claude-plugin/marketplace.json
++ plugins/<name>/ layout.
 
 Usage:
-    python plugins/marketplace-ops/skills/marketplace-audit/scripts/audit_marketplace.py [--fix]
+    python <plugin-root>/skills/marketplace-audit/scripts/audit_marketplace.py [--fix] [--project-root PATH]
 """
 
 import json

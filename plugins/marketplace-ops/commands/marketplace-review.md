@@ -1,6 +1,6 @@
 ---
 description: >
-  AI-powered quality review of plugin descriptions, trigger keywords, agent prompts, skill instructions, and command definitions -- evaluates activation accuracy, content quality, and cross-plugin coherence.
+  AI-powered quality review of plugin descriptions, trigger keywords, agent prompts, skill instructions, and command definitions in any Claude Code plugin marketplace -- evaluates activation accuracy, content quality, and cross-plugin coherence.
   TRIGGER WHEN: the user asks to review plugin/agent/skill quality, audit triggers, or evaluate marketplace content.
   DO NOT TRIGGER WHEN: just validating marketplace.json structure (use /marketplace-ops:marketplace-health) or authoring new components (use /marketplace-ops:marketplace-scaffold-plugin).
 argument-hint: "[plugin-name] [--all] [--fix]"
@@ -8,7 +8,7 @@ argument-hint: "[plugin-name] [--all] [--fix]"
 
 # Marketplace AI Review
 
-Perform an AI-driven quality evaluation of plugin content across the ACP marketplace.
+Perform an AI-driven quality evaluation of plugin content across any Claude Code plugin marketplace.
 
 ## What this evaluates
 
@@ -18,7 +18,7 @@ This review goes beyond structural validation (which `/marketplace-health` handl
 
 ### Step 1: Load marketplace data
 
-Read `.claude-plugin/marketplace.json` to get the full plugin registry.
+Read `.claude-plugin/marketplace.json` at the project root to get the full plugin registry.
 
 ### Step 2: For each plugin (or the specified one), evaluate these dimensions
 
@@ -28,137 +28,75 @@ Evaluate the `description` field:
 - **Clarity**: Is it immediately clear what the plugin does?
 - **Trigger coverage**: Does it mention enough trigger scenarios for Claude to auto-invoke?
 - **Specificity**: Does it name concrete actions, not just abstract categories?
-- **Conciseness**: Is it under 200 characters while still informative?
-- **Differentiation**: Does it distinguish this plugin from similar ones?
+- **Length**: Under 1024 chars, ideally under 300 for auto-load discoverability
+- **Keyword coverage**: Keywords array contains the concrete domain terms users will search for
 
-Score: 1-5. Flag descriptions scoring below 3.
+#### B. Agent Quality (for each agent in the plugin)
 
-#### B. Agent Description & Prompt Quality
+Read the agent `.md` file:
+- **Description directive voice**: Uses "ALWAYS invoke", "You MUST", "Use PROACTIVELY" or similar (vs passive "Helps with", "Can be used for")
+- **TRIGGER WHEN clause**: present, specific, uses concrete verbs / domain terms
+- **DO NOT TRIGGER WHEN clause**: present, names sibling conflicts (which other agent should handle this case instead)
+- **Body structure**: clear sections (ROLE, CAPABILITIES, CONVENTIONS, OUTPUT FORMAT or similar)
+- **Body size**: 60-200 lines for simple agents, up to ~560 lines for complex; flag over 700 lines
+- **Tool restrictions**: minimal but sufficient (e.g., a read-only reviewer should NOT have Write/Edit)
+- **Model choice**: justified if not `opus`
+- **Color consistency**: matches siblings in the same plugin where appropriate
 
-For each agent .md file, read the full content and evaluate:
-- **Description trigger words**: Are the trigger phrases in `description` specific enough for Claude to know WHEN to use this agent? Descriptions should be slightly "pushy" -- Claude tends to under-trigger
-- **Description action coverage**: Does the description cover all the agent's actual capabilities?
-- **System prompt structure**: Does the body follow terse keyword-list style with clear sections?
-- **System prompt completeness**: Does the prompt cover role, capabilities, conventions, output format?
-- **System prompt length**: Is it appropriately sized? (simple agents 60-200 lines, complex up to 800)
-- **Tool selection**: Are the tools listed appropriate and minimal for the agent's purpose? Are any critical tools missing?
-- **Model choice**: Is the model appropriate for the task complexity?
+#### C. Skill Quality (for each skill in the plugin)
 
-Score: 1-5 per dimension. Flag any below 3.
+Read the skill `SKILL.md`:
+- **Description**: same directive voice + TRIGGER WHEN / DO NOT TRIGGER WHEN checks as agents
+- **Body size**: under 500 lines; larger content should go in `references/`
+- **Progressive disclosure**: uses `references/` for deep content, keeps SKILL.md scannable
+- **Action-oriented**: teaches what Claude doesn't already know; avoids restating general best practices
+- **Examples**: 3-5 `<example>` tags for high-activation skills
 
-#### C. Skill Description & Content Quality
+#### D. Command Quality (for each command in the plugin)
 
-For each SKILL.md, read the full content and evaluate:
-- **Description trigger words**: Does `description` contain specific trigger phrases? It should tell Claude WHEN to activate, not just WHAT it does
-- **Description pushiness**: Claude under-triggers -- is the description assertive enough? (e.g., "Use PROACTIVELY when..." or "You MUST use this before...")
-- **Content conciseness**: Is SKILL.md under 500 lines? Claude already knows most things -- skills should only add context Claude lacks
-- **Instruction clarity**: Are steps actionable and unambiguous?
-- **Reference usage**: Does it use references/ subdirectory for detailed docs instead of bloating SKILL.md?
+Read the command `.md` file:
+- **Frontmatter shape**: `description` and `argument-hint` as separate YAML keys (not a single concatenated string)
+- **Argument hint**: accurate, shows the expected arguments
+- **Body**: actionable procedure, not just marketing copy
+- **Integration**: references the agent or skill that does the real work
 
-Score: 1-5 per dimension. Flag any below 3.
+### Step 3: Cross-plugin coherence
 
-#### D. Command Quality
+- Detect overlapping triggers between plugins (two agents competing for the same activation)
+- Detect orphan references (agent X references skill Y that doesn't exist)
+- Identify missing sibling-conflict DO NOT TRIGGER clauses when two plugins cover adjacent domains
 
-For each command .md, evaluate:
-- **Description**: Clear, actionable, includes key trigger terms
-- **Argument hint**: Present and helpful (if the command accepts arguments)
-- **Procedure clarity**: Steps are unambiguous and complete
+### Step 4: Report
 
-Score: 1-5. Flag below 3.
+Write `.marketplace-review/REPORT.md` with:
 
-#### E. Keyword & Category Analysis
+```markdown
+# Marketplace AI Review -- <marketplace-name> -- <date>
 
-Cross-plugin analysis:
-- **Keyword relevance**: Do plugin keywords actually match the plugin's capabilities?
-- **Keyword completeness**: Are there obvious missing keywords that would help discoverability?
-- **Category accuracy**: Does the category correctly classify the plugin?
-- **Cross-plugin overlap**: Identify plugins with >50% keyword overlap that might be candidates for merging
-- **Taxonomy gaps**: Are there capability areas with no plugin coverage?
+## Summary
+- Plugins evaluated: N
+- Critical issues: K
+- Recommendations: M
 
-### Step 3: Generate report
+## Per-plugin findings
+### <plugin-name>
+- Description score: X/5 -- <reasoning>
+- Agents: ...
+- Skills: ...
+- Commands: ...
+- Recommended fixes:
+  - [CRITICAL] ...
+  - [WARNING] ...
 
-Output a structured report per plugin:
-
-```
-## Plugin: <name> (v<version>)
-
-### Description Quality: X/5
-- Current: "<description>"
-- Issues: ...
-- Suggested: "<improved description>"
-
-### Agents (N total)
-| Agent | Triggers | Prompt | Tools | Score |
-|-------|----------|--------|-------|-------|
-| name  | X/5      | X/5    | X/5   | X/5   |
-
-Issues:
-- agent-name: "<specific issue and fix>"
-
-### Skills (N total)
-| Skill | Triggers | Pushiness | Conciseness | Score |
-|-------|----------|-----------|-------------|-------|
-| name  | X/5      | X/5       | X/5         | X/5   |
-
-Issues:
-- skill-name: "<specific issue and fix>"
-
-### Commands (N total)
-| Command | Description | Args | Procedure | Score |
-|---------|-------------|------|-----------|-------|
-| name    | X/5         | X/5  | X/5       | X/5   |
-
-Issues:
-- command-name: "<specific issue and fix>"
+## Cross-plugin observations
+- ...
 ```
 
-### Step 4: Summary and recommendations
+### With --fix flag
 
-```
-## Marketplace Review Summary
+For each recommendation, offer to apply the fix with user confirmation. Stage changes via Edit, do not auto-commit.
 
-Overall Score: X/5
-Plugins reviewed: N
-Components reviewed: N agents, N skills, N commands
+## Notes
 
-Top issues:
-1. ...
-2. ...
-3. ...
-
-Consolidation opportunities:
-- Plugins X and Y share 70% keywords -- consider merging
-- Skill Z could be shared between plugins A and B
-
-Missing coverage:
-- No plugin covers <area>
-```
-
-### Step 5: With --fix flag
-
-For each issue scored below 3:
-- Propose the specific edit (old text -> new text)
-- Ask for user confirmation before applying
-- After fixes, bump affected plugin versions and metadata.version
-
-## Quality rubric reference
-
-### Description trigger word examples (good vs bad)
-
-**Bad** (too vague, Claude won't trigger):
-- "Handles code review"
-- "Development utilities"
-- "Frontend tools"
-
-**Good** (specific triggers, Claude knows when to activate):
-- "Use when reviewing pull requests, analyzing diffs, or auditing code quality"
-- "Use PROACTIVELY when writing Python -- covers testing, packaging, async patterns"
-- "Expert CSS developer for active CSS work - refactoring styles, migrating SASS/preprocessors"
-
-### Agent prompt body examples (good vs bad)
-
-**Bad** (verbose prose):
-- "You are an expert in CSS development who helps developers write better stylesheets..."
-
-**Good** (terse keyword-list):
-- "# ROLE\nCSS architecture expert\n\n# CAPABILITIES\n- Refactor SASS to native CSS\n- CSS Grid/Flexbox layouts\n- Container queries, cascade layers"
+- Marketplace-agnostic: works on any project with a standard Claude Code plugin layout.
+- Complements (does not replace) the deterministic audit run by `/marketplace-ops:marketplace-health` and the detailed lint in `/marketplace-ops:skills-validate`.

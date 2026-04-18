@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Skill & Agent Description Validator for ACP.
+Skill & Agent Description Validator for Claude Code plugin marketplaces.
 
 Checks activation quality, description patterns, token budget,
 and body size against skills-creator conventions.
