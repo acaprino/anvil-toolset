@@ -25,7 +25,7 @@ plugins/
 - `model`: LLM model (default: `opus`)
 - `tools` (optional): comma-separated tool list (e.g. `Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch, Task`); omit to allow all tools
 - `color`: UI accent color (one of: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `cyan`)
-- Body: terse keyword-list style system prompt; simple agents ~50-200 lines, complex agents up to ~560 lines
+- Body: terse keyword-list style system prompt; simple agents ~50-200 lines, complex agents up to ~700 lines
 
 **Skills** - Directory with `SKILL.md` (frontmatter: `name`, `description`) and optional supplementary subdirs: `references/` (docs), `scripts/`, `templates/`, `assets/`, `lib/`.
 
@@ -37,7 +37,7 @@ plugins/
 
 - Agent names: kebab-case matching the filename (e.g. `quick-searcher.md`)
 - Plugin names: kebab-case directory names
-- Default model: `opus` (Opus 4.6); exceptions noted per-agent (e.g. `quick-searcher` uses `sonnet`)
+- Default model: `opus` (latest Claude Opus); exceptions noted per-agent (e.g. `quick-searcher` uses `sonnet`)
 - Agent body style: terse keyword lists, imperative tone, structured with markdown headers
 - Skills supplementary subdirs: `references/`, `scripts/`, `templates/`, `assets/`, `lib/` as needed
 - No build step or runtime framework - plugins are markdown with optional helper scripts (Python, JS) in skills' `scripts/` subdirs
