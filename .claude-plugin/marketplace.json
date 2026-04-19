@@ -234,8 +234,8 @@
     {
       "name": "python-development",
       "source": "./plugins/python-development",
-      "description": "Python development toolkit -- TDD with pytest, code refactoring with complexity metrics, performance profiling, async patterns, uv package management, dead code detection, comment auditing, project scaffolding, and /python-audit consolidated quality report",
-      "version": "1.18.0",
+      "description": "Python development toolkit -- TDD with pytest, code refactoring with complexity metrics, performance profiling, async patterns, uv package management, dead code detection, comment auditing, project scaffolding, Pydantic v2 patterns + v1 migration, and /python-audit consolidated quality report",
+      "version": "1.19.0",
       "author": {
         "name": "Alfio"
       },
@@ -266,7 +266,8 @@
         "./skills/python-packaging",
         "./skills/uv-package-manager",
         "./skills/python-comments",
-        "./skills/python-dead-code"
+        "./skills/python-dead-code",
+        "./skills/pydantic-v2"
       ],
       "commands": [
         "./commands/python-scaffold.md",
@@ -478,8 +479,8 @@
     {
       "name": "typescript-development",
       "source": "./plugins/typescript-development",
-      "description": "TypeScript and JavaScript development best practices with dead code detection via Knip, coding standards enforcement, and enterprise-grade TypeScript mastery (type system, generics, React/NestJS integration, Zod validation, modern toolchain)",
-      "version": "1.7.1",
+      "description": "TypeScript and JavaScript development toolkit -- hands-on typescript-engineer agent (architecture + implementation), dead-code detection via Knip, coding standards enforcement, and enterprise-grade TypeScript mastery (type system, generics, React/NestJS integration, Zod validation, modern toolchain)",
+      "version": "2.0.0",
       "author": {
         "name": "Alfio"
       },
@@ -503,6 +504,9 @@
       ],
       "category": "development",
       "strict": false,
+      "agents": [
+        "./agents/typescript-engineer.md"
+      ],
       "skills": [
         "./skills/typescript-write",
         "./skills/knip",
@@ -538,8 +542,8 @@
     {
       "name": "digital-marketing",
       "source": "./plugins/digital-marketing",
-      "description": "SEO optimization, content marketing, brand naming, domain hunting, text humanization, customer review response, and GA4/GTM analytics implementation -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, AI text rewriting, professional review reply generation with sentiment analysis, Google Analytics 4 + Google Tag Manager deployment with EU/GDPR Consent Mode v2 compliance, and /ga4-audit Playwright-powered verification",
-      "version": "1.29.0",
+      "description": "SEO optimization, content marketing, brand naming, domain hunting, text humanization, customer review response, GA4/GTM analytics implementation, and answer-engine optimization (Google AI Overviews / SGE, Perplexity, ChatGPT Search, Claude Search, Bing Copilot) -- technical audits, keyword research, content strategy, brand naming, domain checks, trademark screening, AI text rewriting, professional review reply generation with sentiment analysis, Google Analytics 4 + Google Tag Manager deployment with EU/GDPR Consent Mode v2 compliance, /ga4-audit Playwright-powered verification, and AEO auditing (crawler access, E-E-A-T, structured data, passage extractability)",
+      "version": "1.30.0",
       "author": {
         "name": "Alfio"
       },
@@ -587,7 +591,8 @@
         "./agents/seo-specialist.md",
         "./agents/content-marketer.md",
         "./agents/text-humanizer.md",
-        "./agents/ga4-implementation-expert.md"
+        "./agents/ga4-implementation-expert.md",
+        "./agents/llm-seo-optimize.md"
       ],
       "skills": [
         "./skills/brand-naming",
