@@ -255,6 +255,8 @@ Load from the `stripe:stripe` skill's `references/` directory (see `SKILL.md` fo
 - `entitlements.md` -- Feature + ProductFeature + ActiveEntitlement, webhook-driven cache
 - `webhooks-production.md` -- signature verification, idempotency, full event catalog by use-case, audit checklist
 - `stripe-agent-toolkit.md` -- LLM tool-calling, OpenAI Agents SDK / Vercel AI / LangChain / CrewAI, MCP server, RAK scoping
+- `test-clocks.md` -- simulating subscription lifecycle in test mode
+- `pci-dss-4-checklist.md` -- PCI DSS 4.0 / 4.0.1 compliance for SAQ-A and SAQ-A-EP merchants
 - `stripe-patterns.md` -- Connect, tax, 3DS, Radar, disputes, idempotency
 - `firebase-integration.md` -- Firebase + Firestore integration
 - `api-cheatsheet.md` -- quick API reference

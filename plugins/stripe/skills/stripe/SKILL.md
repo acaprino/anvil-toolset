@@ -19,12 +19,16 @@ Unified reference for Stripe integrations. Content is split across `references/`
 - **Usage-based billing / metered pricing** -> `references/billing-meters.md` (legacy `usage_type=metered` was removed in 2025-03-31.basil)
 - **Feature gating from Stripe products** -> `references/entitlements.md`
 - **LLM agents calling Stripe (OpenAI Agents SDK / Vercel AI / LangChain / CrewAI / MCP)** -> `references/stripe-agent-toolkit.md`
+- **Simulating subscription lifecycle in tests** -> `references/test-clocks.md`
+- **PCI DSS 4.0 / 4.0.1 compliance (SAQ-A, SAQ-A-EP)** -> `references/pci-dss-4-checklist.md`
 - **Subscription lifecycle** -> `references/subscription-patterns.md`, `references/usage-revenue-modeling.md`
 - **Checkout conversion optimization** -> `references/checkout-optimization.md`
 - **Pricing strategy and tier design** -> `references/pricing-patterns.md`
 - **Firebase + Stripe integration** -> `references/firebase-integration.md`
 - **Stripe-idiomatic patterns (reusable code)** -> `references/stripe-patterns.md`
 - **Cost analysis / unit economics** -> `references/cost-analysis.md`
+
+**Reference style note:** the newer references (`billing-meters`, `entitlements`, `webhooks-production`, `typescript-nextjs`, `embedded-checkout`, `stripe-agent-toolkit`, `test-clocks`, `pci-dss-4-checklist`) intentionally link to official Stripe docs for canonical code samples instead of mirroring them locally. Local content is limited to non-obvious gotchas and decision criteria.
 
 ## Scripts
 
@@ -34,6 +38,8 @@ Ready-to-run Python helpers (adapt to your project; require `STRIPE_SECRET_KEY` 
 - `scripts/stripe_utils.py` -- shared utility functions used by the other scripts
 - `scripts/sync_subscriptions.py` -- reconcile local DB vs Stripe subscription state
 - `scripts/webhook_handler.py` -- signature-verified webhook receiver template with idempotency
+- `scripts/webhook_audit.py` -- report gaps between configured webhook endpoints and the must-have event catalog
+- `scripts/simulate_subscription.py` -- walk a test-clock subscription through trial end, renewal, failed payment, and recovery
 
 All scripts live at `${CLAUDE_PLUGIN_ROOT}/skills/stripe/scripts/<name>.py`. Agents should reference them by that path.
 
@@ -87,5 +93,6 @@ See `references/webhooks-production.md` for the full treatment (event catalog by
 
 - Pricing, tier design, revenue projections -> `revenue-optimizer` agent (same plugin)
 - API implementation, webhooks, Connect, subscriptions -> `stripe-integrator` agent (same plugin)
+- Webhook audit (Stripe account + codebase) -> `stripe-webhooks-auditor` agent + `/stripe:audit-webhooks` command
 - GDPR / PCI posture around payment data -> `business:privacy-doc-generator`
 - Cross-platform token/auth handling in a payment flow -> `platform-engineering:platform-reviewer`
