@@ -1,4 +1,3 @@
-<!-- Source: SpillwaveSolutions/mastering-typescript-skill - mastering-typescript/SKILL.md -->
 ---
 name: mastering-typescript
 description: |
@@ -30,6 +29,8 @@ tags:
   - langchain
   - vite
 ---
+
+Source: SpillwaveSolutions/mastering-typescript-skill - `mastering-typescript/SKILL.md`
 
 # Mastering Modern TypeScript
 

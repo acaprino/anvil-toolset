@@ -1,5 +1,5 @@
 ---
-name: claude-agent-sdk
+name: agent-sdk-builder
 description: >
   Build apps with the Claude Agent SDK (formerly Claude Code SDK). Covers programmatic agent loops, tool integration, subagent orchestration, prompt caching, and migration between Claude model versions.
   TRIGGER WHEN: code references claude-agent-sdk, user says "agent sdk", "build an agent", "programmatic claude", "claude code sdk", "sidecar", "run claude programmatically".

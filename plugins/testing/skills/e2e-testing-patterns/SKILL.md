@@ -1,4 +1,3 @@
-<!-- upstream: wshobson/agents - plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md -->
 ---
 name: e2e-testing-patterns
 description: >
@@ -8,6 +7,8 @@ description: >
   setting up Playwright or Cypress, visual regression testing, accessibility testing.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 ---
+
+Source: wshobson/agents - `plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md`
 
 # E2E Testing Patterns
 

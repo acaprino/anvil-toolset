@@ -1,4 +1,3 @@
-<!-- upstream: github/awesome-copilot - skills/multi-stage-dockerfile/SKILL.md -->
 ---
 name: multi-stage-dockerfile
 description: >
@@ -6,6 +5,9 @@ description: >
   TRIGGER WHEN: creating Dockerfiles, optimizing container images, multi-stage builds, Docker best practices.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 ---
+
+Source: github/awesome-copilot - `skills/multi-stage-dockerfile/SKILL.md`
+
 
 Your goal is to help me create efficient multi-stage Dockerfiles that follow best practices, resulting in smaller, more secure container images.
 

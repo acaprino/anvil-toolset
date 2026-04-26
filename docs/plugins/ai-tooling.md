@@ -81,7 +81,7 @@ Skill activation engine that checks every installed skill against the current ta
 
 ---
 
-### `claude-agent-sdk`
+### `agent-sdk-builder`
 
 Build apps with the Claude Agent SDK (formerly Claude Code SDK). Covers programmatic agent orchestration, subagent management, custom tools, and deployment workflows.
 

@@ -1,8 +1,8 @@
 ---
 name: brainstorming
 description: >
-  Explore user intent, requirements, and design through collaborative dialogue before any implementation. You MUST use this before ANY creative or implementation work -- creating features, building components, adding functionality, modifying behavior, or any non-trivial task. A conversation that starts as a question but progresses into "which approach should we take?" or "here's the architecture" IS a brainstorming session and MUST invoke this skill before any implementation begins.
-  TRIGGER WHEN: (1) user says 'brainstorm', 'design', 'build', 'create', 'add', 'implement', 'develop', 'make', or gives any task involving new code; (2) the conversation has evolved into architectural discussion -- comparing approaches, evaluating trade-offs, drawing architecture diagrams, making technology choices, or discussing how components connect -- even if no explicit trigger word was used. A conversation that starts as a question but progresses into "which approach should we take?" or "here's the architecture" IS a brainstorming session and MUST invoke this skill before any implementation begins.
+  Explore user intent, requirements, and design through collaborative dialogue before any implementation. You MUST use this before ANY creative or implementation work -- creating features, building components, adding functionality, modifying behavior, or any non-trivial task.
+  TRIGGER WHEN: (1) user says 'brainstorm', 'design', 'build', 'create', 'add', 'implement', 'develop', 'make', or gives any task involving new code; (2) the conversation has evolved into architectural discussion -- comparing approaches, evaluating trade-offs, drawing architecture diagrams, making technology choices, or discussing how components connect -- even without an explicit trigger word. A conversation that started as a question but progressed into "which approach should we take?" IS a brainstorming session and MUST invoke this skill before any implementation begins.
   DO NOT TRIGGER WHEN: user has a spec/plan ready, is fixing a specific bug, or doing a one-line change.
 ---
 
