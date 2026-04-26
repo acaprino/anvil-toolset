@@ -100,3 +100,19 @@ Google's Core Web Vitals measure real-world user experience and directly influen
 
 - Cold start time (<2 seconds target), frame rendering latency (<16ms for 60fps), and layout stability during data loading.
 - Desktop: track window render time, UI thread responsiveness, and resize stability.
+
+## Official docs
+
+- Core Web Vitals + thresholds: https://web.dev/articles/vitals
+- LCP optimization guide: https://web.dev/articles/optimize-lcp
+- INP optimization guide: https://web.dev/articles/optimize-inp
+- CLS optimization guide: https://web.dev/articles/optimize-cls
+- web.dev image optimization: https://web.dev/learn/images
+- WebP / AVIF browser support (caniuse): https://caniuse.com/webp
+- MDN responsive images (`srcset`/`sizes`): https://developer.mozilla.org/en-US/docs/Learn/HTML/Multimedia_and_embedding/Responsive_images
+- MDN `font-display`: https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display
+- webpack-bundle-analyzer: https://github.com/webpack-contrib/webpack-bundle-analyzer
+- Lighthouse CI: https://github.com/GoogleChrome/lighthouse-ci
+- CrUX (Chrome User Experience Report): https://developer.chrome.com/docs/crux
+- Brotli compression (RFC 7932): https://www.rfc-editor.org/rfc/rfc7932
+- Pinterest case study: https://medium.com/pinterest-engineering/a-one-year-pwa-retrospective-f4a2f4129e05

@@ -27,3 +27,14 @@
 - Assume "eventually consistent" means "always correct" -- CRDTs solve merge conflicts, not authorization or validation.
 - Skip testing offline scenarios.
 - Store unbounded offline data without compaction/garbage collection.
+
+## Official docs
+
+- MDN Background Sync API: https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API
+- MDN IndexedDB: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+- Workbox (Google's service worker toolkit): https://developer.chrome.com/docs/workbox
+- Yjs (CRDT library): https://github.com/yjs/yjs
+- Automerge (CRDT library): https://automerge.org/
+- ShareJS / sharedb (Operational Transform): https://github.com/share/sharedb
+- Android WorkManager: https://developer.android.com/topic/libraries/architecture/workmanager
+- iOS BGTaskScheduler: https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler

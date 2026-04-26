@@ -40,3 +40,16 @@ Token storage is where most authentication implementations fail. The correct app
 - Use the JWT `none` algorithm -- always validate the `alg` header server-side.
 - Embed sensitive user data in JWT payloads (they're base64-encoded, not encrypted).
 - Store credentials in Android SharedPreferences or iOS NSUserDefaults without hardware-backed encryption.
+
+## Official docs
+
+- OAuth 2.1 (consolidating BCPs): https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1
+- OAuth 2.0 for Native Apps (RFC 8252) -- system browser + PKCE: https://www.rfc-editor.org/rfc/rfc8252
+- PKCE (RFC 7636): https://www.rfc-editor.org/rfc/rfc7636
+- OWASP JWT Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html
+- iOS Keychain: https://developer.apple.com/documentation/security/keychain_services
+- Android EncryptedSharedPreferences: https://developer.android.com/reference/androidx/security/crypto/EncryptedSharedPreferences
+- Android Custom Tabs: https://developer.chrome.com/docs/android/custom-tabs
+- iOS ASWebAuthenticationSession: https://developer.apple.com/documentation/authenticationservices/aswebauthenticationsession
+- Windows Credential Manager: https://learn.microsoft.com/en-us/windows/win32/api/wincred/
+- libsecret (Linux): https://wiki.gnome.org/Projects/Libsecret

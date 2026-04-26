@@ -58,3 +58,20 @@
 - Electron: use `ipcMain.handle`/`ipcRenderer.invoke` with preload scripts and context isolation.
 - Tauri: use the `invoke` command system -- the Rust core process manages global state (settings, DB connections).
 - Keep shared state between frontend and backend minimal and well-structured.
+
+## Official docs
+
+- RFC 7807 / 9457 Problem Details for HTTP APIs: https://www.rfc-editor.org/rfc/rfc9457.html
+- GraphQL spec: https://spec.graphql.org/
+- REST API design (Microsoft guidance): https://learn.microsoft.com/en-us/azure/architecture/best-practices/api-design
+- Google API design guide: https://cloud.google.com/apis/design
+- TanStack Query: https://tanstack.com/query
+- SWR: https://swr.vercel.app/
+- Zustand: https://zustand-demo.pmnd.rs/
+- Redux Toolkit: https://redux-toolkit.js.org/
+- Pinia: https://pinia.vuejs.org/
+- Dexie.js (IndexedDB wrapper): https://dexie.org/
+- Android Room: https://developer.android.com/training/data-storage/room
+- iOS SwiftData: https://developer.apple.com/documentation/swiftdata
+- Tauri IPC: https://v2.tauri.app/develop/calling-rust/
+- Electron context isolation: https://www.electronjs.org/docs/latest/tutorial/context-isolation

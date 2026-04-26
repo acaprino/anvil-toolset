@@ -99,3 +99,20 @@
 - Cache personalized or authenticated responses at the CDN layer without `Vary` headers or private caching.
 - Purge the entire cache when a single resource changes.
 - Vary cache on Cookie header unless truly necessary -- it destroys hit rates.
+
+## Official docs
+
+- HTTP/2 spec (RFC 9113): https://www.rfc-editor.org/rfc/rfc9113
+- HTTP/3 spec (RFC 9114): https://www.rfc-editor.org/rfc/rfc9114
+- MDN `Cache-Control`: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+- `stale-while-revalidate` (RFC 5861): https://www.rfc-editor.org/rfc/rfc5861
+- Postgres EXPLAIN ANALYZE: https://www.postgresql.org/docs/current/sql-explain.html
+- Postgres index types: https://www.postgresql.org/docs/current/indexes-types.html
+- LeakCanary (Android): https://square.github.io/leakcanary/
+- Xcode Instruments: https://developer.apple.com/tutorials/instruments
+- Android WorkManager: https://developer.android.com/topic/libraries/architecture/workmanager
+- iOS BGTaskScheduler: https://developer.apple.com/documentation/backgroundtasks/bgtaskscheduler
+- Next.js rendering modes: https://nextjs.org/docs/app/building-your-application/rendering
+- React Server Components: https://react.dev/reference/rsc/server-components
+- Astro Islands: https://docs.astro.build/en/concepts/islands/
+- Tauri vs Electron benchmarks (community): https://github.com/Elanis/web-to-desktop-framework-comparison

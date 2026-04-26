@@ -35,3 +35,13 @@ Cross-site scripting remains one of the most prevalent web vulnerabilities. Its 
 - Use `innerHTML`, `document.write()`, or `eval()` with user-supplied data.
 - Disable CSP for developer convenience.
 - Use `unsafe-inline` or `unsafe-eval` in CSP directives -- they defeat the purpose entirely.
+
+## Official docs
+
+- OWASP XSS Prevention Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet.html
+- MDN Content Security Policy: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+- W3C CSP Level 3: https://www.w3.org/TR/CSP3/
+- MDN SameSite cookies: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+- MDN Subresource Integrity: https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
+- DOMPurify: https://github.com/cure53/DOMPurify
+- British Airways Magecart case: https://ico.org.uk/about-the-ico/media-centre/news-and-blogs/2020/10/ico-fines-british-airways-20m-for-data-breach-affecting-more-than-400-000-customers/

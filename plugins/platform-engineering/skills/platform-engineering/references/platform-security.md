@@ -121,3 +121,22 @@ await flipFuses(
 | **X-Content-Type-Options** (`nosniff`) | Important | Important | N/A | Important | N/A |
 | **Referrer-Policy** (`strict-origin-when-cross-origin`) | Important | Important | N/A | Important | N/A |
 | **Permissions-Policy** | Important | Important | N/A | Important | N/A |
+
+## Official docs
+
+- OWASP MASVS (mobile): https://mas.owasp.org/MASVS/
+- OWASP MAS Testing Guide: https://mas.owasp.org/MASTG/
+- iOS Keychain Services: https://developer.apple.com/documentation/security/keychain_services
+- Android Keystore: https://developer.android.com/training/articles/keystore
+- Android Network Security Config: https://developer.android.com/training/articles/security-config
+- iOS App Transport Security: https://developer.apple.com/documentation/security/preventing_insecure_network_connections
+- iOS LocalAuthentication (biometrics): https://developer.apple.com/documentation/localauthentication
+- Android BiometricPrompt: https://developer.android.com/reference/androidx/biometric/BiometricPrompt
+- Electron Security checklist: https://www.electronjs.org/docs/latest/tutorial/security
+- Electron Fuses: https://www.electronjs.org/docs/latest/tutorial/fuses (`@electron/fuses`: https://github.com/electron/fuses)
+- electron-builder asar integrity: https://www.electron.build/configuration/configuration#asarintegrity
+- Tauri Security: https://v2.tauri.app/security/
+- MDN HSTS: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+- MDN Permissions-Policy: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy
+- securityheaders.com (testing): https://securityheaders.com/
+- TU Wien Cache API research (PWA persistent MITM): https://github.com/SBA-Research/cache-api-research

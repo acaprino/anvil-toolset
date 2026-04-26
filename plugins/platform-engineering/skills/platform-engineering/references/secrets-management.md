@@ -16,3 +16,15 @@
 - Store secrets in `.env` files that get bundled into client builds. Variables prefixed with `REACT_APP_`, `VITE_`, or `NEXT_PUBLIC_` are embedded in the production JavaScript bundle and are visible to anyone who opens DevTools.
 - Hardcode secrets in mobile binaries -- reverse-engineering tools extract them in minutes.
 - Store secrets in Electron ASAR archives, which are extractable with `asar extract app.asar`.
+
+## Official docs
+
+- OWASP Secrets Management Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+- AWS Secrets Manager: https://aws.amazon.com/secrets-manager/
+- HashiCorp Vault: https://www.vaultproject.io/
+- Azure Key Vault: https://azure.microsoft.com/en-us/products/key-vault
+- GCP Secret Manager: https://cloud.google.com/security/products/secret-manager
+- GitHub secret scanning + push protection: https://docs.github.com/en/code-security/secret-scanning
+- detect-secrets: https://github.com/Yelp/detect-secrets
+- GitLeaks: https://github.com/gitleaks/gitleaks
+- TruffleHog: https://github.com/trufflesecurity/trufflehog

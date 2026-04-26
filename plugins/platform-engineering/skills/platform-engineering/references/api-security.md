@@ -28,3 +28,13 @@ Every API endpoint your application exposes is discoverable. Assuming obscurity 
 - Return verbose error messages exposing stack traces, database schemas, or internal paths.
 - Expose GraphQL introspection in production.
 - Rely on obscurity -- "nobody will find this endpoint" is not a security strategy.
+
+## Official docs
+
+- OWASP API Security Top 10 (2023): https://owasp.org/API-Security/editions/2023/en/0x11-t10/
+- OWASP API Security Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html
+- MDN CORS: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+- OpenAPI Specification: https://www.openapis.org/
+- JSON Schema validation: https://json-schema.org/
+- Peloton incident writeup (Pen Test Partners): https://www.pentestpartners.com/security-blog/peloton-account-takeover/
+- Parler scrape postmortem: https://en.wikipedia.org/wiki/Parler#Data_breach
