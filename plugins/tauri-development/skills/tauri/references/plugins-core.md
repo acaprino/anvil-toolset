@@ -1,37 +1,39 @@
 # Tauri 2 Core Plugins
 
-## Adding Plugins
+Universal plugins (work on desktop AND mobile). For mobile-only plugins (biometric, haptics, nfc, barcode-scanner), see `plugins-mobile.md`.
 
-```bash
-npm run tauri add <plugin-name>
-```
+## When to use
 
-This automatically:
-1. Adds Rust crate to `Cargo.toml`
-2. Adds npm package
-3. Updates capabilities if needed
+Choosing which plugin to add for a capability you need (filesystem, HTTP, store, SQL, deep links, dialogs, etc.) and registering it correctly.
 
-## Universal Plugins
+## Universal plugin matrix
 
-| Plugin | Desktop | Mobile | Description |
-|--------|---------|--------|-------------|
-| `fs` | yes | yes | File system access |
-| `http` | yes | yes | HTTP client |
-| `notification` | yes | yes | Push/local notifications |
-| `clipboard-manager` | yes | yes | Clipboard access |
-| `dialog` | yes | yes | Native dialogs |
-| `opener` | yes | yes | Open URLs in system browser |
-| `store` | yes | yes | Key-value storage |
-| `sql` | yes | yes | SQLite database |
-| `log` | yes | yes | Logging |
-| `os` | yes | yes | OS information |
-| `deep-link` | yes | yes | URL scheme handling |
+| Plugin | Desktop | Mobile | Use for |
+|--------|---------|--------|---------|
+| `fs` | yes | yes | File read/write (use `BaseDirectory.AppData` for cross-platform) |
+| `http` | yes | yes | HTTP client that bypasses CORS (vs browser fetch) |
+| `notification` | yes | yes | OS notifications |
+| `clipboard-manager` | yes | yes | Clipboard read/write |
+| `dialog` | yes | yes | Native open/save/message dialogs |
+| `opener` | yes | yes | Open URL in system browser (preferred for OAuth) |
+| `store` | yes | yes | Persistent key-value (JSON file under app data) |
+| `sql` | yes | yes | SQLite |
+| `log` | yes | yes | Structured logging to stdout/file/webview |
+| `os` | yes | yes | Platform/arch detection |
+| `deep-link` | yes | yes | Custom URL scheme handling |
 
-For mobile-only plugins (biometric, barcode-scanner, haptics, nfc), see `references/plugins-mobile.md`.
+Add via `npm run tauri add <name>` -- it patches Cargo.toml, package.json, and capabilities in one shot.
 
-## Plugin Configuration
+## Gotchas
 
-### lib.rs Setup
+- **Adding the plugin in `lib.rs` is half the job.** You also need the JS package (`npm i @tauri-apps/plugin-<name>`) AND the permission entry in `capabilities/default.json`. `tauri add` does all three; manual installs forget #3 every time.
+- **`opener` vs `shell` for OAuth.** Use `opener::openUrl` for OAuth/external links -- it invokes the OS default browser. The `shell` plugin's `open` works on desktop but is more permissive than necessary and adds attack surface. Google specifically blocks OAuth in WebViews (see `authentication.md`).
+- **`tauri-plugin-store` is async-by-default.** `await store.save()` is required after `set` to actually flush to disk -- without it the app exits and writes are lost.
+- **`tauri-plugin-log` colors break on Windows terminals** that don't support ANSI codes -- gate `with_colors` behind `cfg!(debug_assertions)` if you ship CLI users.
+- **`tauri-plugin-sql` migrations live in a `migrations` Vec** at builder time, not in app code. Adding migrations after launch requires a release.
+
+## Minimal lib.rs registration shape
+
 ```rust
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -42,146 +44,34 @@ pub fn run() {
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_store::Builder::new().build())
+        .plugin(tauri_plugin_log::Builder::new().build())
         .invoke_handler(tauri::generate_handler![])
         .run(tauri::generate_context!())
         .expect("error");
 }
 ```
 
-### Permissions (capabilities/default.json)
+## Deep-link config (desktop)
+
 ```json
-{
-  "permissions": [
-    "core:default",
-    "opener:default",
-    "deep-link:default",
-    "fs:default",
-    "http:default",
-    "notification:default",
-    "store:default",
-    "clipboard-manager:default"
-  ]
+// tauri.conf.json
+"plugins": {
+  "deep-link": { "desktop": { "schemes": ["myapp"] } }
 }
 ```
 
-## Deep Linking Configuration
+For mobile deep-link config (Android Intent Filters, iOS Associated Domains), see `plugins-mobile.md`.
 
-### tauri.conf.json
-```json
-{
-  "plugins": {
-    "deep-link": {
-      "desktop": {
-        "schemes": ["myapp"]
-      }
-    }
-  }
-}
-```
+## Official docs
 
-For mobile deep link configuration (custom schemes, app links, Android Intent Filters, iOS Associated Domains), see `references/plugins-mobile.md`.
+- Plugin index: https://v2.tauri.app/plugin/
+- Per-plugin permission reference: each page has a "Permissions" section, e.g. https://v2.tauri.app/plugin/file-system/#permissions
+- `tauri add` CLI: https://v2.tauri.app/reference/cli/#add
+- Awesome Tauri (community plugins): https://github.com/tauri-apps/awesome-tauri
 
-## Opener Plugin (External URLs)
+## Related
 
-The `opener` plugin opens URLs in the system browser on all platforms. On desktop, you can also use the `shell` plugin's `open` command as an alternative.
-
-### Setup
-```bash
-npm run tauri add opener
-```
-
-### Usage
-```typescript
-import { openUrl } from '@tauri-apps/plugin-opener';
-
-// Open URL in system browser
-await openUrl('https://example.com');
-
-// Open email client
-await openUrl('mailto:hello@example.com');
-
-// Open phone dialer
-await openUrl('tel:+1234567890');
-```
-
-### Permissions
-```json
-{
-  "permissions": [
-    "opener:default"
-  ]
-}
-```
-
-### OAuth Use Case
-Critical for OAuth flows where Google blocks WebView sign-in. See [authentication.md](authentication.md) for complete OAuth implementation guide.
-
-## Logging Plugin
-
-```rust
-// Cargo.toml
-tauri-plugin-log = "2"
-
-// lib.rs
-.plugin(
-    tauri_plugin_log::Builder::new()
-        .level(log::LevelFilter::Debug)
-        .with_colors(tauri_plugin_log::fern::colors::ColoredLevelConfig::default())
-        .build()
-)
-
-// Usage
-log::info!("App started");
-log::debug!("Debug info: {:?}", data);
-log::error!("Error: {}", error);
-```
-
-## Store Plugin (Persistent Storage)
-
-```typescript
-import { Store } from '@tauri-apps/plugin-store';
-
-const store = new Store('settings.json');
-
-// Save
-await store.set('theme', 'dark');
-await store.set('user', { id: 1, name: 'John' });
-await store.save();
-
-// Load
-const theme = await store.get<string>('theme');
-const user = await store.get<{ id: number; name: string }>('user');
-
-// Delete
-await store.delete('theme');
-await store.clear();
-```
-
-## SQL Plugin (SQLite)
-
-```typescript
-import Database from '@tauri-apps/plugin-sql';
-
-const db = await Database.load('sqlite:app.db');
-
-// Create table
-await db.execute(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE
-  )
-`);
-
-// Insert
-await db.execute(
-  'INSERT INTO users (name, email) VALUES (?, ?)',
-  ['John', 'john@example.com']
-);
-
-// Select
-const users = await db.select<{ id: number; name: string; email: string }[]>(
-  'SELECT * FROM users WHERE name LIKE ?',
-  ['%John%']
-);
-```
+- `plugins-mobile.md` -- biometric, barcode, haptics, nfc, geolocation
+- `frontend-patterns.md` -- JS-side usage examples for these plugins
+- `authentication.md` -- why `opener` matters for OAuth
+- `shell-plugin.md` -- when to reach for `shell` instead of `opener`

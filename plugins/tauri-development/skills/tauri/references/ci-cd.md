@@ -1,99 +1,56 @@
 # CI/CD for Tauri Applications
 
-## Pipeline Stages
+Provider-agnostic notes on what makes a Tauri pipeline different from a generic Node app build.
 
-A typical Tauri CI/CD pipeline has these stages:
+## When to use
 
-1. **Setup** -- install toolchain (Rust, Node.js, platform SDK)
-2. **Cache** -- restore Rust target/, node_modules/
-3. **Build frontend** -- bundle the web assets
-4. **Build Tauri** -- compile Rust + bundle into platform installer
-5. **Sign** -- code signing for distribution
-6. **Artifact** -- upload build output
-7. **Release** (optional) -- create release, publish
+Designing or auditing a CI pipeline that produces Tauri installers/bundles. For mobile-specific CI (signing, store upload, 16KB page size), continue to `ci-cd-mobile.md`.
 
-## Caching Strategy
+## OS matrix (cannot be flattened)
 
-### Rust Compilation Cache
-Cache `src-tauri/target/` keyed by:
-- OS + architecture
-- `Cargo.lock` hash
-- Rust toolchain version
+| Target | Runner OS | Notes |
+|--------|-----------|-------|
+| Windows (.msi/.nsis) | Windows | WebView2 bundled or bootstrapped at install |
+| macOS (.dmg/.app) | macOS | codesign + notarization required for distribution |
+| Linux (.AppImage/.deb) | Ubuntu | needs `libwebkit2gtk-4.1-dev` |
+| Android (.apk/.aab) | Ubuntu | Android SDK + NDK; can build on Linux |
+| iOS (.ipa) | macOS | Xcode required, no Linux/Windows alternative |
 
-Typical cache sizes: 500MB-2GB. Use incremental compilation cache where supported.
+Always run platforms in parallel jobs -- a serial matrix wastes hours.
 
-### Node Dependencies
-Cache `node_modules/` keyed by lockfile hash.
+## Gotchas
 
-### Platform-Specific Caches
-- **Gradle** (Android): `~/.gradle/caches/`
-- **CocoaPods** (iOS): `~/Library/Caches/CocoaPods/`, `Pods/`
+- **Don't ship debug builds by accident.** Without an explicit release profile, binaries are 10-50x larger and noticeably slower. Set in `Cargo.toml`:
+  ```toml
+  [profile.release]
+  lto = true
+  opt-level = "s"      # "3" if you optimize for speed over size
+  codegen-units = 1
+  strip = true
+  panic = "abort"
+  ```
+- **Cache `src-tauri/target/` aggressively.** Key on `Cargo.lock` hash + Rust toolchain version + OS. Cache size 500MB-2GB; Rust rebuilds without it take 20+ minutes.
+- **Signing secrets as base64.** Store keystores, .p12, .p8 as base64-encoded CI secrets (`base64 -i file | tr -d '\n'`) and decode at build time to a temp path. Never commit credentials.
+- **`tauri-apps/tauri-action`** is the path of least resistance on GitHub Actions for desktop builds (auto-uploads to a draft release). On other CIs you call `tauri build` directly and upload `src-tauri/target/release/bundle/*` yourself.
+- **Updater signing key.** `TAURI_SIGNING_PRIVATE_KEY` + `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` are required if you ship the updater plugin -- builds without them succeed but produce unsigned `.json` manifests that the updater will refuse.
 
-## OS Matrix
+## Artifact paths cheat sheet
 
-| Target Platform | CI Runner OS | Notes |
-|----------------|-------------|-------|
-| Windows (.msi, .nsis) | Windows | WebView2 bundled or bootstrapped |
-| macOS (.dmg, .app) | macOS | WKWebView (system) |
-| Linux (.AppImage, .deb) | Ubuntu | libwebkit2gtk-4.1 required |
-| Android (.apk, .aab) | Ubuntu | Android SDK + NDK required |
-| iOS (.ipa) | macOS | Xcode required |
+| Platform | Bundle output |
+|----------|---------------|
+| Windows / macOS / Linux | `src-tauri/target/release/bundle/` |
+| Android | `src-tauri/gen/android/app/build/outputs/` |
+| iOS | `src-tauri/gen/apple/build/` |
 
-## Release Profiles in CI
+## Official docs
 
-Ensure `Cargo.toml` has optimized release profile:
+- Tauri CI/CD guide: https://v2.tauri.app/distribute/pipelines/
+- `tauri-action`: https://github.com/tauri-apps/tauri-action
+- Code signing per platform: https://v2.tauri.app/distribute/sign/
+- Auto-updater + key generation: https://v2.tauri.app/plugin/updater/
 
-```toml
-[profile.release]
-lto = true
-opt-level = "s"       # Optimize for size (or "3" for speed)
-codegen-units = 1     # Better optimization
-strip = true          # Remove debug symbols
-panic = "abort"       # Smaller binary
-```
+## Related
 
-## Code Signing Concepts
-
-### Signing Secrets Management
-- Store signing keys/certificates as CI secrets (base64-encoded for binary files)
-- Decode at build time into temporary paths
-- Never commit signing credentials to the repository
-
-### Platform Signing Overview
-| Platform | Signing Method | Required Credentials |
-|----------|---------------|---------------------|
-| Windows | Authenticode (optional) | Code signing certificate (.pfx) |
-| macOS | codesign + notarization | Apple Developer ID, API key |
-| Linux | None required | -- |
-| Android | Keystore | .jks file + password + alias |
-| iOS | Apple provisioning | Certificate + provisioning profile or API key |
-
-## Artifact Management
-
-Build outputs by platform:
-| Platform | Output | Typical Location |
-|----------|--------|-----------------|
-| Windows | `.msi`, `.nsis` | `src-tauri/target/release/bundle/` |
-| macOS | `.dmg`, `.app` | `src-tauri/target/release/bundle/` |
-| Linux | `.AppImage`, `.deb` | `src-tauri/target/release/bundle/` |
-| Android | `.apk`, `.aab` | `src-tauri/gen/android/app/build/outputs/` |
-| iOS | `.ipa` | `src-tauri/gen/apple/build/` |
-
-## Tauri Official CI Action
-
-The `tauri-apps/tauri-action` simplifies desktop builds with automatic artifact upload and release creation. Works with GitHub Actions; for other CI providers, use direct CLI commands.
-
-## Environment Variables
-
-Common variables needed in CI:
-```
-TAURI_SIGNING_PRIVATE_KEY    # For auto-updater signing
-TAURI_SIGNING_PRIVATE_KEY_PASSWORD
-```
-
-## Pipeline Anti-Patterns
-
-- **No caching** -- Rust builds are slow; always cache target/
-- **Building all targets sequentially** -- use parallel jobs per platform
-- **Hardcoded paths** -- use CI variables for temp dirs and artifact paths
-- **Skipping release profile** -- debug builds are 10-50x larger
+- `ci-cd-mobile.md` -- Android keystore, App Store Connect API, store upload, 16KB page size
+- `build-deploy-desktop.md` -- desktop signing/notarization details
+- `build-deploy-mobile.md` -- Android/iOS bundle gotchas the CI inherits

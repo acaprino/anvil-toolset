@@ -1,300 +1,67 @@
 # Testing with Emulator and ADB
 
-## Emulator Setup
+Practical recipes for testing Tauri 2 mobile apps on an Android emulator. iOS simulator is mostly Xcode-driven and doesn't need a separate guide.
 
-### Create Optimized Emulator
-Android Studio → Device Manager → Create Device
+## When to use
 
-**Recommended configuration:**
-```
-Device: Pixel 7 Pro
-System Image: API 34 (Android 14) x86_64 with Google Play
-RAM: 4096 MB
-VM Heap: 512 MB
-Internal Storage: 8 GB
-```
+Iterating on Android in `tauri android dev`, debugging WebView issues, scripting install/log/screenshot/restart cycles, or tracking down "works on the emulator, breaks on a real device" issues.
 
-### Verify Hardware Virtualization
-```bash
-# Linux (KVM)
-egrep -c '(vmx|svm)' /proc/cpuinfo  # must be > 0
-sudo apt install qemu-kvm
-kvm-ok
+## Emulator + ADB sanity checklist
 
-# macOS Intel: HAXM included with Android Studio
-# macOS Apple Silicon: native ARM64 emulation
-# Windows: enable Hyper-V or HAXM in BIOS
-```
+1. AVD created in Android Studio (Pixel 7 Pro, API 34, x86_64 + Google Play, 4GB RAM is the safe default).
+2. `adb devices -l` lists it.
+3. `cargo tauri android dev` finds it without `--device`.
+4. If not: `adb kill-server && adb start-server` and retry.
 
-### Start Emulator from CLI
-```bash
-# List available emulators
-emulator -list-avds
+## Gotchas
 
-# Start with GPU acceleration
-emulator -avd Pixel_7_Pro_API_34 -gpu host
+- **`--force-ip-prompt` and pick the LAN IP, not 127.0.0.1.** Tauri offers a list of network interfaces; selecting localhost makes the emulator reach itself, not your dev server, and the WebView shows blank. The LAN IP (`192.168.x.x`) is what you want even on the emulator.
+- **Vite must print `Network: http://192.168.x.x:5173/`.** If you only see `Local`, you forgot to honour `TAURI_DEV_HOST` in `vite.config.ts` (see `setup-mobile.md`). The emulator can't reach `localhost`.
+- **HMR not working on the device?** `adb reverse tcp:5174 tcp:5174` exposes the WebSocket port back. If still broken, full restart: emulator → Vite → `adb kill-server` → start emulator → `cargo tauri android dev`.
+- **Logcat is noisy.** Tauri-relevant filter: `adb logcat | grep -iE "(tauri|RustStdout|WebView)"`. Just Rust prints: `adb logcat | grep "RustStdout"`. With timestamps: `-v time`.
+- **`adb install` after a previous install fails with `INSTALL_FAILED_ALREADY_EXISTS`.** Use `-r -d` (reinstall, allow downgrade) or `adb uninstall com.your.app.identifier` first.
+- **IAP doesn't work on emulators without Google Play.** The "Google APIs" image is not enough -- pick "Google Play" explicitly when creating the AVD. Verify with `adb shell pm list packages | grep vending`.
+- **Hardware virtualization missing = 5x slower.** Linux: `egrep -c '(vmx|svm)' /proc/cpuinfo` must be > 0, install `qemu-kvm`. Windows: enable Hyper-V or HAXM in BIOS.
+- **Slow Rust builds**: `cargo tauri android build --target aarch64` skips the x86 / armv7 builds; combine with `sccache` for ~50% speedup on incremental rebuilds.
+- **WebView DevTools**: open Chrome → `chrome://inspect/#devices` → click "inspect" on your app's WebView. The standard Chrome inspector attaches.
 
-# Headless for CI
-emulator -avd Pixel_7_Pro_API_34 -no-window -no-audio
-
-# Optimized network
-emulator -avd Pixel_7_Pro_API_34 -gpu host -netdelay none -netspeed full
-```
-
-## ADB Connection
+## The five commands worth aliasing
 
 ```bash
-# List connected devices
-adb devices -l
-
-# If emulator not detected, restart ADB
-adb kill-server
-adb start-server
-adb devices
-```
-
-## Development Commands
-
-```bash
-# Dev on emulator (auto-detect)
+# Start dev cycle
 cargo tauri android dev
 
-# Select specific device
-cargo tauri android dev --device emulator-5554
+# Tail Tauri-only logs
+adb logcat -c && adb logcat | grep -iE "(tauri|RustStdout)"
 
-# Force IP selection prompt
-cargo tauri android dev --force-ip-prompt
-```
-
-**Important:** When prompted for IP, select your LAN address (e.g., `192.168.1.x`), NOT `127.0.0.1`.
-
-## ADB Commands
-
-### APK Installation
-```bash
-# Build debug APK
-cargo tauri android build --debug
-
-# Install (replace existing)
+# Reinstall debug APK without uninstalling
 adb install -r src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
 
-# Force reinstall
-adb install -r -d app-universal-debug.apk
-
-# Uninstall
-adb uninstall com.your.app.identifier
-
-# Clear app data
-adb shell pm clear com.your.app.identifier
-```
-
-### Logcat (View Logs)
-```bash
-# Tauri filtered logs
-adb logcat | grep -iE "(tauri|RustStdout|WebView)"
-
-# Rust logs only
-adb logcat | grep "RustStdout"
-
-# Clear and start fresh
-adb logcat -c && adb logcat | grep -i tauri
-
-# With timestamp
-adb logcat -v time | grep -i tauri
-
-# Save to file
-adb logcat -v time > debug_$(date +%Y%m%d_%H%M%S).log
-
-# Errors/warnings only
-adb logcat "*:W" | grep -i tauri
-
-# Better tool with colors
-pip install pidcat
-pidcat com.your.app.identifier
-```
-
-### App Management
-```bash
-# Force stop
-adb shell am force-stop com.your.app.identifier
-
-# Start app
-adb shell am start -n com.your.app.identifier/.MainActivity
-
-# Restart
+# Force restart the app (faster than reinstall)
 adb shell am force-stop com.your.app.identifier && \
-adb shell am start -n com.your.app.identifier/.MainActivity
+  adb shell am start -n com.your.app.identifier/.MainActivity
+
+# Test deep link
+adb shell am start -W -a android.intent.action.VIEW -d "myapp://open/screen" com.your.app.identifier
 ```
 
-### Shell & File System
+## Permissions during dev
+
 ```bash
-# Interactive shell
-adb shell
-
-# Access app data (debug builds only)
-adb shell run-as com.your.app.identifier ls /data/data/com.your.app.identifier/
-
-# Copy files
-adb pull /sdcard/Download/file.txt ./
-adb push ./config.json /sdcard/Download/
-
-# Screenshot
-adb shell screencap /sdcard/screenshot.png && adb pull /sdcard/screenshot.png ./
-
-# Screen recording (max 3 min)
-adb shell screenrecord /sdcard/recording.mp4
-# Ctrl+C to stop
-adb pull /sdcard/recording.mp4 ./
-```
-
-### Network & Ports
-```bash
-# Forward PC port to device
-adb forward tcp:8080 tcp:8080
-
-# Reverse (device to PC, useful for local APIs)
-adb reverse tcp:3000 tcp:3000
-
-# List forwards
-adb forward --list
-
-# Remove all
-adb forward --remove-all
-```
-
-## Chrome DevTools for WebView
-
-1. Start app on emulator
-2. Open Chrome on PC → `chrome://inspect/#devices`
-3. Find device, click "inspect" on WebView
-
-## Testing Specific Features
-
-### Permissions
-```bash
-# Grant permission
 adb shell pm grant com.your.app.identifier android.permission.CAMERA
-
-# Revoke (to test request flow)
-adb shell pm revoke com.your.app.identifier android.permission.CAMERA
-
-# List app permissions
-adb shell dumpsys package com.your.app.identifier | grep permission
+adb shell pm revoke com.your.app.identifier android.permission.CAMERA   # to test request flow
 ```
 
-### Deep Links
-```bash
-# Custom scheme
-adb shell am start -W -a android.intent.action.VIEW \
-  -d "myapp://open/screen" com.your.app.identifier
+## Official docs
 
-# Universal link
-adb shell am start -W -a android.intent.action.VIEW \
-  -d "https://app.example.com/open"
-```
+- Android emulator CLI: https://developer.android.com/studio/run/emulator-commandline
+- ADB reference: https://developer.android.com/tools/adb
+- WebView debugging in Chrome DevTools: https://developer.chrome.com/docs/devtools/remote-debugging/webviews
+- pidcat (better logcat with colors): https://github.com/JakeWharton/pidcat
+- Tauri Android dev guide: https://v2.tauri.app/develop/#android
 
-### IAP on Emulator
-Requirements:
-1. Emulator with Google Play (not just "Google APIs")
-2. Google account configured as license tester
-3. App published in internal testing track
+## Related
 
-```bash
-# Verify Google Play present
-adb shell pm list packages | grep vending
-
-# Clear Play Store cache if issues
-adb shell pm clear com.android.vending
-```
-
-## Troubleshooting
-
-### "No available Android Emulator detected"
-```bash
-adb devices                    # Verify emulator running
-echo $ANDROID_HOME            # Check env vars
-adb kill-server && adb start-server
-emulator -avd YOUR_AVD_NAME & # Start manually
-sleep 15
-cargo tauri android dev
-```
-
-### "INSTALL_FAILED_ALREADY_EXISTS"
-```bash
-adb uninstall com.your.app.identifier
-# or
-adb install -r -d app-universal-debug.apk
-```
-
-### Frontend not loading / Connection timeout
-```bash
-# Check your IP
-ip addr | grep "inet "        # Linux
-ipconfig | findstr IPv4       # Windows
-
-# Open firewall
-sudo ufw allow 5173
-sudo ufw allow 5174
-
-# Test from device
-adb shell curl http://192.168.1.100:5173
-
-# Vite must show: Network: http://192.168.x.x:5173/
-```
-
-### HMR not working
-```bash
-# Reverse WebSocket port
-adb reverse tcp:5174 tcp:5174
-
-# Full restart:
-# 1. Close emulator
-# 2. Close Vite
-# 3. adb kill-server
-# 4. Start emulator
-# 5. cargo tauri android dev
-```
-
-### Slow builds
-```bash
-# Use specific target
-cargo tauri android build --target aarch64
-
-# Enable incremental in Cargo.toml
-[profile.dev]
-incremental = true
-
-# Use sccache
-cargo install sccache
-export RUSTC_WRAPPER=sccache
-```
-
-## Automation Script (Justfile)
-
-```makefile
-emu:
-    emulator -avd Pixel_7_Pro_API_34 -gpu host &
-
-dev:
-    cargo tauri android dev
-
-debug:
-    cargo tauri android build --debug
-    adb install -r src-tauri/gen/android/app/build/outputs/apk/universal/debug/app-universal-debug.apk
-
-log:
-    adb logcat -c && adb logcat | grep -iE "(tauri|RustStdout)"
-
-shot:
-    @mkdir -p screenshots
-    adb shell screencap /sdcard/shot.png
-    adb pull /sdcard/shot.png ./screenshots/$(shell date +%s).png
-
-restart:
-    adb shell am force-stop com.your.app.identifier
-    adb shell am start -n com.your.app.identifier/.MainActivity
-
-clean:
-    rm -rf src-tauri/gen/android
-    cargo tauri android init
-```
+- `setup-mobile.md` -- the toolchain underneath this
+- `build-deploy-mobile.md` -- moving from emulator to real device + signing
+- `plugins-mobile.md` -- the plugins you're testing on the emulator

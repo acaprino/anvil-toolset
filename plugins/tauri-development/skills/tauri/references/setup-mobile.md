@@ -1,61 +1,34 @@
 # Mobile Environment Setup
 
-> For base prerequisites (Rust, Node, Tauri CLI), see `tauri-core/references/setup.md`.
+Android SDK + iOS Xcode tooling on top of the base prerequisites in `setup.md`.
 
-## Android Development
+## When to use
 
-**Install Android Studio** with SDK Manager components:
-- Android SDK Platform (API 34+)
-- Android SDK Platform-Tools
-- Android SDK Build-Tools
-- NDK (Side by side)
-- Android SDK Command-line Tools
+Adding Android or iOS targets to an existing Tauri 2 project, or setting up a new dev machine for mobile builds. Pure desktop projects can skip this entirely.
 
-**Environment Variables:**
+## Rust targets (the one thing easy to forget)
+
 ```bash
-# macOS
-export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-export ANDROID_HOME="$HOME/Library/Android/sdk"
-export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
-
-# Linux
-export JAVA_HOME=/opt/android-studio/jbr
-export ANDROID_HOME="$HOME/Android/Sdk"
-export NDK_HOME="$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)"
-
-# Windows (PowerShell)
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
-$env:NDK_HOME = "$env:ANDROID_HOME\ndk\<version>"
-```
-
-**Windows: Strawberry Perl (if using `reqwest` with `native-tls`):**
-
-If your Rust dependencies include `reqwest` with the `native-tls` feature, cross-compiling for Android requires OpenSSL. The vendored `openssl-src` crate needs a full Perl installation -- Git Bash's built-in Perl is insufficient. Install [Strawberry Perl](https://strawberryperl.com/) and ensure it is in your PATH before running `tauri android build`.
-
-**Rust targets:**
-```bash
+# Android
 rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
-```
 
-## iOS Development (macOS only)
-
-- Xcode from Mac App Store (full install, not just CLI tools)
-- Command Line Tools: `xcode-select --install`
-- CocoaPods: `brew install cocoapods`
-- Apple Developer account configured in Xcode
-
-**Rust targets:**
-```bash
+# iOS (macOS only)
 rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim
 ```
 
-## Vite Configuration for Mobile
+`tauri android init` / `tauri ios init` won't add these for you -- the build will fail late with cryptic linker errors if they're missing.
+
+## Gotchas
+
+- **Strawberry Perl on Windows.** If your Rust deps include `reqwest` with `native-tls`, cross-compiling for Android pulls in the vendored `openssl-src` crate, which needs a full Perl install. Git Bash's bundled Perl is **not** sufficient. Install [Strawberry Perl](https://strawberryperl.com/) and put it on PATH before `tauri android build`. The error message ("Could not find Perl") doesn't make this obvious.
+- **`TAURI_DEV_HOST` is set automatically** by `tauri android dev` / `tauri ios dev` -- your `vite.config.ts` should read it and bind `server.host` + HMR to it. If you hardcode `localhost`, the device can't reach the dev server.
+- **Vite build target.** Mobile WebViews lag desktop -- target `chrome105` for Android WebView (matches Tauri 2's WebView2 floor) and `safari14` for iOS WKWebView. `esnext` will silently produce code the device WebView can't parse.
+- **iOS needs the full Xcode**, not just CLI tools. CocoaPods via `brew install cocoapods` -- the gem version drifts.
+- **Android NDK version**: install from SDK Manager, then `NDK_HOME` should resolve dynamically (e.g. `$ANDROID_HOME/ndk/$(ls -1 $ANDROID_HOME/ndk)`); pinning a specific version path breaks across machines.
+
+## Vite config snippet (the parts that matter)
 
 ```typescript
-// vite.config.ts
-import { defineConfig } from 'vite';
-
 export default defineConfig({
   server: {
     host: process.env.TAURI_DEV_HOST || 'localhost',
@@ -69,42 +42,21 @@ export default defineConfig({
   envPrefix: ['VITE_', 'TAURI_'],
   build: {
     target: process.env.TAURI_ENV_PLATFORM === 'windows' ? 'chrome105' : 'safari14',
-    minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
-    sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },
 });
 ```
 
-The `TAURI_DEV_HOST` variable is set automatically when running `cargo tauri android dev` or `cargo tauri ios dev`. It enables HMR over the local network so the mobile device can reach the dev server.
+## Official docs
 
-## Platform-Specific Configuration
+- Mobile prerequisites: https://v2.tauri.app/start/prerequisites/#mobile-targets
+- Android setup: https://v2.tauri.app/develop/#android
+- iOS setup: https://v2.tauri.app/develop/#ios
+- Android permissions reference: https://developer.android.com/reference/android/Manifest.permission
+- iOS Info.plist usage descriptions: https://developer.apple.com/documentation/bundleresources/information_property_list
 
-### Android Permissions (AndroidManifest.xml)
-Location: `src-tauri/gen/android/app/src/main/AndroidManifest.xml`
+## Related
 
-```xml
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-</manifest>
-```
-
-### iOS Permissions (Info.plist)
-Location: `src-tauri/Info.ios.plist`
-
-```xml
-<plist version="1.0">
-<dict>
-    <key>NSCameraUsageDescription</key>
-    <string>Camera access for scanning</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Location for local features</string>
-    <key>NSFaceIDUsageDescription</key>
-    <string>Face ID for authentication</string>
-</dict>
-</plist>
-```
+- `setup.md` -- base prerequisites
+- `build-deploy-mobile.md` -- store builds, signing, the full Android/iOS gotcha trail
+- `testing.md` -- emulator + ADB + WebView debugging
+- `ci-cd-mobile.md` -- CI build matrix for mobile

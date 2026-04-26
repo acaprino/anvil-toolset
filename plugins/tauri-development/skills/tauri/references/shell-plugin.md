@@ -1,352 +1,61 @@
 # Shell Plugin
 
-Child processes, sidecar binaries, and scoped commands with tauri-plugin-shell.
+Spawn child processes, run sidecar binaries, stream stdout/stderr. The hard parts are scope-based permissions and a few cross-platform spawn gotchas.
 
-## Quick Reference
+## When to use
 
-| Task | API |
-|------|-----|
-| Add plugin | `npm run tauri add shell` |
-| Run command | `Command::new("cmd")` (Rust) |
-| Run sidecar | `Command::sidecar("name")` (Rust) |
-| Frontend command | `Command.create("cmd")` (TS) |
-| Frontend sidecar | `Command.sidecar("name")` (TS) |
-| Open URL | Use `tauri-plugin-opener` instead |
+Running a CLI tool the user has installed (git, node, ffmpeg) or a binary you ship as a sidecar. For OAuth and "open URL" actions, use `opener` instead -- safer scope.
 
-## Plugin Setup
+## When NOT to use
 
-### Install
+External URL handoff (browsers, mailto, tel) -- use `tauri-plugin-opener` (`openUrl`). The shell plugin's `open` is more permissive than necessary.
 
-```bash
-npm run tauri add shell
-```
+## Gotchas
 
-### Cargo.toml
+- **Every command needs an explicit scope entry** in `capabilities/default.json`. Tauri 2 dropped the v1 "allow any cmd" mode -- you list the exact `cmd` + `args` shape (or use `{ "validator": "<regex>" }` for variable args). Forgotten scopes throw at runtime, not at build.
+- **Windows: pop-up cmd.exe windows.** Spawning console binaries on Windows shows a black flash unless you set `creation_flags(0x08000000)` (CREATE_NO_WINDOW) on the Command before `.spawn()`. Affects every CLI tool spawn from a windowed app.
+- **PATH is not the user's PATH.** Spawned processes inherit the app's environment, which on macOS launched-from-Finder lacks `/usr/local/bin`, `/opt/homebrew/bin`, etc. Specify full paths or set `envs([...])` explicitly when calling Homebrew/MacPorts binaries.
+- **Sidecar filenames must end with the target triple** (e.g. `my-tool-aarch64-apple-darwin`). Tauri picks the right one at runtime; missing the suffix = "sidecar not found." Get your triple via `rustc -Vv | grep host`.
+- **`spawn()` returns a `Receiver` you must drain.** If you don't `recv()` events, the channel buffers up and stalls the child's stdio. Run the receive loop in `tokio::spawn`.
+- **`child.kill()` is best-effort on Windows** -- console children may need extra teardown. Always set a sensible timeout for your wait loop, don't rely on `kill()` to immediately reap.
+- **`shell:allow-stdin-write` is a separate permission** -- omitting it makes `child.write()` fail silently in release builds.
 
-```toml
-[dependencies]
-tauri-plugin-shell = "2"
-```
-
-### lib.rs
-
-```rust
-tauri::Builder::default()
-    .plugin(tauri_plugin_shell::init())
-```
-
-## Scoped Commands (Permissions)
-
-Shell commands must be explicitly allowed in capabilities. Tauri 2 uses a scope-based permission model.
-
-### capabilities/default.json
-
-```json
-{
-  "identifier": "default",
-  "windows": ["main"],
-  "permissions": [
-    "core:default",
-    {
-      "identifier": "shell:allow-execute",
-      "allow": [
-        {
-          "name": "git-status",
-          "cmd": "git",
-          "args": ["status"]
-        },
-        {
-          "name": "node-version",
-          "cmd": "node",
-          "args": ["--version"]
-        },
-        {
-          "name": "run-script",
-          "cmd": "node",
-          "args": [
-            { "validator": "\\S+" }
-          ]
-        }
-      ]
-    },
-    "shell:allow-spawn",
-    "shell:allow-stdin-write"
-  ]
-}
-```
-
-### Argument Validators
-
-```json
-{
-  "name": "flexible-git",
-  "cmd": "git",
-  "args": [
-    { "validator": "(status|log|diff|branch)" },
-    { "validator": ".*", "raw": true }
-  ]
-}
-```
-
-- Fixed string: `"status"` -- exact match only
-- Validator regex: `{ "validator": "\\S+" }` -- matches pattern
-- `"raw": true` -- pass through without shell escaping
-
-## Rust API
-
-### Execute Command (Collected Output)
-
-```rust
-use tauri_plugin_shell::ShellExt;
-
-#[tauri::command]
-async fn run_git_status(app: tauri::AppHandle) -> Result<String, String> {
-    let output = app
-        .shell()
-        .command("git")
-        .args(["status", "--porcelain"])
-        .output()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).to_string())
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
-    }
-}
-```
-
-### Spawn Command (Streaming)
-
-```rust
-use tauri_plugin_shell::{ShellExt, process::CommandEvent};
-
-#[tauri::command]
-async fn run_long_process(app: tauri::AppHandle) -> Result<(), String> {
-    let (mut rx, child) = app
-        .shell()
-        .command("cargo")
-        .args(["build", "--release"])
-        .current_dir("/path/to/project")
-        .envs([("RUST_LOG", "info")])
-        .spawn()
-        .map_err(|e| e.to_string())?;
-
-    // Stream output
-    tokio::spawn(async move {
-        while let Some(event) = rx.recv().await {
-            match event {
-                CommandEvent::Stdout(line) => {
-                    println!("stdout: {}", String::from_utf8_lossy(&line));
-                }
-                CommandEvent::Stderr(line) => {
-                    eprintln!("stderr: {}", String::from_utf8_lossy(&line));
-                }
-                CommandEvent::Terminated(status) => {
-                    println!("Process exited: {:?}", status.code);
-                    break;
-                }
-                CommandEvent::Error(err) => {
-                    eprintln!("Error: {}", err);
-                    break;
-                }
-                _ => {}
-            }
-        }
-    });
-
-    Ok(())
-}
-```
-
-### Kill Process
-
-```rust
-// child from .spawn()
-child.kill().map_err(|e| e.to_string())?;
-```
-
-### Write to Stdin
-
-```rust
-let (mut rx, mut child) = app
-    .shell()
-    .command("node")
-    .args(["-i"]) // interactive mode
-    .spawn()
-    .map_err(|e| e.to_string())?;
-
-// Write to stdin
-child.write("console.log('hello')\n".as_bytes())
-    .map_err(|e| e.to_string())?;
-```
-
-## Sidecar Binaries
-
-Sidecar binaries are external executables bundled with your app.
-
-### tauri.conf.json
-
-```json
-{
-  "bundle": {
-    "externalBin": [
-      "binaries/my-tool",
-      "binaries/ffmpeg"
-    ]
-  }
-}
-```
-
-### File Naming Convention
-
-Sidecar binaries must follow the target triple naming:
-
-```
-binaries/
-  my-tool-x86_64-pc-windows-msvc.exe
-  my-tool-x86_64-unknown-linux-gnu
-  my-tool-aarch64-apple-darwin
-  my-tool-x86_64-apple-darwin
-```
-
-Get the target triple:
-
-```bash
-rustc -Vv | grep host
-```
-
-### Rust: Run Sidecar
-
-```rust
-use tauri_plugin_shell::ShellExt;
-
-#[tauri::command]
-async fn run_sidecar(app: tauri::AppHandle) -> Result<String, String> {
-    let output = app
-        .shell()
-        .sidecar("my-tool")
-        .map_err(|e| e.to_string())?
-        .args(["--input", "data.json"])
-        .output()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    if output.status.success() {
-        Ok(String::from_utf8_lossy(&output.stdout).to_string())
-    } else {
-        Err(String::from_utf8_lossy(&output.stderr).to_string())
-    }
-}
-```
-
-### Sidecar Permissions
+## Permission scope shape (the part that's easy to mis-spell)
 
 ```json
 {
   "identifier": "shell:allow-execute",
   "allow": [
-    {
-      "name": "my-tool",
-      "sidecar": true,
-      "args": [
-        { "validator": ".*" }
-      ]
-    }
+    { "name": "git-status", "cmd": "git", "args": ["status"] },
+    { "name": "run-script", "cmd": "node", "args": [{ "validator": "\\S+" }] },
+    { "name": "my-tool", "sidecar": true, "args": [{ "validator": ".*" }] }
   ]
 }
 ```
 
-## Frontend API
+Scope keys: `name` (referenced from JS as `Command.create('name')`), `cmd` (literal binary), `args` (mix of literal strings and `{validator: regex}`), `sidecar: true` for bundled binaries.
 
-### Execute Command
+## Sidecar config
 
-```typescript
-import { Command } from '@tauri-apps/plugin-shell';
-
-// Collected output
-const output = await Command.create('git-status').execute();
-console.log('stdout:', output.stdout);
-console.log('stderr:', output.stderr);
-console.log('code:', output.code);
+```json
+// tauri.conf.json
+"bundle": {
+  "externalBin": ["binaries/my-tool"]
+}
 ```
 
-### Spawn Command (Streaming)
+Files on disk: `binaries/my-tool-x86_64-pc-windows-msvc.exe`, `binaries/my-tool-aarch64-apple-darwin`, etc.
 
-```typescript
-import { Command } from '@tauri-apps/plugin-shell';
+## Official docs
 
-const command = Command.create('run-script', ['build.js']);
+- Shell plugin: https://v2.tauri.app/plugin/shell/
+- Permission reference: https://v2.tauri.app/plugin/shell/#default-permission
+- Sidecar binaries: https://v2.tauri.app/develop/sidecar/
+- Rust API: https://docs.rs/tauri-plugin-shell
+- JS API: https://v2.tauri.app/reference/javascript/shell/
 
-command.on('close', (data) => {
-  console.log(`Exited with code ${data.code} and signal ${data.signal}`);
-});
+## Related
 
-command.stdout.on('data', (line) => {
-  console.log(`stdout: ${line}`);
-});
-
-command.stderr.on('data', (line) => {
-  console.error(`stderr: ${line}`);
-});
-
-const child = await command.spawn();
-
-// Later: kill the process
-await child.kill();
-```
-
-### Write to Stdin
-
-```typescript
-const child = await command.spawn();
-await child.write('input data\n');
-```
-
-### Run Sidecar
-
-```typescript
-import { Command } from '@tauri-apps/plugin-shell';
-
-const command = Command.sidecar('my-tool', ['--input', 'data.json']);
-const output = await command.execute();
-```
-
-## Environment Variables
-
-```rust
-// Set env vars for child process
-app.shell()
-    .command("node")
-    .args(["server.js"])
-    .envs([
-        ("NODE_ENV", "production"),
-        ("PORT", "3000"),
-    ])
-    .spawn()?;
-```
-
-## Working Directory
-
-```rust
-app.shell()
-    .command("npm")
-    .args(["run", "build"])
-    .current_dir("/path/to/project")
-    .output()
-    .await?;
-```
-
-## Common Issues
-
-| Problem | Solution |
-|---------|----------|
-| Command not allowed | Add scoped permission to capabilities/default.json |
-| Sidecar not found | Check target triple in filename, verify `externalBin` path |
-| Sidecar permission denied | Add `"sidecar": true` to permission scope |
-| Args rejected | Verify args match validators exactly |
-| Stdin not working | Ensure `shell:allow-stdin-write` permission |
-| Open URL fails | Use `tauri-plugin-opener` (`openUrl()`), not shell plugin |
-| Windows: cmd.exe popup | Use `.creation_flags(0x08000000)` (CREATE_NO_WINDOW) |
-| PATH not found | Specify full path or set env vars explicitly |
+- `plugins-core.md` -- when to use `opener` instead
+- `frontend-patterns.md` -- JS Channel pattern (used for streaming spawn output)
+- `rust-patterns.md` -- error handling for spawn results

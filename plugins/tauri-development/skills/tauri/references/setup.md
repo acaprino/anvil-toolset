@@ -1,40 +1,26 @@
 # Environment Setup
 
-## Prerequisites
+Base prerequisites for any Tauri 2 project. Mobile setup builds on top of this in `setup-mobile.md`.
 
-### All Platforms
-- Rust (latest stable): `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
-- Node.js LTS
-- Tauri CLI: `npm install -D @tauri-apps/cli`
+## When to use
 
-## Project Initialization
+First time setting up Tauri on a machine, or onboarding a new contributor. For mobile-specific tooling (Android Studio, Xcode, NDK), continue to `setup-mobile.md` after this.
 
-```bash
-# New project
-npm create tauri-app@latest
-# Select targets during setup
+## Gotchas
 
-# Add mobile to existing project
-npm run tauri android init
-npm run tauri ios init
+- `cargo tauri info` is your fastest sanity check after install -- it surfaces missing toolchains, SDK paths, and version drift before you waste time on a broken `dev`.
+- Vite users **must** set `envPrefix: ['VITE_', 'TAURI_']` -- otherwise `TAURI_*` env vars (used by mobile dev host, debug flags) are stripped at build time.
+- `clearScreen: false` in `vite.config.ts` is non-negotiable when running under `cargo tauri dev`; without it, Tauri logs (Rust panics, plugin errors) get wiped from the terminal on every HMR reload.
+- Don't `npm install -g @tauri-apps/cli` -- pin it as a devDependency per project so versions don't drift across apps on the same machine.
 
-# Verify setup
-cargo tauri info
-```
+## Official docs
 
-## Vite Configuration
+- Prerequisites + per-OS install: https://v2.tauri.app/start/prerequisites/
+- Create a project: https://v2.tauri.app/start/create-project/
+- Rust install: https://www.rust-lang.org/tools/install
+- Vite + Tauri config reference: https://v2.tauri.app/start/frontend/vite/
 
-```typescript
-// vite.config.ts
-import { defineConfig } from 'vite';
+## Related
 
-export default defineConfig({
-  clearScreen: false,
-  envPrefix: ['VITE_', 'TAURI_'],
-  build: {
-    target: 'esnext',
-    minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
-    sourcemap: !!process.env.TAURI_ENV_DEBUG,
-  },
-});
-```
+- `setup-mobile.md` -- Android SDK / iOS Xcode on top of these prerequisites
+- `rust-patterns.md` -- backend code organization once Rust toolchain is up

@@ -8,105 +8,73 @@ description: >
 
 # Tauri 2 Development
 
-Cross-platform patterns for Tauri 2 applications -- core, desktop, and mobile.
+Index for Tauri 2 patterns -- core, desktop, mobile. Each section points to a focused reference; the references hold gotchas and link out to canonical docs at v2.tauri.app.
 
-## Quick Reference
+## Quick command reference
 
 | Task | Command |
 |------|---------|
 | New project | `npm create tauri-app@latest` |
 | Add plugin | `npm run tauri add <plugin-name>` |
-| Dev mode | `cargo tauri dev` |
-| Build | `cargo tauri build` |
-| Info | `cargo tauri info` |
-| Init Android | `npm run tauri android init` |
-| Init iOS | `npm run tauri ios init` |
-| Dev Android | `npm run tauri android dev` |
-| Dev iOS | `npm run tauri ios dev` |
-| Build APK | `npm run tauri android build --apk` |
-| Build AAB | `npm run tauri android build --aab` |
-| Build iOS | `npm run tauri ios build` |
+| Dev (desktop) | `cargo tauri dev` |
+| Build (desktop) | `cargo tauri build` |
+| Info / sanity check | `cargo tauri info` |
+| Init Android / iOS | `npm run tauri android init` / `ios init` |
+| Dev mobile | `npm run tauri android dev` / `ios dev` |
+| Build APK / AAB | `npm run tauri android build --apk` / `--aab` |
+| Build IPA | `npm run tauri ios build` |
 
-## Core Patterns
+## Reading order by topic
 
-### New Project Setup
-1. Read [references/setup.md](references/setup.md) for environment prerequisites
-2. Run `npm create tauri-app@latest`
-3. Configure `tauri.conf.json` with app identifier
+### Core
+- `setup.md` -- prerequisites (Rust, Node, Vite gotchas)
+- `rust-patterns.md` -- commands, state, channels, events, error handling
+- `frontend-patterns.md` -- invoke, channels, listeners, capabilities
+- `plugins-core.md` -- universal plugins (fs, http, store, sql, deep-link, ...)
 
-### Rust Backend & IPC
-- **Commands, state, channels, events**: Read [references/rust-patterns.md](references/rust-patterns.md)
-- **Frontend invoke, channels, TypeScript typing**: Read [references/frontend-patterns.md](references/frontend-patterns.md)
+### Desktop
+- `window-management.md` -- multi-window, frameless, tray, menus, global shortcuts
+- `shell-plugin.md` -- spawn child processes, sidecar binaries, scoped commands
+- `build-deploy-desktop.md` -- bundling, code signing, notarization, auto-updater
+- `platform-webviews.md` -- WebView2 / WKWebView / WebKitGTK differences and floors
+- `authentication.md` -- OAuth/PKCE via system browser
+- `ci-cd.md` -- provider-agnostic pipeline patterns
 
-### Universal Plugins
-- **fs, store, sql, http, log, dialog, opener**: Read [references/plugins-core.md](references/plugins-core.md)
+### Mobile
+- `setup-mobile.md` -- Android SDK + iOS Xcode tooling
+- `plugins-mobile.md` -- biometric, barcode, haptics, NFC, geolocation, Android safe-area workaround
+- `authentication-mobile.md` -- deep-link OAuth, Apple Sign-In, Firebase callback
+- `iap.md` -- in-app purchases (Google Play + App Store)
+- `testing.md` -- emulator, ADB, logcat, WebView debugging
+- `build-deploy-mobile.md` -- signing, store builds, NDK / 16KB / RustWebViewClient gotchas
+- `ci-cd-mobile.md` -- mobile signing in CI, store upload
 
-### Authentication
-- **OAuth/PKCE via system browser**: Read [references/authentication.md](references/authentication.md)
+### Specialized
+- `high-frequency-ui.md` -- streaming/trading UI composition (atomic state, virtualization, rust-lld)
+- `ipc-streaming.md` -- Channel-vs-emit benchmarks, rkyv zero-copy, backpressure
 
-### CI/CD
-- **Provider-agnostic pipelines**: Read [references/ci-cd.md](references/ci-cd.md)
-
-## Desktop Patterns
-
-### Window Management
-- **Multi-window, frameless, system tray, menus, shortcuts**: Read [references/window-management.md](references/window-management.md)
-
-### Shell Plugin
-- **Child processes, sidecar binaries, scoped commands**: Read [references/shell-plugin.md](references/shell-plugin.md)
-
-### Desktop Bundling & Deployment
-- **.msi, .dmg, .AppImage, code signing, auto-updater**: Read [references/build-deploy-desktop.md](references/build-deploy-desktop.md)
-
-### Platform WebViews
-- **WebView2, WKWebView, WebKitGTK differences**: Read [references/platform-webviews.md](references/platform-webviews.md)
-
-## Mobile Patterns
-
-### Mobile Environment Setup
-1. Read [references/setup-mobile.md](references/setup-mobile.md) for Android SDK / iOS Xcode setup
-2. Run `npm run tauri android init` / `npm run tauri ios init`
-3. Configure mobile-specific permissions
-
-### Mobile Plugins
-- **Biometric, haptics, NFC, barcode**: Read [references/plugins-mobile.md](references/plugins-mobile.md)
-
-### In-App Purchases
-- **Google Play / App Store IAP**: Read [references/iap.md](references/iap.md)
-
-### Mobile Authentication
-- **Deep link OAuth, Apple Sign-In, Firebase callback**: Read [references/authentication-mobile.md](references/authentication-mobile.md)
-
-### Mobile Testing
-- **Emulator, ADB, logcat, WebView debugging**: Read [references/testing.md](references/testing.md)
-- Use `adb logcat | grep -iE "(tauri|RustStdout)"` for logs
-
-### Mobile Builds & Deployment
-- **APK/IPA builds, store submission**: Read [references/build-deploy-mobile.md](references/build-deploy-mobile.md)
-- **Mobile CI/CD pipelines**: Read [references/ci-cd-mobile.md](references/ci-cd-mobile.md)
-
-## Project Structure
+## Project skeleton
 
 ```
 my-app/
-+-- src/                          # Frontend (React/Vue/Svelte/etc.)
++-- src/                          # Frontend (React/Vue/Svelte/...)
 +-- src-tauri/
 |   +-- Cargo.toml
 |   +-- tauri.conf.json           # Main config
 |   +-- src/
 |   |   +-- main.rs               # Desktop entry (don't modify)
-|   |   +-- lib.rs                # Main code + mobile entry
+|   |   +-- lib.rs                # All your code + mobile entry
 |   +-- capabilities/
 |   |   +-- default.json          # Permissions
 |   +-- gen/
-|       +-- android/              # Android project (if mobile)
-|       +-- apple/                # Xcode project (if mobile)
+|       +-- android/              # Generated Android project
+|       +-- apple/                # Generated Xcode project
 ```
 
-## Essential Configuration
+## Minimum viable config
 
-### tauri.conf.json
 ```json
+// tauri.conf.json
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "MyApp",
@@ -118,43 +86,26 @@ my-app/
 }
 ```
 
-### capabilities/default.json
 ```json
-{
-  "identifier": "default",
-  "windows": ["main"],
-  "permissions": ["core:default"]
-}
+// capabilities/default.json
+{ "identifier": "default", "windows": ["main"], "permissions": ["core:default"] }
 ```
 
-### lib.rs (Mobile Entry)
 ```rust
+// src-tauri/src/lib.rs
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        #[cfg(mobile)]
-        .plugin(tauri_plugin_biometric::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![])
         .run(tauri::generate_context!())
         .expect("error");
 }
 ```
 
-## Common Issues
+## Official docs
 
-| Problem | Solution |
-|---------|----------|
-| White screen | Check JS console, verify `devUrl`, check capabilities |
-| Command not found | Verify handler registered in `invoke_handler` |
-| Permission denied | Add permission to capabilities/default.json |
-| Plugin not loaded | Check `.plugin()` call in lib.rs |
-| iOS won't connect | Use `--force-ip-prompt`, select IPv6 |
-| Emulator not detected | Verify `adb devices`, restart ADB |
-| HMR not working | Configure `vite.config.ts` with `TAURI_DEV_HOST` |
-
-## Resources
-
-- Docs: https://v2.tauri.app
-- Plugins: https://v2.tauri.app/plugin/
+- Tauri 2: https://v2.tauri.app
+- Plugin index: https://v2.tauri.app/plugin/
 - GitHub: https://github.com/tauri-apps/tauri
+- Awesome Tauri (community): https://github.com/tauri-apps/awesome-tauri
