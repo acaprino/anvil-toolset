@@ -1,6 +1,12 @@
-# Python Packaging - Detailed Reference Guide
+# Python Packaging Reference
 
-## Full-Featured pyproject.toml Example
+`pyproject.toml` shape, src-layout, build/publish flow, and the gotchas that bite when distributing to PyPI. The full PEP 621 metadata schema lives upstream; this file is the recommended baseline + the trip-wires.
+
+## When to use
+
+Setting up a new Python package for distribution, or auditing an existing `pyproject.toml`. For decision-tree (when to package vs ship as a private repo), see `python-packaging/SKILL.md`.
+
+## Recommended `pyproject.toml` baseline
 
 ```toml
 [build-system]
@@ -12,513 +18,158 @@ name = "my-awesome-package"
 version = "1.0.0"
 description = "An awesome Python package"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 license = {text = "MIT"}
-authors = [
-    {name = "Your Name", email = "you@example.com"},
-]
-maintainers = [
-    {name = "Maintainer Name", email = "maintainer@example.com"},
-]
-keywords = ["example", "package", "awesome"]
+authors = [{name = "Your Name", email = "you@example.com"}]
+keywords = ["example", "package"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
 ]
-
 dependencies = [
     "requests>=2.28.0,<3.0.0",
-    "click>=8.0.0",
     "pydantic>=2.0.0",
 ]
 
 [project.optional-dependencies]
-dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-]
-docs = [
-    "sphinx>=5.0.0",
-    "sphinx-rtd-theme>=1.0.0",
-]
-all = [
-    "my-awesome-package[dev,docs]",
-]
+dev = ["pytest>=7", "pytest-cov", "ruff", "mypy"]
+docs = ["sphinx>=5", "sphinx-rtd-theme"]
 
 [project.urls]
-Homepage = "https://github.com/username/my-awesome-package"
-Documentation = "https://my-awesome-package.readthedocs.io"
-Repository = "https://github.com/username/my-awesome-package"
-"Bug Tracker" = "https://github.com/username/my-awesome-package/issues"
-Changelog = "https://github.com/username/my-awesome-package/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/username/repo"
+Repository = "https://github.com/username/repo"
+"Bug Tracker" = "https://github.com/username/repo/issues"
 
 [project.scripts]
 my-cli = "my_package.cli:main"
-awesome-tool = "my_package.tools:run"
-
-[project.entry-points."my_package.plugins"]
-plugin1 = "my_package.plugins:plugin1"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "src"}                  # src-layout
 zip-safe = false
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["my_package*"]
-exclude = ["tests*"]
 
 [tool.setuptools.package-data]
 my_package = ["py.typed", "*.pyi", "data/*.json"]
+```
 
-# Black configuration
-[tool.black]
-line-length = 100
-target-version = ["py38", "py39", "py310", "py311"]
-include = '\.pyi?$'
+## Gotchas (the trip-wires)
 
-# Ruff configuration
-[tool.ruff]
-line-length = 100
-target-version = "py38"
+- **Always use src-layout** (`src/my_package/`), never flat layout (`my_package/` at repo root). Flat layout means `pip install -e .` plus a stale local import can shadow the installed package, leading to "tests pass locally, fail in CI" mysteries.
+- **`py.typed` marker file** is required for downstream type checkers to honor your annotations. Add an empty `py.typed` to your package dir AND list it in `package-data`. PEP 561.
+- **`license = {text = "MIT"}` vs `license = {file = "LICENSE"}`** -- newer setuptools prefers `text` for SPDX identifiers; `file` includes the LICENSE file content. Don't mix them.
+- **Version conflicts**: `dependencies = ["requests>=2.28.0,<3.0.0"]` -- always pin upper-bounds for runtime deps to avoid breaking when a dep majors. Loose `>=` is the leading cause of "worked yesterday" issues.
+- **`requires-python = ">=3.11"`** matters: pip uses it to skip the package on incompatible Pythons. Forgetting this means users on 3.9 get the wheel and crash on import.
+- **Build backend choice**: `setuptools` (default), `hatchling` (modern, simpler), `flit_core` (minimal pure-Python), `pdm-backend`, `poetry-core`. Pick one and stick with it. Mixing backends across a monorepo is friction.
+- **`twine check dist/*`** before `twine upload`. Catches malformed README rendering, missing classifiers, and other PyPI-rejection issues before you publish.
+- **Test on TestPyPI first** (`twine upload --repository testpypi dist/*`). PyPI uploads are immutable -- you cannot delete or replace a version, only yank it.
+- **Use API tokens, not passwords** for PyPI uploads. Configure in `~/.pypirc` or via `TWINE_PASSWORD` env var.
+- **Wheels and sdists**: `python -m build` produces both. Wheels (`.whl`) are pre-built for fast install; sdist (`.tar.gz`) is the source fallback. Always ship both.
 
-[tool.ruff.lint]
-select = ["E", "F", "I", "N", "W", "UP"]
+## Build + publish (the canonical flow)
 
-# MyPy configuration
-[tool.mypy]
-python_version = "3.8"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
+```bash
+# Modern: PEP 517 build
+pip install build twine
+python -m build                            # produces dist/*.whl + dist/*.tar.gz
+twine check dist/*                         # verify before upload
+twine upload --repository testpypi dist/*  # test first
+twine upload dist/*                        # publish to PyPI
+```
 
-# Pytest configuration
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --cov=my_package --cov-report=term-missing"
+For uv users, replace `pip install build twine` with `uv tool install build twine`.
 
-# Coverage configuration
-[tool.coverage.run]
-source = ["src"]
-omit = ["*/tests/*"]
+## src-layout structure
 
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
+```
+my-awesome-package/
+├── pyproject.toml
+├── README.md
+├── LICENSE
+├── src/
+│   └── my_package/
+│       ├── __init__.py
+│       ├── py.typed                       # PEP 561 marker
+│       ├── core.py
+│       └── cli.py
+└── tests/
+    ├── test_core.py
+    └── test_cli.py
+```
+
+Then `pip install -e ".[dev]"` installs editable + dev deps.
+
+## Versioning conventions
+
+| Strategy | Use |
+|----------|-----|
+| **Semantic versioning** (semver) | Public APIs, libraries -- MAJOR.MINOR.PATCH |
+| **CalVer** (e.g. 2026.4.26) | Apps, end-user tools where API stability isn't promised |
+| **Pre-release** (1.0.0a1, 1.0.0b1, 1.0.0rc1) | Alpha / beta / RC channels |
+| **Post-release** (1.0.0.post1) | Metadata-only fixes (typo in README, wrong classifier) |
+
+PyPI accepts PEP 440 versions only -- `1.0.0-rc1` is invalid; use `1.0.0rc1`.
+
+## Common classifiers (the few you need)
+
+```toml
+classifiers = [
+    "Development Status :: 4 - Beta",       # 1=Planning, 4=Beta, 5=Production/Stable
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",                      # if you ship type hints
 ]
 ```
 
-## CLI Pattern Examples
+Full list: https://pypi.org/classifiers/.
 
-### CLI with Click
+## Entry points (CLI commands + plugin systems)
 
-```python
-# src/my_package/cli.py
-import click
-
-@click.group()
-@click.version_option()
-def cli():
-    """My awesome CLI tool."""
-    pass
-
-@cli.command()
-@click.argument("name")
-@click.option("--greeting", default="Hello", help="Greeting to use")
-def greet(name: str, greeting: str):
-    """Greet someone."""
-    click.echo(f"{greeting}, {name}!")
-
-@cli.command()
-@click.option("--count", default=1, help="Number of times to repeat")
-def repeat(count: int):
-    """Repeat a message."""
-    for i in range(count):
-        click.echo(f"Message {i + 1}")
-
-def main():
-    """Entry point for CLI."""
-    cli()
-
-if __name__ == "__main__":
-    main()
-```
-
-**Register in pyproject.toml:**
 ```toml
 [project.scripts]
-my-tool = "my_package.cli:main"
+my-cli = "my_package.cli:main"              # `my-cli` command runs my_package.cli.main()
+
+[project.entry-points."my_package.plugins"]
+plugin1 = "my_package.plugins:plugin1"      # plugin discovery via importlib.metadata
 ```
 
-**Usage:**
-```bash
-pip install -e .
-my-tool greet World
-my-tool greet Alice --greeting="Hi"
-my-tool repeat --count=3
-```
+## Trusted publishing (the modern PyPI auth)
 
-### CLI with argparse
-
-```python
-# src/my_package/cli.py
-import argparse
-import sys
-
-def main():
-    """Main CLI entry point."""
-    parser = argparse.ArgumentParser(
-        description="My awesome tool",
-        prog="my-tool"
-    )
-
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s 1.0.0"
-    )
-
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
-
-    # Add subcommand
-    process_parser = subparsers.add_parser("process", help="Process data")
-    process_parser.add_argument("input_file", help="Input file path")
-    process_parser.add_argument(
-        "--output", "-o",
-        default="output.txt",
-        help="Output file path"
-    )
-
-    args = parser.parse_args()
-
-    if args.command == "process":
-        process_data(args.input_file, args.output)
-    else:
-        parser.print_help()
-        sys.exit(1)
-
-def process_data(input_file: str, output_file: str):
-    """Process data from input to output."""
-    print(f"Processing {input_file} -> {output_file}")
-
-if __name__ == "__main__":
-    main()
-```
-
-## CI/CD and Publishing Examples
-
-### Automated Publishing with GitHub Actions
+For GitHub Actions, configure **trusted publishing** in PyPI project settings -- no API token needed, uses OIDC. Workflow:
 
 ```yaml
-# .github/workflows/publish.yml
-name: Publish to PyPI
-
-on:
-  release:
-    types: [created]
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          pip install build twine
-
-      - name: Build package
-        run: python -m build
-
-      - name: Check package
-        run: twine check dist/*
-
-      - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
+- uses: pypa/gh-action-pypi-publish@release/v1
 ```
 
-### Multi-Architecture Wheels
-
-```yaml
-# .github/workflows/wheels.yml
-name: Build wheels
-
-on: [push, pull_request]
-
-jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
-
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ./wheelhouse/*.whl
-```
-
-## Advanced Build Configurations
-
-### Including Data Files
-
-```toml
-[tool.setuptools.package-data]
-my_package = [
-    "data/*.json",
-    "templates/*.html",
-    "static/css/*.css",
-    "py.typed",
-]
-```
-
-**Accessing data files:**
-```python
-# src/my_package/loader.py
-from importlib.resources import files
-import json
-
-def load_config():
-    """Load configuration from package data."""
-    config_file = files("my_package").joinpath("data/config.json")
-    with config_file.open() as f:
-        return json.load(f)
-
-# Python 3.9+
-from importlib.resources import files
-
-data = files("my_package").joinpath("data/file.txt").read_text()
-```
-
-### Namespace Packages
-
-**For large projects split across multiple repositories:**
-
-```
-# Package 1: company-core
-company/
-  core/
-    __init__.py
-    models.py
-
-# Package 2: company-api
-company/
-  api/
-    __init__.py
-    routes.py
-```
-
-**Do NOT include __init__.py in the namespace directory (company/):**
-
-```toml
-# company-core/pyproject.toml
-[project]
-name = "company-core"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["company.core*"]
-
-# company-api/pyproject.toml
-[project]
-name = "company-api"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["company.api*"]
-```
-
-**Usage:**
-```python
-# Both packages can be imported under same namespace
-from company.core import models
-from company.api import routes
-```
-
-### C Extensions
-
-```toml
-[build-system]
-requires = ["setuptools>=61.0", "wheel", "Cython>=0.29"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools]
-ext-modules = [
-    {name = "my_package.fast_module", sources = ["src/fast_module.c"]},
-]
-```
-
-**Or with setup.py:**
-```python
-# setup.py
-from setuptools import setup, Extension
-
-setup(
-    ext_modules=[
-        Extension(
-            "my_package.fast_module",
-            sources=["src/fast_module.c"],
-            include_dirs=["src/include"],
-        )
-    ]
-)
-```
-
-### Git-Based Versioning
-
-```toml
-[build-system]
-requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "my-package"
-dynamic = ["version"]
-
-[tool.setuptools_scm]
-write_to = "src/my_package/_version.py"
-version_scheme = "post-release"
-local_scheme = "dirty-tag"
-```
-
-**Creates versions like:**
-- `1.0.0` (from git tag)
-- `1.0.1.dev3+g1234567` (3 commits after tag)
-
-### Private Package Index
-
-```bash
-# Install from private index
-pip install my-package --index-url https://private.pypi.org/simple/
-
-# Or add to pip.conf
-[global]
-index-url = https://private.pypi.org/simple/
-extra-index-url = https://pypi.org/simple/
-
-# Upload to private index
-twine upload --repository-url https://private.pypi.org/ dist/*
-```
-
-## File Templates
-
-### .gitignore for Python Packages
-
-```gitignore
-# Build artifacts
-build/
-dist/
-*.egg-info/
-*.egg
-.eggs/
-
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# Virtual environments
-venv/
-env/
-ENV/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Distribution
-*.whl
-*.tar.gz
-```
-
-### MANIFEST.in
-
-```
-# MANIFEST.in
-include README.md
-include LICENSE
-include pyproject.toml
-
-recursive-include src/my_package/data *.json
-recursive-include src/my_package/templates *.html
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
-```
-
-### README.md Template
-
-```markdown
-# My Package
-
-[![PyPI version](https://badge.fury.io/py/my-package.svg)](https://pypi.org/project/my-package/)
-[![Python versions](https://img.shields.io/pypi/pyversions/my-package.svg)](https://pypi.org/project/my-package/)
-[![Tests](https://github.com/username/my-package/workflows/Tests/badge.svg)](https://github.com/username/my-package/actions)
-
-Brief description of your package.
-
-## Installation
-
-pip install my-package
-
-## Quick Start
-
-from my_package import something
-result = something.do_stuff()
-
-## Features
-
-- Feature 1
-- Feature 2
-- Feature 3
-
-## Documentation
-
-Full documentation: https://my-package.readthedocs.io
-
-## Development
-
-git clone https://github.com/username/my-package.git
-cd my-package
-pip install -e ".[dev]"
-pytest
-
-## License
-
-MIT
-```
+Requires PyPI project to have the GH org/repo/workflow registered. Token-free, audit-friendly.
+
+## Official docs
+
+- PEP 621 (pyproject.toml `[project]` table): https://peps.python.org/pep-0621/
+- PEP 517 (build backends): https://peps.python.org/pep-0517/
+- PEP 561 (`py.typed` marker): https://peps.python.org/pep-0561/
+- PEP 440 (version specifiers): https://peps.python.org/pep-0440/
+- packaging.python.org tutorials: https://packaging.python.org/en/latest/tutorials/packaging-projects/
+- setuptools `pyproject.toml`: https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+- hatchling: https://hatch.pypa.io/latest/config/build/
+- flit_core: https://flit.pypa.io/
+- twine: https://twine.readthedocs.io/
+- `python -m build`: https://build.pypa.io/
+- TestPyPI: https://test.pypi.org/
+- PyPI trusted publishers: https://docs.pypi.org/trusted-publishers/
+- PyPI classifiers: https://pypi.org/classifiers/
+
+## Related
+
+- `python-packaging/SKILL.md` -- decision tree (when to package, src vs flat, build backend choice)
+- `uv-package-manager` skill -- modern dep management that pairs with this
+- `python-tdd/references/framework-config.md` -- pytest config that lives in the same `pyproject.toml`

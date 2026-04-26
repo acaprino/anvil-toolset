@@ -1,754 +1,164 @@
-# Python Performance Optimization - Detailed Patterns and Examples
+# Python Performance Optimization Patterns
 
-## Profiling Tools - Detailed Examples
+The profilers, the optimization patterns, and the gotchas. Per-tool walkthroughs live in tool READMEs and `docs.python.org/3/library/profile.html`; this file is the **decision tree** + **the gotchas** + **the patterns that move the needle**.
 
-### cProfile - CPU Profiling
+## When to use
 
+Diagnosing a slow Python program, picking the right profiler, or choosing between optimization patterns (caching, vectorization, C extensions). For the architectural decision tree (when to even bother optimizing), see `python-performance-optimization/SKILL.md`.
+
+## Profiler decision tree (the only thing to memorize)
+
+| Question | Tool |
+|----------|------|
+| **Where is time spent across the program?** | `cProfile` (function-level CPU time) |
+| **Which line is slow inside a hot function?** | `line_profiler` (`@profile` decorator + `kernprof -l -v`) |
+| **Where is memory allocated?** | `tracemalloc` (stdlib) or `memory_profiler` (`@profile` for memory) |
+| **Why is GC running so often?** | `objgraph` (object reference cycles) or `gc.get_stats()` |
+| **What's blocking the event loop?** | `asyncio` debug mode (`PYTHONASYNCIODEBUG=1`) |
+| **Per-line micro-bench in CI** | `pytest-benchmark` (statistical, comparable across commits) |
+| **Quick A/B for a snippet** | `timeit` (`python -m timeit "..."`) or `%timeit` in IPython/Jupyter |
+| **Hot path in production with low overhead** | `py-spy` (sampling profiler, attaches to running process) |
+| **Stack trace flame graph** | `py-spy record -o profile.svg --pid <pid>` |
+
+## Gotchas
+
+- **`cProfile` overhead is significant** -- a function profiled at 100ns may show 500ns. Useful for *relative* comparisons, not absolute timings.
+- **`timeit` runs the code N times** in a loop; the default `-n` auto-scales until you get a meaningful measurement. Don't trust a single run; run 5+ and report min (not mean -- min eliminates noise from OS scheduling).
+- **`@profile` is line_profiler's decorator** -- it does NOT exist in Python by default. The script ONLY runs under `kernprof`; running `python script.py` directly fails with `NameError: name 'profile' is not defined`. Workaround: `from line_profiler import LineProfiler` in code.
+- **`memory_profiler` requires `psutil`** as a transitive dep. On macOS Apple Silicon, install with `pip install psutil --no-binary :all:` if the wheel is incompatible.
+- **`tracemalloc` snapshot diff is the right way** to find memory leaks: `snapshot1 = tracemalloc.take_snapshot()`, do work, `snapshot2 = ...`, `snapshot2.compare_to(snapshot1, 'lineno')`. NOT a single snapshot.
+- **GC tuning rarely helps** unless you're allocating millions of objects. `gc.set_threshold(700, 10, 10)` (defaults are higher) for write-heavy workloads. `gc.disable()` only for short-lived processes that don't need it.
+- **GIL is the silent ceiling for CPU-bound threads.** `threading` does not give parallelism for pure-Python CPU work. Use `multiprocessing` or `concurrent.futures.ProcessPoolExecutor`. `asyncio` doesn't help either -- it's single-threaded.
+- **`functools.lru_cache(maxsize=None)` for pure functions only.** Methods on instances will keep the instance alive forever (memory leak). For methods, use `functools.cache` per instance via descriptor pattern, or keep the instance lifetime bounded.
+- **String concatenation in a loop is O(n²)** -- use `"".join(parts)` instead. Surprises people; it's the canonical case where Python's "obvious" code is wrong.
+- **List comprehension > `for` + `.append()`** by ~30%. Generator expression < list comprehension when you don't need the whole result in memory.
+- **`numpy` for array math, NOT `for` loops.** A vectorized `(arr1 + arr2) ** 2` is 100× faster than the equivalent Python loop. Same for pandas: `df['col'].apply(func)` is slow; use vector ops or `df.eval()`.
+- **`async`/`await` doesn't make CPU work faster** -- it only helps with I/O concurrency. CPU-bound work in an async function blocks the event loop.
+
+## Profiling recipes (the few worth memorizing)
+
+### cProfile -- one-shot
+
+```bash
+python -m cProfile -o output.prof script.py
+python -m pstats output.prof
+# At the prompt:
+sort cumtime
+stats 20
+```
+
+In code:
 ```python
-import cProfile
-import pstats
+import cProfile, pstats
 from pstats import SortKey
 
-def slow_function():
-    """Function to profile."""
-    total = 0
-    for i in range(1000000):
-        total += i
-    return total
+profiler = cProfile.Profile()
+profiler.enable()
+main()
+profiler.disable()
 
-def another_function():
-    """Another function."""
-    return [i**2 for i in range(100000)]
-
-def main():
-    """Main function to profile."""
-    result1 = slow_function()
-    result2 = another_function()
-    return result1, result2
-
-# Profile the code
-if __name__ == "__main__":
-    profiler = cProfile.Profile()
-    profiler.enable()
-
-    main()
-
-    profiler.disable()
-
-    # Print stats
-    stats = pstats.Stats(profiler)
-    stats.sort_stats(SortKey.CUMULATIVE)
-    stats.print_stats(10)  # Top 10 functions
-
-    # Save to file for later analysis
-    stats.dump_stats("profile_output.prof")
+stats = pstats.Stats(profiler).sort_stats(SortKey.CUMULATIVE)
+stats.print_stats(20)
 ```
 
-**Command-line profiling:**
-```bash
-# Profile a script
-python -m cProfile -o output.prof script.py
-
-# View results
-python -m pstats output.prof
-# In pstats:
-# sort cumtime
-# stats 10
-```
-
-### line_profiler - Line-by-Line Profiling
-
-```python
-# Install: pip install line-profiler
-
-# Add @profile decorator (line_profiler provides this)
-@profile
-def process_data(data):
-    """Process data with line profiling."""
-    result = []
-    for item in data:
-        processed = item * 2
-        result.append(processed)
-    return result
-
-# Run with:
-# kernprof -l -v script.py
-```
-
-**Manual line profiling:**
-```python
-from line_profiler import LineProfiler
-
-def process_data(data):
-    """Function to profile."""
-    result = []
-    for item in data:
-        processed = item * 2
-        result.append(processed)
-    return result
-
-if __name__ == "__main__":
-    lp = LineProfiler()
-    lp.add_function(process_data)
-
-    data = list(range(100000))
-
-    lp_wrapper = lp(process_data)
-    lp_wrapper(data)
-
-    lp.print_stats()
-```
-
-### memory_profiler - Memory Usage
-
-```python
-# Install: pip install memory-profiler
-
-from memory_profiler import profile
-
-@profile
-def memory_intensive():
-    """Function that uses lots of memory."""
-    # Create large list
-    big_list = [i for i in range(1000000)]
-
-    # Create large dict
-    big_dict = {i: i**2 for i in range(100000)}
-
-    # Process data
-    result = sum(big_list)
-
-    return result
-
-if __name__ == "__main__":
-    memory_intensive()
-
-# Run with:
-# python -m memory_profiler script.py
-```
-
-### py-spy - Production Profiling
+### line_profiler -- per-line breakdown
 
 ```bash
-# Install: pip install py-spy
-
-# Profile a running Python process
-py-spy top --pid 12345
-
-# Generate flamegraph
-py-spy record -o profile.svg --pid 12345
-
-# Profile a script
-py-spy record -o profile.svg -- python script.py
-
-# Dump current call stack
-py-spy dump --pid 12345
+pip install line_profiler
+# Annotate the function with @profile (no import; kernprof injects it)
+kernprof -l -v script.py
 ```
 
-## Optimization Pattern Examples
+### memory_profiler -- per-line memory
 
-### List Comprehensions vs Loops
-
-```python
-import timeit
-
-# Slow: Traditional loop
-def slow_squares(n):
-    """Create list of squares using loop."""
-    result = []
-    for i in range(n):
-        result.append(i**2)
-    return result
-
-# Fast: List comprehension
-def fast_squares(n):
-    """Create list of squares using comprehension."""
-    return [i**2 for i in range(n)]
-
-# Benchmark
-n = 100000
-
-slow_time = timeit.timeit(lambda: slow_squares(n), number=100)
-fast_time = timeit.timeit(lambda: fast_squares(n), number=100)
-
-print(f"Loop: {slow_time:.4f}s")
-print(f"Comprehension: {fast_time:.4f}s")
-print(f"Speedup: {slow_time/fast_time:.2f}x")
-
-# Even faster for simple operations: map
-def faster_squares(n):
-    """Use map for even better performance."""
-    return list(map(lambda x: x**2, range(n)))
+```bash
+pip install memory_profiler psutil
+# Annotate with @profile (memory variant)
+python -m memory_profiler script.py
 ```
 
-### Generator Expressions for Memory
-
-```python
-import sys
-
-def list_approach():
-    """Memory-intensive list."""
-    data = [i**2 for i in range(1000000)]
-    return sum(data)
-
-def generator_approach():
-    """Memory-efficient generator."""
-    data = (i**2 for i in range(1000000))
-    return sum(data)
-
-# Memory comparison
-list_data = [i for i in range(1000000)]
-gen_data = (i for i in range(1000000))
-
-print(f"List size: {sys.getsizeof(list_data)} bytes")
-print(f"Generator size: {sys.getsizeof(gen_data)} bytes")
-
-# Generators use constant memory regardless of size
-```
-
-### String Concatenation
-
-```python
-import timeit
-
-def slow_concat(items):
-    """Slow string concatenation."""
-    result = ""
-    for item in items:
-        result += str(item)
-    return result
-
-def fast_concat(items):
-    """Fast string concatenation with join."""
-    return "".join(str(item) for item in items)
-
-def faster_concat(items):
-    """Even faster with list."""
-    parts = [str(item) for item in items]
-    return "".join(parts)
-
-items = list(range(10000))
-
-# Benchmark
-slow = timeit.timeit(lambda: slow_concat(items), number=100)
-fast = timeit.timeit(lambda: fast_concat(items), number=100)
-faster = timeit.timeit(lambda: faster_concat(items), number=100)
-
-print(f"Concatenation (+): {slow:.4f}s")
-print(f"Join (generator): {fast:.4f}s")
-print(f"Join (list): {faster:.4f}s")
-```
-
-### Dictionary Lookups vs List Searches
-
-```python
-import timeit
-
-# Create test data
-size = 10000
-items = list(range(size))
-lookup_dict = {i: i for i in range(size)}
-
-def list_search(items, target):
-    """O(n) search in list."""
-    return target in items
-
-def dict_search(lookup_dict, target):
-    """O(1) search in dict."""
-    return target in lookup_dict
-
-target = size - 1  # Worst case for list
-
-# Benchmark
-list_time = timeit.timeit(
-    lambda: list_search(items, target),
-    number=1000
-)
-dict_time = timeit.timeit(
-    lambda: dict_search(lookup_dict, target),
-    number=1000
-)
-
-print(f"List search: {list_time:.6f}s")
-print(f"Dict search: {dict_time:.6f}s")
-print(f"Speedup: {list_time/dict_time:.0f}x")
-```
-
-### Local Variable Access
-
-```python
-import timeit
-
-# Global variable (slow)
-GLOBAL_VALUE = 100
-
-def use_global():
-    """Access global variable."""
-    total = 0
-    for i in range(10000):
-        total += GLOBAL_VALUE
-    return total
-
-def use_local():
-    """Use local variable."""
-    local_value = 100
-    total = 0
-    for i in range(10000):
-        total += local_value
-    return total
-
-# Local is faster
-global_time = timeit.timeit(use_global, number=1000)
-local_time = timeit.timeit(use_local, number=1000)
-
-print(f"Global access: {global_time:.4f}s")
-print(f"Local access: {local_time:.4f}s")
-print(f"Speedup: {global_time/local_time:.2f}x")
-```
-
-### Function Call Overhead
-
-```python
-import timeit
-
-def calculate_inline():
-    """Inline calculation."""
-    total = 0
-    for i in range(10000):
-        total += i * 2 + 1
-    return total
-
-def helper_function(x):
-    """Helper function."""
-    return x * 2 + 1
-
-def calculate_with_function():
-    """Calculation with function calls."""
-    total = 0
-    for i in range(10000):
-        total += helper_function(i)
-    return total
-
-# Inline is faster due to no call overhead
-inline_time = timeit.timeit(calculate_inline, number=1000)
-function_time = timeit.timeit(calculate_with_function, number=1000)
-
-print(f"Inline: {inline_time:.4f}s")
-print(f"Function calls: {function_time:.4f}s")
-```
-
-## Advanced Optimization Examples
-
-### NumPy for Numerical Operations
-
-```python
-import timeit
-import numpy as np
-
-def python_sum(n):
-    """Sum using pure Python."""
-    return sum(range(n))
-
-def numpy_sum(n):
-    """Sum using NumPy."""
-    return np.arange(n).sum()
-
-n = 1000000
-
-python_time = timeit.timeit(lambda: python_sum(n), number=100)
-numpy_time = timeit.timeit(lambda: numpy_sum(n), number=100)
-
-print(f"Python: {python_time:.4f}s")
-print(f"NumPy: {numpy_time:.4f}s")
-print(f"Speedup: {python_time/numpy_time:.2f}x")
-
-# Vectorized operations
-def python_multiply():
-    """Element-wise multiplication in Python."""
-    a = list(range(100000))
-    b = list(range(100000))
-    return [x * y for x, y in zip(a, b)]
-
-def numpy_multiply():
-    """Vectorized multiplication in NumPy."""
-    a = np.arange(100000)
-    b = np.arange(100000)
-    return a * b
-
-py_time = timeit.timeit(python_multiply, number=100)
-np_time = timeit.timeit(numpy_multiply, number=100)
-
-print(f"\nPython multiply: {py_time:.4f}s")
-print(f"NumPy multiply: {np_time:.4f}s")
-print(f"Speedup: {py_time/np_time:.2f}x")
-```
-
-### Caching with functools.lru_cache
-
-```python
-from functools import lru_cache
-import timeit
-
-def fibonacci_slow(n):
-    """Recursive fibonacci without caching."""
-    if n < 2:
-        return n
-    return fibonacci_slow(n-1) + fibonacci_slow(n-2)
-
-@lru_cache(maxsize=None)
-def fibonacci_fast(n):
-    """Recursive fibonacci with caching."""
-    if n < 2:
-        return n
-    return fibonacci_fast(n-1) + fibonacci_fast(n-2)
-
-# Massive speedup for recursive algorithms
-n = 30
-
-slow_time = timeit.timeit(lambda: fibonacci_slow(n), number=1)
-fast_time = timeit.timeit(lambda: fibonacci_fast(n), number=1000)
-
-print(f"Without cache (1 run): {slow_time:.4f}s")
-print(f"With cache (1000 runs): {fast_time:.4f}s")
-
-# Cache info
-print(f"Cache info: {fibonacci_fast.cache_info()}")
-```
-
-### Using __slots__ for Memory
-
-```python
-import sys
-
-class RegularClass:
-    """Regular class with __dict__."""
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-class SlottedClass:
-    """Class with __slots__ for memory efficiency."""
-    __slots__ = ['x', 'y', 'z']
-
-    def __init__(self, x, y, z):
-        self.x = x
-        self.y = y
-        self.z = z
-
-# Memory comparison
-regular = RegularClass(1, 2, 3)
-slotted = SlottedClass(1, 2, 3)
-
-print(f"Regular class size: {sys.getsizeof(regular)} bytes")
-print(f"Slotted class size: {sys.getsizeof(slotted)} bytes")
-
-# Significant savings with many instances
-regular_objects = [RegularClass(i, i+1, i+2) for i in range(10000)]
-slotted_objects = [SlottedClass(i, i+1, i+2) for i in range(10000)]
-
-print(f"\nMemory for 10000 regular objects: ~{sys.getsizeof(regular) * 10000} bytes")
-print(f"Memory for 10000 slotted objects: ~{sys.getsizeof(slotted) * 10000} bytes")
-```
-
-### Multiprocessing for CPU-Bound Tasks
-
-```python
-import multiprocessing as mp
-import time
-
-def cpu_intensive_task(n):
-    """CPU-intensive calculation."""
-    return sum(i**2 for i in range(n))
-
-def sequential_processing():
-    """Process tasks sequentially."""
-    start = time.time()
-    results = [cpu_intensive_task(1000000) for _ in range(4)]
-    elapsed = time.time() - start
-    return elapsed, results
-
-def parallel_processing():
-    """Process tasks in parallel."""
-    start = time.time()
-    with mp.Pool(processes=4) as pool:
-        results = pool.map(cpu_intensive_task, [1000000] * 4)
-    elapsed = time.time() - start
-    return elapsed, results
-
-if __name__ == "__main__":
-    seq_time, seq_results = sequential_processing()
-    par_time, par_results = parallel_processing()
-
-    print(f"Sequential: {seq_time:.2f}s")
-    print(f"Parallel: {par_time:.2f}s")
-    print(f"Speedup: {seq_time/par_time:.2f}x")
-```
-
-### Async I/O for I/O-Bound Tasks
-
-```python
-import asyncio
-import aiohttp
-import time
-import requests
-
-urls = [
-    "https://httpbin.org/delay/1",
-    "https://httpbin.org/delay/1",
-    "https://httpbin.org/delay/1",
-    "https://httpbin.org/delay/1",
-]
-
-def synchronous_requests():
-    """Synchronous HTTP requests."""
-    start = time.time()
-    results = []
-    for url in urls:
-        response = requests.get(url)
-        results.append(response.status_code)
-    elapsed = time.time() - start
-    return elapsed, results
-
-async def async_fetch(session, url):
-    """Async HTTP request."""
-    async with session.get(url) as response:
-        return response.status
-
-async def asynchronous_requests():
-    """Asynchronous HTTP requests."""
-    start = time.time()
-    async with aiohttp.ClientSession() as session:
-        tasks = [async_fetch(session, url) for url in urls]
-        results = await asyncio.gather(*tasks)
-    elapsed = time.time() - start
-    return elapsed, results
-
-# Async is much faster for I/O-bound work
-sync_time, sync_results = synchronous_requests()
-async_time, async_results = asyncio.run(asynchronous_requests())
-
-print(f"Synchronous: {sync_time:.2f}s")
-print(f"Asynchronous: {async_time:.2f}s")
-print(f"Speedup: {sync_time/async_time:.2f}x")
-```
-
-## Database Optimization Examples
-
-### Batch Database Operations
-
-```python
-import sqlite3
-import time
-
-def create_db():
-    """Create test database."""
-    conn = sqlite3.connect(":memory:")
-    conn.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT)")
-    return conn
-
-def slow_inserts(conn, count):
-    """Insert records one at a time."""
-    start = time.time()
-    cursor = conn.cursor()
-    for i in range(count):
-        cursor.execute("INSERT INTO users (name) VALUES (?)", (f"User {i}",))
-        conn.commit()  # Commit each insert
-    elapsed = time.time() - start
-    return elapsed
-
-def fast_inserts(conn, count):
-    """Batch insert with single commit."""
-    start = time.time()
-    cursor = conn.cursor()
-    data = [(f"User {i}",) for i in range(count)]
-    cursor.executemany("INSERT INTO users (name) VALUES (?)", data)
-    conn.commit()  # Single commit
-    elapsed = time.time() - start
-    return elapsed
-
-# Benchmark
-conn1 = create_db()
-slow_time = slow_inserts(conn1, 1000)
-
-conn2 = create_db()
-fast_time = fast_inserts(conn2, 1000)
-
-print(f"Individual inserts: {slow_time:.4f}s")
-print(f"Batch insert: {fast_time:.4f}s")
-print(f"Speedup: {slow_time/fast_time:.2f}x")
-```
-
-### Query Optimization
-
-```python
-# Use indexes for frequently queried columns
-"""
--- Slow: No index
-SELECT * FROM users WHERE email = 'user@example.com';
-
--- Fast: With index
-CREATE INDEX idx_users_email ON users(email);
-SELECT * FROM users WHERE email = 'user@example.com';
-"""
-
-# Use query planning
-import sqlite3
-
-conn = sqlite3.connect("example.db")
-cursor = conn.cursor()
-
-# Analyze query performance
-cursor.execute("EXPLAIN QUERY PLAN SELECT * FROM users WHERE email = ?", ("test@example.com",))
-print(cursor.fetchall())
-
-# Use SELECT only needed columns
-# Slow: SELECT *
-# Fast: SELECT id, name
-```
-
-## Memory Optimization Examples
-
-### Detecting Memory Leaks
+### tracemalloc -- find leaks
 
 ```python
 import tracemalloc
-import gc
+tracemalloc.start()
+snap1 = tracemalloc.take_snapshot()
 
-def memory_leak_example():
-    """Example that leaks memory."""
-    leaked_objects = []
+do_work()
 
-    for i in range(100000):
-        # Objects added but never removed
-        leaked_objects.append([i] * 100)
-
-    # In real code, this would be an unintended reference
-
-def track_memory_usage():
-    """Track memory allocations."""
-    tracemalloc.start()
-
-    # Take snapshot before
-    snapshot1 = tracemalloc.take_snapshot()
-
-    # Run code
-    memory_leak_example()
-
-    # Take snapshot after
-    snapshot2 = tracemalloc.take_snapshot()
-
-    # Compare
-    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-
-    print("Top 10 memory allocations:")
-    for stat in top_stats[:10]:
-        print(stat)
-
-    tracemalloc.stop()
-
-# Monitor memory
-track_memory_usage()
-
-# Force garbage collection
-gc.collect()
+snap2 = tracemalloc.take_snapshot()
+for stat in snap2.compare_to(snap1, 'lineno')[:10]:
+    print(stat)
 ```
 
-### Iterators vs Lists
+### py-spy -- production sampling
 
-```python
-import sys
-
-def process_file_list(filename):
-    """Load entire file into memory."""
-    with open(filename) as f:
-        lines = f.readlines()  # Loads all lines
-        return sum(1 for line in lines if line.strip())
-
-def process_file_iterator(filename):
-    """Process file line by line."""
-    with open(filename) as f:
-        return sum(1 for line in f if line.strip())
-
-# Iterator uses constant memory
-# List loads entire file into memory
+```bash
+pip install py-spy
+sudo py-spy top --pid <PID>                  # live top-like view
+sudo py-spy record -o profile.svg --pid <PID> --duration 30
 ```
 
-### Weakref for Caches
+py-spy is the right tool when you can't restart the process (live prod debugging). Sub-1% overhead.
 
-```python
-import weakref
+### timeit -- micro-bench
 
-class CachedResource:
-    """Resource that can be garbage collected."""
-    def __init__(self, data):
-        self.data = data
-
-# Regular cache prevents garbage collection
-regular_cache = {}
-
-def get_resource_regular(key):
-    """Get resource from regular cache."""
-    if key not in regular_cache:
-        regular_cache[key] = CachedResource(f"Data for {key}")
-    return regular_cache[key]
-
-# Weak reference cache allows garbage collection
-weak_cache = weakref.WeakValueDictionary()
-
-def get_resource_weak(key):
-    """Get resource from weak cache."""
-    resource = weak_cache.get(key)
-    if resource is None:
-        resource = CachedResource(f"Data for {key}")
-        weak_cache[key] = resource
-    return resource
-
-# When no strong references exist, objects can be GC'd
+```bash
+python -m timeit -n 10000 -s "import json" "json.dumps({'a': 1})"
 ```
 
-## Benchmarking Tools
+In IPython/Jupyter: `%timeit json.dumps({'a': 1})` (single line) or `%%timeit` (cell).
 
-### Custom Benchmark Decorator
+## Optimization patterns (in order of typical ROI)
 
-```python
-import time
-from functools import wraps
+1. **Algorithmic** -- Profile first, then check Big-O. A `O(n²)` loop replaced by a `dict` lookup beats every micro-optimization.
+2. **Vectorization** -- numpy / pandas for numeric work. 10-1000× speedup over Python loops.
+3. **Caching** -- `functools.lru_cache` for pure functions, Redis / dict for cross-call state. Memoize expensive deterministic work.
+4. **Lazy evaluation** -- generators (`yield`) instead of lists when you process one item at a time. Saves memory and often time (early exit).
+5. **Concurrency** -- `asyncio` for I/O-bound, `ProcessPoolExecutor` for CPU-bound. Threading helps only if the bottleneck is in C extensions that release the GIL.
+6. **Native code** -- Cython, mypyc, Numba, or PyO3 (Rust) for hot loops. 10-100× speedup but adds build complexity.
+7. **JIT** -- PyPy for compute-heavy pure-Python code. Drop-in for CPython in many cases; check compatibility.
 
-def benchmark(func):
-    """Decorator to benchmark function execution."""
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.perf_counter()
-        result = func(*args, **kwargs)
-        elapsed = time.perf_counter() - start
-        print(f"{func.__name__} took {elapsed:.6f} seconds")
-        return result
-    return wrapper
+## Anti-patterns (the things that look smart but aren't)
 
-@benchmark
-def slow_function():
-    """Function to benchmark."""
-    time.sleep(0.5)
-    return sum(range(1000000))
+- **`__slots__` for every class** -- saves a few KB per instance but makes inheritance + serialization harder. Use only for classes instantiated millions of times.
+- **Premature `lru_cache` decoration** -- caching everything pollutes memory and complicates lifetime reasoning. Profile first.
+- **Manual loop unrolling in Python** -- the interpreter doesn't benefit; readability suffers.
+- **`is` for equality of small ints / strings** -- relies on CPython interning, breaks portability and is brittle.
+- **Replacing `dict` with `OrderedDict`** in modern Python -- unnecessary since 3.7 (ordering is guaranteed).
+- **Using `multiprocessing` for tasks that take < 1 second total** -- fork overhead dominates.
 
-result = slow_function()
-```
+## When to reach for native code
 
-### Performance Testing with pytest-benchmark
+Threshold heuristic: if profiling shows **a single function consuming > 30% of total time AND vectorization isn't an option**, consider:
 
-```python
-# Install: pip install pytest-benchmark
+| Tool | When |
+|------|------|
+| **Cython** | C-like syntax, gradual typing, mature ecosystem |
+| **mypyc** | Compile typed Python directly; less invasive than Cython |
+| **Numba** | NumPy-heavy code, GPU support via CUDA |
+| **PyO3 (Rust)** | New extensions, modern toolchain, memory safety |
+| **C/C++ + ctypes** | Existing C library you want to wrap |
 
-def test_list_comprehension(benchmark):
-    """Benchmark list comprehension."""
-    result = benchmark(lambda: [i**2 for i in range(10000)])
-    assert len(result) == 10000
+## Official docs
 
-def test_map_function(benchmark):
-    """Benchmark map function."""
-    result = benchmark(lambda: list(map(lambda x: x**2, range(10000))))
-    assert len(result) == 10000
+- `cProfile` + `pstats`: https://docs.python.org/3/library/profile.html
+- `tracemalloc`: https://docs.python.org/3/library/tracemalloc.html
+- `gc` module: https://docs.python.org/3/library/gc.html
+- `timeit`: https://docs.python.org/3/library/timeit.html
+- `functools.lru_cache`: https://docs.python.org/3/library/functools.html#functools.lru_cache
+- `concurrent.futures`: https://docs.python.org/3/library/concurrent.futures.html
+- line_profiler: https://github.com/pyutils/line_profiler
+- memory_profiler: https://github.com/pythonprofilers/memory_profiler
+- py-spy: https://github.com/benfred/py-spy
+- pytest-benchmark: https://pytest-benchmark.readthedocs.io/
+- Cython: https://cython.org/
+- mypyc: https://mypyc.readthedocs.io/
+- Numba: https://numba.pydata.org/
+- PyO3: https://pyo3.rs/
 
-# Run with: pytest test_performance.py --benchmark-compare
-```
+## Related
+
+- `python-performance-optimization/SKILL.md` -- decision tree (when to optimize, when not)
+- `async-python-patterns/references/async-patterns.md` -- when async genuinely helps and when it doesn't
+- `python-refactor/references/cognitive_complexity_guide.md` -- complexity refactoring (often resolves perf as a side effect)

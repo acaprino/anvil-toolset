@@ -1,10 +1,12 @@
 # Framework Configuration
 
-Reference for pytest configuration, coverage tooling, markers, plugins, and CI/CD integration.
+pytest + coverage + plugins + CI integration. Most surface lives in pytest/coverage docs; this file is the recommended baseline shape and the threshold conventions.
 
-## pytest Configuration
+## When to use
 
-### pyproject.toml (preferred)
+Setting up `pyproject.toml` for a new Python project's test suite, or auditing an existing test config for missing essentials (markers registered, branch coverage, fail-under threshold, parallel execution).
+
+## Recommended `pyproject.toml` baseline
 
 ```toml
 [tool.pytest.ini_options]
@@ -18,6 +20,7 @@ addopts = [
     "--tb=short",
     "--cov=src",
     "--cov-report=term-missing",
+    "--cov-fail-under=80",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -29,37 +32,11 @@ filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
 ]
-```
 
-### pytest.ini (alternative)
-
-```ini
-[pytest]
-testpaths = tests
-python_files = test_*.py
-python_functions = test_*
-addopts = -v --strict-markers --tb=short --cov=src --cov-report=term-missing
-markers =
-    slow: marks tests as slow
-    integration: marks integration tests
-    unit: marks unit tests
-    e2e: marks end-to-end tests
-```
-
-## Coverage Configuration
-
-### pyproject.toml coverage settings
-
-```toml
 [tool.coverage.run]
 source = ["src"]
 branch = true
-omit = [
-    "*/tests/*",
-    "*/migrations/*",
-    "*/__main__.py",
-    "*/conftest.py",
-]
+omit = ["*/tests/*", "*/migrations/*", "*/__main__.py", "*/conftest.py"]
 
 [tool.coverage.report]
 fail_under = 80
@@ -74,130 +51,81 @@ exclude_lines = [
     "if TYPE_CHECKING:",
     "@overload",
 ]
-
-[tool.coverage.html]
-directory = "htmlcov"
 ```
 
-### Threshold gates
+## Gotchas
 
-- `fail_under = 80` - blocks test run if line coverage drops below 80%
-- Combine with `--cov-fail-under=80` in addopts for CLI enforcement
-- Use branch coverage (`branch = true`) to catch untested conditionals
+- **`--strict-markers` is non-negotiable** -- without it, typos in `@pytest.mark.foo` silently pass instead of erroring. Every marker must be registered in `markers`.
+- **`branch = true` matters more than line coverage.** Catches untested conditionals (the `if x:` where you never tested the false branch). Always set it.
+- **`filterwarnings = ["error", ...]`** turns warnings into failures by default -- you opt back in for known noise. Without `error`, deprecation traps land in production.
+- **Coverage gate is double-set on purpose**: `--cov-fail-under=80` in `addopts` AND `fail_under = 80` under `[tool.coverage.report]`. The first fails the pytest run, the second fails standalone `coverage report`.
+- **`exclude_lines` for `if TYPE_CHECKING:` and `@overload`** -- otherwise import-time-only code shows as uncovered.
+- **`ignore_errors` and `pragma: no cover` are easy to abuse** -- audit them periodically. They hide real coverage gaps.
+- **`pytest-randomly`** is the cheapest way to catch hidden test interdependencies (tests passing only because of run order). Add it day one.
+- **`pytest-asyncio` mode**: in `[tool.pytest.ini_options]` set `asyncio_mode = "auto"` if you want async test functions auto-detected; otherwise decorate with `@pytest.mark.asyncio`.
 
-## Markers
-
-### Built-in useful markers
-
-| Marker | Purpose | Example |
-|--------|---------|---------|
-| `@pytest.mark.skip(reason="...")` | Unconditionally skip | Feature not ready |
-| `@pytest.mark.skipif(condition)` | Skip on condition | OS-specific tests |
-| `@pytest.mark.xfail(reason="...")` | Expected failure | Known bug |
-| `@pytest.mark.parametrize` | Run with multiple inputs | Data-driven tests |
-
-### Custom markers and running by marker
+## Marker patterns
 
 ```bash
-# Register in pyproject.toml (see above), then use:
-pytest -m unit              # run only unit tests
-pytest -m "not slow"        # skip slow tests
-pytest -m "integration"     # run integration tests only
-pytest -m "not e2e"         # exclude e2e tests
+pytest -m unit                          # only unit tests
+pytest -m "not slow"                    # skip slow
+pytest -m integration                   # only integration
+pytest -m "not e2e"                     # exclude e2e
+pytest -k "test_login or test_signup"   # name-based selection (not marker)
 ```
 
-## Recommended Plugins
+## Plugin selector (the curated list)
 
-| Plugin | Purpose | Install |
-|--------|---------|---------|
-| `pytest-cov` | Coverage reporting | `pip install pytest-cov` |
-| `pytest-asyncio` | Async test support | `pip install pytest-asyncio` |
-| `pytest-mock` | Thin mock wrapper | `pip install pytest-mock` |
-| `hypothesis` | Property-based testing | `pip install hypothesis` |
-| `pytest-xdist` | Parallel test execution | `pip install pytest-xdist` |
-| `pytest-randomly` | Randomize test order | `pip install pytest-randomly` |
-| `pytest-timeout` | Per-test timeouts | `pip install pytest-timeout` |
-| `pytest-sugar` | Better terminal output | `pip install pytest-sugar` |
+| Plugin | Purpose |
+|--------|---------|
+| `pytest-cov` | Coverage reporting |
+| `pytest-asyncio` | Async test support |
+| `pytest-mock` | Thin `unittest.mock` wrapper with cleanup |
+| `hypothesis` | Property-based testing |
+| `pytest-xdist` | Parallel test execution (`-n auto`) |
+| `pytest-randomly` | Randomize test order (catches order dependencies) |
+| `pytest-timeout` | Per-test timeouts (kills hung tests in CI) |
+| `pytest-sugar` | Better terminal output |
 
-Install all at once:
+Install all: `uv add --dev pytest-cov pytest-asyncio pytest-mock hypothesis pytest-xdist pytest-randomly pytest-timeout`
 
-```bash
-pip install pytest-cov pytest-asyncio pytest-mock hypothesis pytest-xdist pytest-randomly
-# or with uv
-uv add --dev pytest-cov pytest-asyncio pytest-mock hypothesis pytest-xdist pytest-randomly
-```
-
-## CI/CD Integration
-
-### GitHub Actions Workflow
-
-```yaml
-# .github/workflows/test.yml
-name: Tests
-
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev]"
-          pip install pytest pytest-cov
-
-      - name: Run tests
-        run: |
-          pytest --cov=src --cov-report=xml --cov-fail-under=80
-
-      - name: Upload coverage
-        if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v4
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: true
-```
-
-### Coverage threshold enforcement
-
-- **CI gate**: `--cov-fail-under=80` exits non-zero if coverage drops below threshold
-- **pyproject.toml gate**: `fail_under = 80` under `[tool.coverage.report]`
-- **PR checks**: Use codecov or coveralls to block merge if coverage decreases
-
-### Metrics to track
+## CI metrics worth tracking
 
 | Metric | Target | Tool |
 |--------|--------|------|
-| Line coverage | >= 80% | pytest-cov, coverage.py |
+| Line coverage | >= 80% | pytest-cov + coverage.py |
 | Branch coverage | >= 70% | coverage.py with `branch = true` |
 | Coverage delta | No decrease | Codecov PR comments |
-| Test execution time | < 5 min | CI timing, pytest-timeout |
-| Flaky test count | 0 | pytest-randomly, CI history |
+| Test execution time | < 5 min | `pytest --durations=10`, pytest-timeout |
+| Flaky test count | 0 | pytest-randomly + CI history |
 
-## Version Requirements
+## Version floor
 
-| Tool | Minimum version | Notes |
-|------|----------------|-------|
+| Tool | Min | Notes |
+|------|-----|-------|
 | Python | 3.11+ | 3.12+ recommended for improved error messages |
 | pytest | 8.0+ | Improved assertion introspection |
-| pytest-cov | 5.0+ | Supports latest coverage.py |
+| pytest-cov | 5.0+ | Latest coverage.py support |
 | coverage.py | 7.0+ | Branch coverage improvements |
-| pytest-asyncio | 0.23+ | Auto mode for async fixtures |
+| pytest-asyncio | 0.23+ | Auto mode |
 | hypothesis | 6.90+ | Python 3.12+ support |
-| pytest-xdist | 3.5+ | Load balancing improvements |
+| pytest-xdist | 3.5+ | Load balancing |
+
+## Official docs
+
+- pytest config reference: https://docs.pytest.org/en/stable/reference/customize.html
+- pytest markers: https://docs.pytest.org/en/stable/example/markers.html
+- coverage.py config reference: https://coverage.readthedocs.io/en/latest/config.html
+- coverage.py exclude_lines: https://coverage.readthedocs.io/en/latest/excluding.html
+- pytest-cov: https://pytest-cov.readthedocs.io/
+- pytest-asyncio: https://pytest-asyncio.readthedocs.io/
+- pytest-xdist: https://pytest-xdist.readthedocs.io/
+- pytest-randomly: https://github.com/pytest-dev/pytest-randomly
+- hypothesis: https://hypothesis.readthedocs.io/
+- Codecov: https://docs.codecov.com/
+
+## Related
+
+- `tdd-best-practices.md` -- the discipline this config supports
+- `pytest-infrastructure.md` -- conftest patterns, fixture scoping, sys.modules race
+- `python-comments` skill -- pairs well via the `D` ruff rule set for docstring coverage
