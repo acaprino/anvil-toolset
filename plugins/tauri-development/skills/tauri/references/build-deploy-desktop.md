@@ -1,307 +1,62 @@
 # Desktop Build & Deployment
 
-Bundling, code signing, and auto-updates for Tauri 2 desktop applications.
+Bundling, code signing, notarization, and the auto-updater. Most surface lives in v2.tauri.app; this file is the gotchas + the updater pubkey/endpoint shape + the GitHub releases convention.
 
-## Quick Reference
+## When to use
+
+Producing distributable installers (.msi/.nsis on Windows, .dmg/.app on macOS, .AppImage/.deb/.rpm on Linux) and wiring the Tauri auto-updater. For mobile builds, see `build-deploy-mobile.md`.
+
+## Format matrix
 
 | Platform | Format | Toolchain |
 |----------|--------|-----------|
-| Windows | `.msi` (WiX), `.nsis` | WiX Toolset / NSIS |
-| macOS | `.dmg`, `.app` | Xcode Command Line Tools |
-| Linux | `.AppImage`, `.deb`, `.rpm` | Various |
+| Windows | `.msi` (WiX) / `.nsis` | WiX Toolset 3.x / NSIS |
+| macOS | `.dmg`, `.app` | Xcode CLT |
+| Linux | `.AppImage` / `.deb` / `.rpm` | various |
 
-| Task | Command |
-|------|---------|
-| Build release | `cargo tauri build` |
-| Build specific target | `cargo tauri build --target x86_64-pc-windows-msvc` |
-| Build debug bundle | `cargo tauri build --debug` |
-| Build with specific format | `cargo tauri build --bundles nsis` |
+Build commands:
+- `cargo tauri build` (default release)
+- `cargo tauri build --target x86_64-pc-windows-msvc`
+- `cargo tauri build --bundles nsis` (specific format)
+- `cargo tauri build --target universal-apple-darwin` (macOS universal)
 
-## Bundle Configuration
+## Gotchas
 
-### tauri.conf.json
+- **NSIS `installMode` choice matters**: `currentUser` (no admin, AppData), `perMachine` (admin, Program Files), or `both` (user picks). Default is fine; pick `currentUser` for consumer apps to skip UAC.
+- **macOS notarization needs `APPLE_ID`, `APPLE_PASSWORD` (app-specific!), and `APPLE_TEAM_ID`** as env vars. Tauri runs notarization automatically during `cargo tauri build` when these are set. Without notarization, Gatekeeper blocks the app on first run.
+- **Universal binary** (`--target universal-apple-darwin`) builds both Intel and Apple Silicon, but doubles build time. Most projects ship two separate `.dmg` files instead.
+- **Linux `.deb` / `.rpm` MUST declare `libwebkit2gtk-4.1-0` (or `webkit2gtk4.1`) as a dep** -- otherwise the package installs but the app refuses to launch with a missing-library error.
+- **AppImage `chmod +x` after download.** Linux distros don't auto-mark downloads as executable.
+- **WiX Toolset 3.x must be on PATH** -- WiX 4 is NOT supported by Tauri yet (as of early 2026).
+- **Updater pubkey embedded in the binary**: change it = ALL existing installations stop accepting updates from this release forward. Generate once with `cargo tauri signer generate -w ~/.tauri/myapp.key` and store the public key in `tauri.conf.json` permanently.
+- **Updater requires `bundle.createUpdaterArtifacts: "v2Compatible"`** in `tauri.conf.json`, otherwise no `.sig` files are produced and the updater silently never finds an update.
+- **Updater endpoint URL placeholders**: `{{target}}` (`windows-x86_64`, `darwin-aarch64`, etc.), `{{arch}}`, `{{current_version}}` -- the server must respond with the JSON shape below.
 
-```json
-{
-  "bundle": {
-    "active": true,
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
-    "resources": [
-      "assets/*",
-      "config/default.toml"
-    ],
-    "copyright": "Copyright 2025 MyCompany",
-    "category": "DeveloperTool",
-    "shortDescription": "My Tauri App",
-    "longDescription": "A desktop application built with Tauri 2.",
-    "targets": "all",
-    "windows": {
-      "certificateThumbprint": null,
-      "digestAlgorithm": "sha256",
-      "timestampUrl": "http://timestamp.digicert.com",
-      "wix": null,
-      "nsis": {
-        "displayLanguageSelector": true,
-        "installerIcon": "icons/icon.ico",
-        "installMode": "both"
-      }
-    },
-    "macOS": {
-      "frameworks": [],
-      "minimumSystemVersion": "10.15",
-      "signingIdentity": null,
-      "providerShortName": null,
-      "entitlements": null
-    },
-    "linux": {
-      "deb": {
-        "depends": ["libwebkit2gtk-4.1-0"],
-        "section": "utils"
-      },
-      "appimage": {
-        "bundleMediaFramework": false
-      },
-      "rpm": {
-        "depends": ["webkit2gtk4.1"]
-      }
-    }
-  }
-}
+## Cargo.toml release profile (mirror in CI/`ci-cd.md`)
+
+```toml
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+strip = true
+panic = "abort"
 ```
 
-## Windows Bundling
+For size-optimized builds (mobile/embedded), use `opt-level = "s"` instead.
 
-### NSIS Installer (Recommended)
+## Auto-updater (the parts worth keeping local)
 
-```json
-{
-  "bundle": {
-    "targets": ["nsis"],
-    "windows": {
-      "nsis": {
-        "installMode": "both",
-        "displayLanguageSelector": true,
-        "installerIcon": "icons/icon.ico",
-        "headerImage": "icons/nsis-header.bmp",
-        "sidebarImage": "icons/nsis-sidebar.bmp"
-      }
-    }
-  }
-}
-```
-
-Install modes:
-- `"currentUser"` -- no admin required, installs to AppData
-- `"perMachine"` -- requires admin, installs to Program Files
-- `"both"` -- user chooses at install time
-
-### WiX MSI
-
-```json
-{
-  "bundle": {
-    "targets": ["msi"],
-    "windows": {
-      "wix": {
-        "language": "en-US",
-        "template": null
-      }
-    }
-  }
-}
-```
-
-Requires WiX Toolset 3.x installed.
-
-### Windows Code Signing
-
-```bash
-# Sign with certificate from Windows Certificate Store
-# Set environment variables before build:
-export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="password"
-
-# In tauri.conf.json:
-# "certificateThumbprint": "YOUR_CERT_THUMBPRINT"
-# "digestAlgorithm": "sha256"
-# "timestampUrl": "http://timestamp.digicert.com"
-```
-
-Using signtool directly:
-
-```bash
-signtool sign /sha1 THUMBPRINT /fd sha256 /tr http://timestamp.digicert.com /td sha256 target/release/bundle/nsis/MyApp_1.0.0_x64-setup.exe
-```
-
-## macOS Bundling
-
-### Build for Both Architectures
-
-```bash
-# Intel
-cargo tauri build --target x86_64-apple-darwin
-
-# Apple Silicon
-cargo tauri build --target aarch64-apple-darwin
-
-# Universal binary (both)
-cargo tauri build --target universal-apple-darwin
-```
-
-### Code Signing
-
-```bash
-# Set signing identity
-export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAM_ID)"
-
-# Or in tauri.conf.json:
-# "macOS": { "signingIdentity": "Developer ID Application: Your Name (TEAM_ID)" }
-```
-
-### Notarization
-
-```bash
-# Environment variables for notarization
-export APPLE_ID="your@email.com"
-export APPLE_PASSWORD="app-specific-password"
-export APPLE_TEAM_ID="TEAM_ID"
-
-# Tauri handles notarization automatically during `cargo tauri build`
-# when these env vars are set
-```
-
-### Entitlements
-
-```xml
-<!-- src-tauri/entitlements.plist -->
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>com.apple.security.app-sandbox</key>
-    <true/>
-    <key>com.apple.security.network.client</key>
-    <true/>
-    <key>com.apple.security.files.user-selected.read-write</key>
-    <true/>
-</dict>
-</plist>
-```
-
-```json
-{
-  "bundle": {
-    "macOS": {
-      "entitlements": "entitlements.plist"
-    }
-  }
-}
-```
-
-## Linux Bundling
-
-### AppImage
-
-```bash
-cargo tauri build --bundles appimage
-```
-
-AppImage is self-contained, works on most distributions.
-
-### Debian Package
-
-```json
-{
-  "bundle": {
-    "linux": {
-      "deb": {
-        "depends": [
-          "libwebkit2gtk-4.1-0",
-          "libssl3"
-        ],
-        "section": "utils",
-        "priority": "optional"
-      }
-    }
-  }
-}
-```
-
-### RPM Package
-
-```json
-{
-  "bundle": {
-    "linux": {
-      "rpm": {
-        "depends": [
-          "webkit2gtk4.1",
-          "openssl"
-        ]
-      }
-    }
-  }
-}
-```
-
-## Bundle Resources
-
-Include extra files in the bundle:
-
-```json
-{
-  "bundle": {
-    "resources": [
-      "assets/**/*",
-      "config/default.toml",
-      "models/model.onnx"
-    ]
-  }
-}
-```
-
-Access at runtime:
-
-```rust
-use tauri::Manager;
-
-#[tauri::command]
-fn get_resource_path(app: tauri::AppHandle) -> Result<String, String> {
-    let resource_path = app
-        .path()
-        .resource_dir()
-        .map_err(|e| e.to_string())?
-        .join("assets/data.json");
-    Ok(resource_path.to_string_lossy().to_string())
-}
-```
-
-## Auto-Updater
-
-### Plugin Setup
-
+### Setup
 ```bash
 npm run tauri add updater
-```
-
-### Generate Update Keys
-
-```bash
 cargo tauri signer generate -w ~/.tauri/myapp.key
 ```
 
-### tauri.conf.json
-
+### `tauri.conf.json`
 ```json
 {
-  "bundle": {
-    "createUpdaterArtifacts": "v2Compatible"
-  },
+  "bundle": { "createUpdaterArtifacts": "v2Compatible" },
   "plugins": {
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ...",
@@ -313,9 +68,7 @@ cargo tauri signer generate -w ~/.tauri/myapp.key
 }
 ```
 
-### Update Server Response Format
-
-The endpoint must return JSON:
+### Update server response shape (the canonical JSON you must serve)
 
 ```json
 {
@@ -323,104 +76,24 @@ The endpoint must return JSON:
   "notes": "Bug fixes and improvements",
   "pub_date": "2025-01-15T12:00:00Z",
   "platforms": {
-    "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ...",
-      "url": "https://releases.myapp.com/MyApp_1.1.0_x64-setup.nsis.zip"
-    },
-    "darwin-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ...",
-      "url": "https://releases.myapp.com/MyApp_1.1.0_x64.app.tar.gz"
-    },
-    "darwin-aarch64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ...",
-      "url": "https://releases.myapp.com/MyApp_1.1.0_aarch64.app.tar.gz"
-    },
-    "linux-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ...",
-      "url": "https://releases.myapp.com/MyApp_1.1.0_amd64.AppImage.tar.gz"
-    }
+    "windows-x86_64":  { "signature": "...", "url": "https://.../MyApp_1.1.0_x64-setup.nsis.zip" },
+    "darwin-x86_64":   { "signature": "...", "url": "https://.../MyApp_1.1.0_x64.app.tar.gz" },
+    "darwin-aarch64":  { "signature": "...", "url": "https://.../MyApp_1.1.0_aarch64.app.tar.gz" },
+    "linux-x86_64":    { "signature": "...", "url": "https://.../MyApp_1.1.0_amd64.AppImage.tar.gz" }
   }
 }
 ```
 
-### Rust: Check and Install Updates
-
-```rust
-use tauri_plugin_updater::UpdaterExt;
-
-#[tauri::command]
-async fn check_for_updates(app: tauri::AppHandle) -> Result<Option<String>, String> {
-    let update = app
-        .updater()
-        .map_err(|e| e.to_string())?
-        .check()
-        .await
-        .map_err(|e| e.to_string())?;
-
-    match update {
-        Some(update) => {
-            println!("Update available: {}", update.version);
-            // Download and install
-            update
-                .download_and_install(|progress, total| {
-                    println!("Downloaded {} of {:?}", progress, total);
-                }, || {
-                    println!("Download complete");
-                })
-                .await
-                .map_err(|e| e.to_string())?;
-            Ok(Some(update.version))
-        }
-        None => Ok(None),
-    }
-}
-```
-
-### Frontend: Check for Updates
-
-```typescript
-import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
-
-async function checkForUpdates() {
-  const update = await check();
-
-  if (update) {
-    console.log(`Update ${update.version} available`);
-
-    await update.downloadAndInstall((event) => {
-      switch (event.event) {
-        case 'Started':
-          console.log(`Downloading ${event.data.contentLength} bytes`);
-          break;
-        case 'Progress':
-          console.log(`Downloaded ${event.data.chunkLength} bytes`);
-          break;
-        case 'Finished':
-          console.log('Download complete');
-          break;
-      }
-    });
-
-    await relaunch();
-  }
-}
-```
+`signature` is produced by `cargo tauri build` alongside each artifact (the `.sig` file). Embed it as a string.
 
 ### Capabilities
-
 ```json
-{
-  "permissions": [
-    "updater:default",
-    "process:allow-restart"
-  ]
-}
+"permissions": ["updater:default", "process:allow-restart"]
 ```
 
-### GitHub Releases as Update Server
+### GitHub Releases as the update server (the zero-infrastructure path)
 
-Use `tauri-action` in GitHub Actions to publish releases with update artifacts:
+Use `tauri-action` to publish releases with update artifacts:
 
 ```yaml
 - uses: tauri-apps/tauri-action@v0
@@ -431,40 +104,74 @@ Use `tauri-action` in GitHub Actions to publish releases with update artifacts:
   with:
     tagName: v__VERSION__
     releaseName: 'v__VERSION__'
-    releaseBody: 'See the release notes for details.'
     releaseDraft: true
 ```
 
-Endpoint for GitHub releases:
-
+Endpoint URL convention for GitHub releases:
 ```
 https://github.com/OWNER/REPO/releases/latest/download/latest.json
 ```
 
-## Build Optimization
+`tauri-action` writes a `latest.json` file in the release with the correct shape -- no extra server code needed.
 
-### Cargo.toml Release Profile
+## Bundle resources
 
-```toml
-[profile.release]
-codegen-units = 1
-lto = true
-opt-level = 3
-strip = true
-panic = "abort"
+```json
+{ "bundle": { "resources": ["assets/**/*", "config/default.toml", "models/model.onnx"] } }
 ```
 
-See the `tauri-desktop` agent for detailed build optimization guidance.
+Access at runtime:
+```rust
+use tauri::Manager;
+let path = app.path().resource_dir()?.join("assets/data.json");
+```
 
-## Common Issues
+## Code signing one-liners
 
-| Problem | Solution |
-|---------|----------|
+### Windows (signtool)
+```bash
+signtool sign /sha1 THUMBPRINT /fd sha256 \
+  /tr http://timestamp.digicert.com /td sha256 \
+  target/release/bundle/nsis/MyApp_1.0.0_x64-setup.exe
+```
+
+### macOS (env-driven, Tauri auto-runs)
+```bash
+export APPLE_SIGNING_IDENTITY="Developer ID Application: Your Name (TEAM_ID)"
+export APPLE_ID="your@email.com"
+export APPLE_PASSWORD="app-specific-password"      # NOT your Apple ID password
+export APPLE_TEAM_ID="TEAM_ID"
+cargo tauri build
+```
+
+## Common build failures
+
+| Problem | Fix |
+|---------|-----|
 | WiX not found | Install WiX Toolset 3.x, add to PATH |
 | NSIS not found | Install NSIS, add to PATH |
-| macOS signing fails | Verify `APPLE_SIGNING_IDENTITY`, run `security find-identity -v` |
-| Notarization fails | Check Apple ID, app-specific password, team ID |
+| macOS signing fails | Verify identity with `security find-identity -v` |
+| Notarization fails | Check Apple ID + app-specific password + team ID |
 | AppImage won't run | `chmod +x MyApp.AppImage`, check FUSE installed |
-| Update signature mismatch | Regenerate with correct key, ensure `pubkey` matches |
-| Resources not found at runtime | Use `app.path().resource_dir()`, verify `bundle.resources` paths |
-| Large bundle size | Enable LTO, strip symbols, check `bundle.resources` for unneeded files |
+| Update signature mismatch | Regenerate; ensure `pubkey` in config matches the key used to sign |
+| Resources not found | Use `app.path().resource_dir()`; verify `bundle.resources` paths |
+| Large bundle | Enable LTO, `strip = true`, audit `bundle.resources` |
+
+## Official docs
+
+- Distribution overview: https://v2.tauri.app/distribute/
+- Per-platform signing: https://v2.tauri.app/distribute/sign/ (Windows, macOS, Linux)
+- macOS notarization: https://v2.tauri.app/distribute/sign/macos/#notarization
+- WiX MSI: https://v2.tauri.app/distribute/windows-installer/#wix
+- NSIS: https://v2.tauri.app/distribute/windows-installer/#nsis
+- AppImage / deb / rpm: https://v2.tauri.app/distribute/linux/
+- Updater plugin: https://v2.tauri.app/plugin/updater/
+- Updater key generation: https://v2.tauri.app/plugin/updater/#signing-updates
+- `tauri-action`: https://github.com/tauri-apps/tauri-action
+
+## Related
+
+- `ci-cd.md` -- pipeline patterns, signing secrets as base64
+- `build-deploy-mobile.md` -- Android/iOS builds and store submission
+- `setup.md` -- toolchain prerequisites
+- `rust-patterns.md` -- the release-profile recommendations

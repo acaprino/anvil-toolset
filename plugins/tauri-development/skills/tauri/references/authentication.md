@@ -1,65 +1,67 @@
 # Authentication in Tauri Apps
 
-## Google OAuth / Firebase Auth
+OAuth + system browser + deep-link return is the only Tauri-friendly path -- Google explicitly blocks OAuth from WebViews. The composite local pattern is: PKCE flow, store-backed CSRF state, Firebase `signInWithCredential` bridge.
 
-### The WebView Problem
+## When to use
 
-**Google explicitly blocks OAuth sign-in from WebViews/embedded browsers** for security reasons. This means:
-- `signInWithPopup()` does not work in Tauri's WebView (desktop or mobile)
+Designing OAuth (Google, generic OIDC) for a Tauri 2 app. For Apple Sign-In and the mobile-side wiring (deep-link plugin config, hosted callback HTML, AuthContext cleanup), see `authentication-mobile.md`.
+
+## When NOT to use
+
+In-app auth via Firebase `signInWithPopup()` or `signInWithRedirect()` -- both fail in Tauri's WebView. Use system browser + deep link.
+
+## Why this is hard (the WebView problem)
+
+Google explicitly blocks OAuth sign-in from WebViews / embedded browsers for security reasons. This means:
+- `signInWithPopup()` does not work in Tauri's WebView (desktop OR mobile)
 - `signInWithRedirect()` also fails
-- This applies to both Firebase Auth and direct Google OAuth
+- Applies to Firebase Auth and direct Google OAuth
 
-### Solution: System Browser + Deep Links
+The fix is to launch the system browser via the `opener` plugin and bring the user back via a deep-link scheme.
 
-The solution is to open OAuth in the system browser and return via deep links.
-
-#### Required Plugins
+## Required plugins
 
 ```bash
 npm run tauri add opener
 npm run tauri add deep-link
 ```
 
-On desktop, you can use either the `opener` plugin or the `shell` plugin (`shell:open`) to launch the system browser. On mobile, use the `opener` plugin -- the `shell` plugin does not work for URLs on Android.
+On desktop you can use `opener` or `shell:open`. On mobile **use `opener`** -- the `shell` plugin does not work for URLs on Android.
 
-### OAuth Flow Architecture
+## Flow architecture
 
 ```
-App --> System Browser (Google OAuth)
-                              |
+App -> openUrl() -> System Browser (Google OAuth)
+                             |
                        User signs in
-                              |
-                   Callback page / redirect
-                   (parses tokens from URL)
-                              |
-                 myapp://auth/callback (deep link)
-                              |
-                       App (validates state, authenticated)
+                             |
+                Callback page (parses tokens, redirects)
+                             |
+                  myapp://auth/callback (deep link)
+                             |
+                       App (validates state, signs in via Firebase)
 ```
 
----
+## Gotchas
 
-## Security Warning
+- **Implicit flow exposes tokens in URLs** -- they may be logged in browser history, server access logs, or referrer headers. **Use Authorization Code + PKCE for production.** Implicit is acceptable only for prototypes.
+- **State parameter MUST be validated on every callback.** Otherwise CSRF: an attacker can send a victim a crafted `myapp://auth/callback?state=...&id_token=...` URL and force-sign-in as the attacker. The state-store is one-time-use.
+- **Use the same `nonce` for both `state` and the OpenID `nonce` parameter.** This way you can validate the ID token nonce matches the value you saved before the redirect.
+- **OAuth state must expire.** A stale state from yesterday should not be honored. 10-minute TTL is the default; check `Date.now() - state.timestamp` on retrieval.
+- **`tauri-plugin-store` requires `await store.save()`** after `set()` to flush to disk -- without it the state is lost on app exit, breaking the callback.
+- **Firebase `signInWithCredential`** is the bridge between OAuth tokens (from system browser) and the Firebase user session. After successful credential sign-in, `onAuthStateChanged` fires and your AuthContext updates.
+- **Don't store the access token in `localStorage`** -- it persists across logouts and is XSS-exfiltrable. Keep it in JS memory; Firebase handles refresh internally via `onIdTokenChanged`.
+- **Deep-link listener must be cleaned up** in `onunload` (app) or component unmount (React) -- see `authentication-mobile.md` for the full AuthContext shape.
 
-> **Token Exposure Risk:** The implicit OAuth flow passes tokens through URLs, which may be logged in browser history, server access logs, or referrer headers. For high-security applications, consider using the **Authorization Code flow with PKCE** (documented below) instead of the implicit flow.
-
----
-
-## TypeScript Interfaces
-
-Define these types for type-safe OAuth handling:
+## TypeScript shape (the types worth keeping)
 
 ```typescript
-// src/types/auth.ts
-
-/** OAuth state stored before redirect */
 export interface OAuthState {
-  continueUri: string;
-  nonce: string;
-  timestamp: number;
+  continueUri: string;     // myapp://auth/callback
+  nonce: string;           // crypto.randomUUID()
+  timestamp: number;       // Date.now() for TTL
 }
 
-/** Parameters received in OAuth callback */
 export interface OAuthCallbackParams {
   access_token?: string;
   id_token?: string;
@@ -68,467 +70,159 @@ export interface OAuthCallbackParams {
   error_description?: string;
 }
 
-/** Auth configuration (validate at startup) */
-export interface AuthConfig {
-  googleClientId: string;
-  callbackUrl: string;
-  appScheme: string;
-}
-
-/** Auth context state */
-export interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  error: string | null;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
-  clearError: () => void;
-}
-```
-
----
-
-## Implementation
-
-### 1. Configuration with Validation
-
-```typescript
-// src/config/auth.ts
-import type { AuthConfig } from '../types/auth';
-
-function getRequiredEnv(key: string): string {
-  const value = import.meta.env[key];
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${key}`);
-  }
-  return value;
-}
-
-export function getAuthConfig(): AuthConfig {
-  return {
-    googleClientId: getRequiredEnv('VITE_GOOGLE_CLIENT_ID'),
-    callbackUrl: getRequiredEnv('VITE_AUTH_CALLBACK_URL'),
-    appScheme: import.meta.env.VITE_APP_SCHEME || 'myapp',
-  };
-}
-
-// Validate config at app startup
-export function validateAuthConfig(): void {
-  const config = getAuthConfig();
-
-  if (!config.googleClientId.endsWith('.apps.googleusercontent.com')) {
-    throw new Error('Invalid Google Client ID format');
-  }
-
-  if (!config.callbackUrl.startsWith('https://')) {
-    throw new Error('Callback URL must use HTTPS');
-  }
-}
-```
-
-### 2. Secure State Management
-
-```typescript
-// src/utils/oauth-state.ts
-import { Store } from '@tauri-apps/plugin-store';
-import type { OAuthState } from '../types/auth';
-
-const OAUTH_STATE_KEY = 'pending_oauth_state';
-const STATE_EXPIRY_MS = 10 * 60 * 1000; // 10 minutes
-
-let store: Store | null = null;
-
-async function getStore(): Promise<Store> {
-  if (!store) {
-    store = new Store('auth.json');
-  }
-  return store;
-}
-
-/** Store OAuth state before redirect */
-export async function saveOAuthState(state: OAuthState): Promise<void> {
-  const s = await getStore();
-  await s.set(OAUTH_STATE_KEY, state);
-  await s.save();
-}
-
-/** Retrieve and clear OAuth state */
-export async function consumeOAuthState(): Promise<OAuthState | null> {
-  const s = await getStore();
-  const state = await s.get<OAuthState>(OAUTH_STATE_KEY);
-
-  // Always clear state after retrieval (one-time use)
-  await s.delete(OAUTH_STATE_KEY);
-  await s.save();
-
-  if (!state) {
-    return null;
-  }
-
-  // Check if state has expired
-  if (Date.now() - state.timestamp > STATE_EXPIRY_MS) {
-    console.warn('OAuth state expired');
-    return null;
-  }
-
-  return state;
-}
-
-/** Clear any pending OAuth state */
-export async function clearOAuthState(): Promise<void> {
-  const s = await getStore();
-  await s.delete(OAUTH_STATE_KEY);
-  await s.save();
-}
-```
-
-### 3. Initiate OAuth Flow (with CSRF Protection)
-
-```typescript
-// src/utils/oauth.ts
-import { openUrl } from '@tauri-apps/plugin-opener';
-import { getAuthConfig } from '../config/auth';
-import { saveOAuthState } from './oauth-state';
-import type { OAuthState } from '../types/auth';
-
 export class OAuthError extends Error {
   constructor(message: string, public code?: string) {
     super(message);
     this.name = 'OAuthError';
   }
 }
+```
+
+## State store (one-time use, store-backed)
+
+```typescript
+import { Store } from '@tauri-apps/plugin-store';
+const STATE_KEY = 'pending_oauth_state';
+const STATE_TTL_MS = 10 * 60 * 1000;
+
+let store: Store | null = null;
+async function getStore() { return store ??= new Store('auth.json'); }
+
+export async function saveOAuthState(state: OAuthState) {
+  const s = await getStore();
+  await s.set(STATE_KEY, state);
+  await s.save();           // <-- without this, lost on exit
+}
+
+export async function consumeOAuthState(): Promise<OAuthState | null> {
+  const s = await getStore();
+  const state = await s.get<OAuthState>(STATE_KEY);
+  await s.delete(STATE_KEY);                                     // one-time use
+  await s.save();
+  if (!state || Date.now() - state.timestamp > STATE_TTL_MS) return null;
+  return state;
+}
+```
+
+## Initiate flow (with CSRF protection)
+
+```typescript
+import { openUrl } from '@tauri-apps/plugin-opener';
 
 export async function initiateGoogleSignIn(): Promise<void> {
   const config = getAuthConfig();
-
-  // Generate single nonce for both state and ID token validation
   const nonce = crypto.randomUUID();
-
   const oauthState: OAuthState = {
     continueUri: `${config.appScheme}://auth/callback`,
     nonce,
     timestamp: Date.now(),
   };
-
-  // Store state BEFORE redirect for validation on callback
   await saveOAuthState(oauthState);
-
-  const stateParam = encodeURIComponent(JSON.stringify(oauthState));
 
   const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
   authUrl.searchParams.set('client_id', config.googleClientId);
   authUrl.searchParams.set('redirect_uri', config.callbackUrl);
-  authUrl.searchParams.set('response_type', 'token id_token');
+  authUrl.searchParams.set('response_type', 'token id_token');         // implicit; use 'code' for PKCE
   authUrl.searchParams.set('scope', 'openid email profile');
-  authUrl.searchParams.set('state', stateParam);
-  authUrl.searchParams.set('nonce', nonce); // Same nonce as in state
+  authUrl.searchParams.set('state', encodeURIComponent(JSON.stringify(oauthState)));
+  authUrl.searchParams.set('nonce', nonce);                            // same nonce as in state
   authUrl.searchParams.set('prompt', 'select_account');
 
   try {
     await openUrl(authUrl.toString());
-  } catch (error) {
-    // Clear state on failure
+  } catch {
     await clearOAuthState();
-    throw new OAuthError(
-      'Failed to open sign-in page. Please try again.',
-      'OPEN_URL_FAILED'
-    );
+    throw new OAuthError('Failed to open sign-in page.', 'OPEN_URL_FAILED');
   }
 }
 ```
 
-### 4. Handle Callback with State Validation
+## Callback handler (validates state + nonce, signs in to Firebase)
 
 ```typescript
-// src/utils/oauth-callback.ts
-import {
-  getAuth,
-  GoogleAuthProvider,
-  signInWithCredential,
-} from 'firebase/auth';
-import { consumeOAuthState } from './oauth-state';
-import { OAuthError } from './oauth';
-import type { OAuthCallbackParams, OAuthState } from '../types/auth';
+import { getAuth, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 
-/** Parse callback URL parameters */
-function parseCallbackUrl(url: string): OAuthCallbackParams {
-  const urlObj = new URL(url);
-  const params = new URLSearchParams(urlObj.search);
-
-  return {
-    access_token: params.get('access_token') || undefined,
-    id_token: params.get('id_token') || undefined,
-    state: params.get('state') || undefined,
-    error: params.get('error') || undefined,
-    error_description: params.get('error_description') || undefined,
-  };
-}
-
-/** Validate state parameter against stored state */
-function validateState(
-  returnedState: string | undefined,
-  storedState: OAuthState
-): boolean {
-  if (!returnedState) {
-    return false;
-  }
-
-  try {
-    const parsed = JSON.parse(decodeURIComponent(returnedState)) as OAuthState;
-    return parsed.nonce === storedState.nonce;
-  } catch {
-    return false;
-  }
-}
-
-/** Handle OAuth callback with full validation */
 export async function handleOAuthCallback(url: string): Promise<void> {
   const params = parseCallbackUrl(url);
+  if (params.error) throw new OAuthError(params.error_description || params.error, params.error);
 
-  // Check for OAuth error response
-  if (params.error) {
-    throw new OAuthError(
-      params.error_description || params.error,
-      params.error
-    );
+  const stored = await consumeOAuthState();
+  if (!stored) throw new OAuthError('No pending authentication.', 'NO_PENDING_STATE');
+
+  // CRITICAL: validate state nonce -- prevents CSRF
+  const returned = JSON.parse(decodeURIComponent(params.state || '')) as OAuthState;
+  if (returned.nonce !== stored.nonce) {
+    throw new OAuthError('Invalid authentication response.', 'STATE_MISMATCH');
   }
 
-  // Retrieve stored state (one-time use)
-  const storedState = await consumeOAuthState();
+  if (!params.id_token) throw new OAuthError('No ID token.', 'MISSING_ID_TOKEN');
 
-  if (!storedState) {
-    throw new OAuthError(
-      'No pending authentication. Please try signing in again.',
-      'NO_PENDING_STATE'
-    );
-  }
-
-  // CRITICAL: Validate state to prevent CSRF attacks
-  if (!validateState(params.state, storedState)) {
-    throw new OAuthError(
-      'Invalid authentication response. Please try again.',
-      'STATE_MISMATCH'
-    );
-  }
-
-  // Validate required tokens
-  if (!params.id_token) {
-    throw new OAuthError(
-      'Authentication failed. No ID token received.',
-      'MISSING_ID_TOKEN'
-    );
-  }
-
-  // Sign in with Firebase
-  const auth = getAuth();
-  const credential = GoogleAuthProvider.credential(
-    params.id_token,
-    params.access_token || null
-  );
-
-  try {
-    await signInWithCredential(auth, credential);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    throw new OAuthError(
-      `Firebase authentication failed: ${message}`,
-      'FIREBASE_AUTH_FAILED'
-    );
-  }
+  const credential = GoogleAuthProvider.credential(params.id_token, params.access_token || null);
+  await signInWithCredential(getAuth(), credential);
+  // onAuthStateChanged fires now; AuthContext picks it up
 }
 ```
 
----
+## PKCE flow (recommended for production)
 
-## Recommended: Authorization Code Flow with PKCE
+PKCE keeps tokens out of URLs entirely. Use `response_type=code` instead of `token id_token`, exchange the code via Google's token endpoint with the verifier:
 
-For production apps requiring higher security, use Authorization Code flow with PKCE instead of implicit flow. This avoids exposing tokens in URLs.
+- Generate `codeVerifier` (32 random bytes, base64url) and `codeChallenge` (SHA-256 of verifier, base64url).
+- Store the verifier alongside the state.
+- Add `code_challenge` and `code_challenge_method=S256` to the auth URL.
+- On callback, POST to `https://oauth2.googleapis.com/token` with `code`, `code_verifier`, `client_id`, `redirect_uri`, `grant_type=authorization_code`.
+- Use the returned `id_token` with `GoogleAuthProvider.credential()` exactly as above.
 
-### PKCE Utilities
+The PKCE callback page (hosted) captures the `code` param and bounces it via deep link instead of the tokens.
 
-```typescript
-// src/utils/pkce.ts
-
-/** Generate cryptographically random code verifier */
-export function generateCodeVerifier(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return base64UrlEncode(array);
-}
-
-/** Generate code challenge from verifier */
-export async function generateCodeChallenge(verifier: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(verifier);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return base64UrlEncode(new Uint8Array(hash));
-}
-
-/** Base64 URL-safe encoding */
-function base64UrlEncode(buffer: Uint8Array): string {
-  const base64 = btoa(String.fromCharCode(...buffer));
-  return base64
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
-```
-
-### PKCE OAuth Flow
+## Token refresh (Firebase handles this)
 
 ```typescript
-// src/utils/oauth-pkce.ts
-import { openUrl } from '@tauri-apps/plugin-opener';
-import { Store } from '@tauri-apps/plugin-store';
-import { getAuthConfig } from '../config/auth';
-import { generateCodeVerifier, generateCodeChallenge } from './pkce';
+import { onIdTokenChanged, getIdToken } from 'firebase/auth';
 
-interface PKCEState {
-  codeVerifier: string;
-  nonce: string;
-  timestamp: number;
-}
-
-export async function initiateGoogleSignInPKCE(): Promise<void> {
-  const config = getAuthConfig();
-  const store = new Store('auth.json');
-
-  // Generate PKCE parameters
-  const codeVerifier = generateCodeVerifier();
-  const codeChallenge = await generateCodeChallenge(codeVerifier);
-  const nonce = crypto.randomUUID();
-
-  // Store verifier for token exchange
-  const pkceState: PKCEState = {
-    codeVerifier,
-    nonce,
-    timestamp: Date.now(),
-  };
-  await store.set('pkce_state', pkceState);
-  await store.save();
-
-  const state = encodeURIComponent(JSON.stringify({
-    continueUri: `${config.appScheme}://auth/callback`,
-    nonce,
-  }));
-
-  const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  authUrl.searchParams.set('client_id', config.googleClientId);
-  authUrl.searchParams.set('redirect_uri', config.callbackUrl);
-  authUrl.searchParams.set('response_type', 'code'); // Code instead of token
-  authUrl.searchParams.set('scope', 'openid email profile');
-  authUrl.searchParams.set('state', state);
-  authUrl.searchParams.set('nonce', nonce);
-  authUrl.searchParams.set('code_challenge', codeChallenge);
-  authUrl.searchParams.set('code_challenge_method', 'S256');
-  authUrl.searchParams.set('prompt', 'select_account');
-
-  await openUrl(authUrl.toString());
-}
-
-export async function exchangeCodeForTokens(code: string): Promise<{
-  idToken: string;
-  accessToken: string;
-}> {
-  const config = getAuthConfig();
-  const store = new Store('auth.json');
-
-  const pkceState = await store.get<PKCEState>('pkce_state');
-  if (!pkceState) {
-    throw new Error('No pending PKCE state');
-  }
-
-  // Clear state after retrieval
-  await store.delete('pkce_state');
-  await store.save();
-
-  // Exchange code for tokens (requires backend or Google's token endpoint)
-  const response = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      client_id: config.googleClientId,
-      code,
-      code_verifier: pkceState.codeVerifier,
-      grant_type: 'authorization_code',
-      redirect_uri: config.callbackUrl,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Token exchange failed');
-  }
-
-  const data = await response.json();
-  return {
-    idToken: data.id_token,
-    accessToken: data.access_token,
-  };
-}
-```
-
-> **Note:** PKCE with Google requires your callback page to capture the authorization code and pass it to your app, where the token exchange happens. This keeps tokens out of URLs entirely.
-
----
-
-## Token Refresh
-
-Firebase Auth handles token refresh automatically, but you can listen for token changes:
-
-```typescript
-// src/utils/token-refresh.ts
-import { getAuth, onIdTokenChanged, getIdToken } from 'firebase/auth';
-
-/** Set up token refresh listener */
-export function setupTokenRefreshListener(
-  onTokenRefresh: (token: string) => void
-): () => void {
-  const auth = getAuth();
-
-  return onIdTokenChanged(auth, async (user) => {
-    if (user) {
-      // Get current token (refreshed automatically if expired)
-      const token = await getIdToken(user);
-      onTokenRefresh(token);
-    }
+export function setupTokenRefreshListener(onTokenRefresh: (token: string) => void) {
+  return onIdTokenChanged(getAuth(), async (user) => {
+    if (user) onTokenRefresh(await getIdToken(user));
   });
 }
 
-/** Force refresh token (e.g., before critical API calls) */
-export async function forceRefreshToken(): Promise<string | null> {
-  const auth = getAuth();
-  const user = auth.currentUser;
-
-  if (!user) {
-    return null;
-  }
-
-  return getIdToken(user, /* forceRefresh */ true);
-}
+// Force refresh before a critical API call:
+await getIdToken(user, /* forceRefresh */ true);
 ```
 
----
+## Google Cloud Console setup
 
-## Google Cloud Console Setup
+1. https://console.cloud.google.com/apis/credentials → Create OAuth 2.0 Client ID (Web application).
+2. Authorized JavaScript origins: `https://your-app.web.app`.
+3. Authorized redirect URIs: `https://your-app.web.app/auth/callback`.
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
-2. Create OAuth 2.0 Client ID (Web application type)
-3. Add authorized JavaScript origins:
-   - `https://your-app.web.app`
-4. Add authorized redirect URIs:
-   - `https://your-app.web.app/auth/callback`
-
----
-
-## Security Checklist
+## Security checklist
 
 - [ ] HTTPS for all callback URLs
 - [ ] State parameter validated on every callback
-- [ ] Nonce validated for ID token (single nonce used)
-- [ ] OAuth state expires after 10 minutes
+- [ ] Same nonce used for state + ID token (validated on Firebase side too)
+- [ ] OAuth state expires (10-minute default)
 - [ ] State cleared after use (one-time)
-- [ ] Tokens stored securely (not in localStorage)
+- [ ] Tokens in JS memory, not `localStorage`
 - [ ] Error messages don't leak sensitive info
-- [ ] PKCE used for high-security applications
+- [ ] PKCE used for production (not implicit flow)
 - [ ] Token refresh listener configured
-- [ ] Deep link listener properly cleaned up
+- [ ] Deep-link listener properly cleaned up (see `authentication-mobile.md`)
+
+## Official docs
+
+- Google OAuth 2.0 reference: https://developers.google.com/identity/protocols/oauth2
+- PKCE (RFC 7636): https://www.rfc-editor.org/rfc/rfc7636
+- OAuth 2.0 for Native Apps (RFC 8252) -- system browser + PKCE: https://www.rfc-editor.org/rfc/rfc8252
+- Firebase Auth `signInWithCredential`: https://firebase.google.com/docs/reference/js/auth.md#signinwithcredential
+- Firebase ID token + refresh: https://firebase.google.com/docs/auth/admin/verify-id-tokens
+- Tauri `opener` plugin: https://v2.tauri.app/plugin/opener/
+- Tauri `deep-link` plugin: https://v2.tauri.app/plugin/deep-link/
+- Tauri `store` plugin: https://v2.tauri.app/plugin/store/
+- OWASP OAuth security cheat sheet: https://cheatsheetseries.owasp.org/cheatsheets/OAuth2_Cheat_Sheet.html
+
+## Related
+
+- `authentication-mobile.md` -- mobile-side: deep-link config, hosted callback HTML, Apple Sign-In, AuthContext + cleanup
+- `plugins-core.md` -- `opener` vs `shell` (and why opener wins for OAuth)
+- `frontend-patterns.md` -- the React lifecycle hook patterns the AuthContext uses
