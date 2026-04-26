@@ -1,200 +1,115 @@
-# WebExtension JavaScript APIs (Complete Reference)
+# WebExtension JavaScript APIs
 
-All APIs accessed via `browser.*` namespace. Firefox returns Promises for all async methods.
+The full API surface lives on MDN -- this file is the navigation index plus the Firefox-only APIs and MV2/MV3 differences worth memorizing. For per-method deep-links, see `mdn-api-urls.md`.
 
-## API Reference Table
+## When to use
 
-| API | Description | Permission |
-|---|---|---|
-| `action` | Toolbar button (MV3) | manifest `action` key |
-| `alarms` | Scheduled events | `alarms` |
-| `bookmarks` | Bookmark management | `bookmarks` |
-| `browserAction` | Toolbar button (MV2) | manifest `browser_action` key |
-| `browserSettings` | Global browser settings (Firefox-only) | `browserSettings` |
-| `browsingData` | Clear browsing data | `browsingData` |
-| `captivePortal` | Detect captive portal (Firefox-only) | `captivePortal` |
-| `clipboard` | System clipboard | `clipboardWrite` |
-| `commands` | Keyboard shortcuts | manifest `commands` key |
-| `contentScripts` | Register content scripts (MV2) | host permissions |
-| `contextualIdentities` | Container tabs (Firefox-only) | `contextualIdentities` + `cookies` |
-| `cookies` | Cookie management | `cookies` + host permissions |
-| `declarativeNetRequest` | Declarative network filtering | `declarativeNetRequest` |
-| `devtools` | DevTools integration | manifest `devtools_page` key |
-| `dns` | DNS resolution (Firefox-only) | `dns` |
-| `dom` | Extension-only DOM features | none |
-| `downloads` | Download management | `downloads` |
-| `events` | Common event types | none (utility) |
-| `extension` | Extension utilities | none |
-| `extensionTypes` | Shared type definitions | none (utility) |
-| `find` | Find text in pages (Firefox-only) | `find` |
-| `history` | Browser history | `history` |
-| `i18n` | Internationalization | none |
-| `identity` | OAuth2 authentication | `identity` |
-| `idle` | System idle detection | `idle` |
-| `management` | Add-on management | `management` |
-| `menus` | Context menu (Firefox name) | `menus` |
-| `notifications` | OS notifications | `notifications` |
-| `omnibox` | Address bar suggestions | manifest `omnibox` key |
-| `pageAction` | Address bar button | manifest `page_action` key |
-| `permissions` | Runtime permissions | none |
-| `pkcs11` | Security modules (Firefox-only) | `pkcs11` |
-| `privacy` | Privacy settings | `privacy` |
-| `proxy` | Proxy management | `proxy` + host permissions |
-| `runtime` | Extension lifecycle + messaging | none |
-| `scripting` | Inject JS/CSS (MV3) | `scripting` + host permissions |
-| `search` | Search engine management | `search` |
-| `sessions` | Restore closed tabs/windows | `sessions` |
-| `sidebarAction` | Sidebar panel (Firefox-only) | manifest `sidebar_action` key |
-| `storage` | Key-value storage | `storage` |
-| `tabGroups` | Tab group management | `tabGroups` |
-| `tabs` | Tab management | `tabs` (for URL/title) |
-| `theme` | Theme management | `theme` |
-| `topSites` | Frequently visited sites | `topSites` |
-| `types` | BrowserSetting type | none (utility) |
-| `userScripts` | Register user scripts | `userScripts` |
-| `webNavigation` | Navigation events | `webNavigation` |
-| `webRequest` | HTTP request interception | `webRequest` (+ `webRequestBlocking` for blocking) |
-| `windows` | Window management | none |
+Picking which API to use, knowing whether it's Firefox-only, and knowing what permission to declare. For per-API method/event listings, hit MDN directly.
 
-## Key API Details
+## API namespace pattern
 
-### browser.tabs
+All APIs accessed via `browser.*` (Firefox returns Promises for all async methods; Chrome's `chrome.*` uses callbacks unless polyfilled). For cross-browser code, use the `webextension-polyfill` package and continue calling `browser.*`.
 
-**Methods:** `query()`, `create()`, `update()`, `remove()`, `get()`, `duplicate()`, `move()`, `reload()`, `sendMessage()`, `connect()`, `captureVisibleTab()`, `goBack()`, `goForward()`, `print()`, `saveAsPDF()`, `toggleReaderMode()`, `discard()`, `group()`, `ungroup()`, `warmup()`, `highlight()`
+## Firefox-only APIs (don't write code expecting Chrome to support these)
 
-**Events:** `onActivated`, `onCreated`, `onRemoved`, `onUpdated`, `onMoved`, `onAttached`, `onDetached`, `onHighlighted`, `onZoomChange`, `onReplaced`
+- `browserSettings` -- global browser settings
+- `captivePortal` -- detect captive portal
+- `contextualIdentities` -- container tabs (also requires `cookies` permission)
+- `dns` -- DNS resolution
+- `find` -- find text in pages
+- `pkcs11` -- security modules
+- `sidebarAction` -- sidebar panel (Chrome has its own side-panel API, different shape)
+- `tabHide` -- experimental, Firefox-only
+- `webRequestFilterResponse` -- response body filtering
 
-**MV2-only methods (use `browser.scripting` in MV3):** `executeScript()`, `insertCSS()`, `removeCSS()`
+Plus: Firefox keeps **blocking `webRequest` in MV3** (Chrome dropped it), and supports both `declarativeNetRequest` AND blocking `webRequest` simultaneously -- this is the headline reason ad-blockers prefer Firefox MV3.
+
+## MV2 → MV3 API renames (the gotchas)
+
+| MV2 | MV3 |
+|-----|-----|
+| `browserAction` (manifest `browser_action`) | `action` (manifest `action`) |
+| `tabs.executeScript` / `tabs.insertCSS` / `tabs.removeCSS` | `scripting.executeScript` / `scripting.insertCSS` / `scripting.removeCSS` |
+| `contentScripts` API | `scripting.registerContentScripts` |
+| `user_scripts` (manifest) | `userScripts` API (MV3 needs optional permission) |
+| `background.scripts` + `persistent` | `background.scripts` (event page in Firefox) / `service_worker` (Chrome) |
+| `web_accessible_resources` (string array) | `web_accessible_resources` (object array with `resources`+`matches`+`extension_ids`) |
+
+Firefox keeps `pageAction` in MV3; Chrome dropped it.
+
+## Storage areas (the only API where Firefox-vs-Chrome differs in limits)
+
+| Area | Limit | Persistence |
+|------|-------|-------------|
+| `storage.local` | 10 MB | On disk |
+| `storage.sync` | 100 KB | Synced across devices (requires sign-in) |
+| `storage.session` | 10 MB | In-memory only, lost on restart |
+| `storage.managed` | Read-only | Set by domain admin |
+
+**Never use `window.localStorage` in extensions** -- Firefox clears it during privacy cleanup. Use `browser.storage.local` instead.
+
+## Permission cheat sheet (the most common ones)
+
+| Permission | Use |
+|------------|-----|
+| `activeTab` | Temporary access to active tab on user action -- prefer over `<all_urls>` |
+| `tabs` | Read URL/title/favIconUrl on Tab objects (different from access) |
+| `storage` | `browser.storage` API |
+| `cookies` | Cookie management (+ host perms required) |
+| `webRequest` | Listen to HTTP requests |
+| `webRequestBlocking` | Modify/block HTTP requests (Firefox keeps this in MV3) |
+| `scripting` | MV3 script/CSS injection |
+| `declarativeNetRequest` | Declarative network filtering |
+| `notifications` | OS notifications |
+| `clipboardWrite` / `clipboardRead` | System clipboard |
+| `unlimitedStorage` | Skip the 10 MB `storage.local` limit |
+| `nativeMessaging` | `runtime.connectNative()` / `sendNativeMessage()` |
+
+## Gotchas
+
+- **Firefox returns Promises for everything.** Chrome's older callback API still works in Chrome MV3 alongside Promises. Cross-browser code: use `webextension-polyfill`.
+- **`browser.tabs.executeScript` is MV2-only.** In MV3 use `browser.scripting.executeScript({ target: { tabId }, func: () => {...} })`.
+- **`chrome.action` exists in Chrome MV3, but `browser.action` may need polyfill** for older Firefox versions -- check `strict_min_version` in `browser_specific_settings`.
+- **`runtime.onInstalled` fires for both `install` and `update`** -- check `reason` to differentiate. The `reason` value `browser_update` and `chrome_update` differ between browsers.
+- **`runtime.setUninstallURL`** is the cleanest way to drive a feedback survey -- works in both MV2/MV3.
+
+## Quick API recipes (the few worth keeping local)
 
 ```javascript
-// Query active tab
+// Active tab (the safe pattern)
 const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
 
-// Create tab
-await browser.tabs.create({ url: "https://example.com" });
+// Storage with default fallback
+const { settings } = await browser.storage.local.get({
+  settings: { theme: "light", fontSize: 14 }
+});
 
-// Send message to content script
-await browser.tabs.sendMessage(tabId, { type: "doSomething" });
-
-// Capture visible tab screenshot
-const dataUrl = await browser.tabs.captureVisibleTab(null, { format: "png" });
-```
-
-### browser.storage
-
-**Four storage areas:**
-- `storage.local` - 10 MB limit, persists on disk
-- `storage.sync` - 100 KB limit, synced across devices
-- `storage.managed` - read-only, set by domain admin
-- `storage.session` - 10 MB limit, in-memory only, lost on restart
-
-**Methods (all areas):** `get()`, `set()`, `remove()`, `clear()`, `getBytesInUse()`
-
-**Event:** `storage.onChanged`
-
-```javascript
-// Set data
-await browser.storage.local.set({ settings: { theme: "dark", fontSize: 14 } });
-
-// Get data with defaults
-const { settings } = await browser.storage.local.get({ settings: { theme: "light" } });
-
-// Listen for changes
+// Listen for storage changes across pages
 browser.storage.onChanged.addListener((changes, areaName) => {
   for (const [key, { oldValue, newValue }] of Object.entries(changes)) {
     console.log(`${areaName}.${key}: ${oldValue} -> ${newValue}`);
   }
 });
 
-// IMPORTANT: Never use window.localStorage - Firefox clears it during privacy cleanup
-```
-
-### browser.runtime
-
-**Properties:** `id`, `lastError`
-
-**Methods:** `sendMessage()`, `connect()`, `sendNativeMessage()`, `connectNative()`, `getManifest()`, `getURL()`, `getPlatformInfo()`, `getBrowserInfo()`, `getBackgroundPage()`, `openOptionsPage()`, `reload()`, `setUninstallURL()`, `getContexts()`, `getFrameId()`
-
-**Lifecycle events:** `onInstalled`, `onStartup`, `onSuspend`, `onSuspendCanceled`, `onUpdateAvailable`
-
-**Messaging events:** `onMessage`, `onMessageExternal`, `onConnect`, `onConnectExternal`, `onUserScriptMessage`, `onUserScriptConnect`
-
-```javascript
-// Check install/update reason
+// Install vs update branch
 browser.runtime.onInstalled.addListener(({ reason }) => {
   if (reason === "install") initializeDefaults();
   if (reason === "update") migrateData();
 });
-
-// Get extension URL
-const url = browser.runtime.getURL("popup/popup.html");
-
-// Set uninstall URL (feedback page)
-browser.runtime.setUninstallURL("https://example.com/uninstall-survey");
 ```
 
-### browser.declarativeNetRequest
+## Official docs
 
-**Rule structure:**
+- WebExtension API index (MDN): https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API
+- Browser compatibility per API: each MDN page has a "Browser compatibility" table
+- Permissions reference: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/permissions
+- Firefox vs Chrome incompatibilities: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Chrome_incompatibilities
+- MV2 → MV3 migration guide: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Manifest_V3_migration_guide
+- `webextension-polyfill`: https://github.com/mozilla/webextension-polyfill
 
-```javascript
-{
-  id: 1,
-  priority: 1,
-  condition: {
-    urlFilter: "*://ads.example.com/*",
-    resourceTypes: ["script", "image"]
-  },
-  action: { type: "block" }
-}
-```
+## Related
 
-**Action types:** `block`, `redirect`, `allow`, `allowAllRequests`, `upgradeScheme`, `modifyHeaders`
-
-**Rule sources:** static (manifest-defined), dynamic (persists across sessions), session (memory-only)
-
-**Firefox advantage:** Supports both `declarativeNetRequest` AND blocking `webRequest` simultaneously.
-
-## Common Permission List
-
-| Permission | Grants |
-|---|---|
-| `activeTab` | Temporary access to active tab on user action |
-| `alarms` | `browser.alarms` API |
-| `bookmarks` | `browser.bookmarks` API |
-| `browserSettings` | `browser.browserSettings` API (Firefox-only) |
-| `browsingData` | `browser.browsingData` API |
-| `clipboardRead` | Read clipboard |
-| `clipboardWrite` | Write clipboard |
-| `contextualIdentities` | `browser.contextualIdentities` API (Firefox-only) |
-| `cookies` | `browser.cookies` API |
-| `declarativeNetRequest` | `browser.declarativeNetRequest` API |
-| `dns` | `browser.dns` API (Firefox-only) |
-| `downloads` | `browser.downloads` API |
-| `find` | `browser.find` API (Firefox-only) |
-| `geolocation` | Geolocation API |
-| `history` | `browser.history` API |
-| `identity` | `browser.identity` API |
-| `idle` | `browser.idle` API |
-| `management` | `browser.management` API |
-| `menus` | `browser.menus` API |
-| `nativeMessaging` | `browser.runtime.connectNative()`/`sendNativeMessage()` |
-| `notifications` | `browser.notifications` API |
-| `pkcs11` | `browser.pkcs11` API (Firefox-only) |
-| `privacy` | `browser.privacy` API |
-| `proxy` | `browser.proxy` API |
-| `scripting` | `browser.scripting` API |
-| `search` | `browser.search` API |
-| `sessions` | `browser.sessions` API |
-| `storage` | `browser.storage` API |
-| `tabGroups` | `browser.tabGroups` API |
-| `tabHide` | `browser.tabs.hide()`/`show()` (Firefox-only, experimental) |
-| `tabs` | Access `url`, `title`, `favIconUrl` on Tab objects |
-| `theme` | `browser.theme` API |
-| `topSites` | `browser.topSites` API |
-| `unlimitedStorage` | Unlimited `storage.local` |
-| `userScripts` | `browser.userScripts` API (MV3: optional-only) |
-| `webNavigation` | `browser.webNavigation` API |
-| `webRequest` | `browser.webRequest` API |
-| `webRequestBlocking` | Blocking `webRequest` (Firefox keeps this in MV3) |
-| `webRequestFilterResponse` | Filter response bodies (Firefox-only) |
+- `mdn-api-urls.md` -- direct deep-links per API method/event
+- `manifest-schema.md` -- which manifest key enables which API
+- `amo-publishing.md` -- which permissions trigger AMO manual review
+- `best-practices.md` -- the MV3 footgun catalog (must-read for production extensions)
