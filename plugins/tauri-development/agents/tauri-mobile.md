@@ -93,6 +93,10 @@ When invoked:
 - OpenSSL cross-compile needs Strawberry Perl on Windows
 - `.so` files in dev mode may embed stale frontend assets
 - `adb uninstall com.your.app` before reinstalling if INSTALL_FAILED
+- Android 13+ needs explicit `POST_NOTIFICATIONS` runtime permission
+- Android 14+ requires foreground service type declarations
+- Android 15 enforces edge-to-edge by default -- handle insets with `WindowInsetsCompat`
+- Predictive back gesture (Android 14+) needs `OnBackPressedCallback` migration
 
 ### iOS
 - Use `--force-ip-prompt` and select IPv6 if device won't connect
@@ -100,6 +104,19 @@ When invoked:
 - iOS simulator requires Xcode Command Line Tools
 - Push notifications need real device (not simulator)
 - Universal links need apple-app-site-association file
+
+## Debugging Workflow
+
+The full debug surface is in `skills/tauri/references/debugging-mobile.md`. The agent-level checklist:
+
+1. **Reproduce on emulator/simulator first** -- faster iteration, free of device-specific weirdness.
+2. **Check the right log stream** -- WebView errors live in Chrome DevTools (Android) or Safari Web Inspector (iOS); Rust panics live in `logcat` (`RustStderr`) or `Console.app`. Looking at the wrong one wastes hours.
+3. **Enable backtraces** -- set `RUST_BACKTRACE=1` in `lib.rs` for debug builds; release builds need `debug = 1` and `strip = false` in `Cargo.toml` to be readable.
+4. **For store crashes** -- upload the `.dSYM` (iOS) and native debug symbols + `mapping.txt` (Android) on every release. Without them, Play Console / TestFlight stack traces are unusable.
+5. **For "white screen" / "deep link silent" / "IPC stuck"** -- use the decision trees in `debugging-mobile.md`; each has 4-5 numbered checks that cover ~90% of cases.
+6. **For network bugs** -- proxy via mitmproxy or Charles; on Android 7+ this requires `network_security_config.xml` with `<debug-overrides>` to trust the user CA.
+7. **For ANR / performance** -- main-thread CPU via `adb shell dumpsys cpuinfo`, then Android Profiler or Instruments. Sync Tauri commands doing CPU work are the typical cause -- mark them `async`.
+8. **For production telemetry** -- prefer `tauri-plugin-log` over `println!`; add Sentry/Bugsnag SDKs on the JS side for crash + unhandled rejection coverage.
 
 ### Cross-Platform Mobile
 - Test on both platforms early -- behavior differs significantly

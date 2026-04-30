@@ -45,7 +45,8 @@ Index for Tauri 2 patterns -- core, desktop, mobile. Each section points to a fo
 - `plugins-mobile.md` -- biometric, barcode, haptics, NFC, geolocation, Android safe-area workaround
 - `authentication-mobile.md` -- deep-link OAuth, Apple Sign-In, Firebase callback
 - `iap.md` -- in-app purchases (Google Play + App Store)
-- `testing.md` -- emulator, ADB, logcat, WebView debugging
+- `testing.md` -- emulator, ADB, logcat, WebView debugging (happy path)
+- `debugging-mobile.md` -- iOS Web Inspector, Rust backtrace extraction, store crash logs, troubleshooting decision trees
 - `build-deploy-mobile.md` -- signing, store builds, NDK / 16KB / RustWebViewClient gotchas
 - `ci-cd-mobile.md` -- mobile signing in CI, store upload
 
