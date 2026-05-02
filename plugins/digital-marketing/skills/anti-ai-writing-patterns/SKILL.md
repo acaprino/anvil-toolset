@@ -223,26 +223,25 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
 
 ## STYLE PATTERNS
 
-### 13. Em Dash and Hyphen Overuse (CRITICAL -- #1 AI Tell)
+### 13. Em Dash and Hyphen Overuse: the #1 AI Tell (CRITICAL)
 
 **The em dash is the single most persistent and recognizable AI writing signature.** It is deeply embedded in LLM training data from books, essays, and articles where humans used it frequently. Models treat it as a default flow connector and cannot reliably stop using it even when explicitly instructed. As a result, human writers are now actively avoiding em dashes because their presence signals AI-generated text. The em dash has become what one Hacker News commenter called "a GPT-ism that is not advisable unless you want people to think your writing is the output of an LLM."
 
 **This pattern has the HIGHEST PRIORITY in the humanization process.** After completing all other rewrites, do a dedicated final pass to find and replace every remaining em dash or double hyphen used as a dash.
 
-**Detection:** Look for em dashes, en dashes, double hyphens (--), and any dash-like punctuation used as sentence connectors, parenthetical insertions, or dramatic pauses. Also look for clusters: two or more dash-interrupted clauses in a single paragraph is a strong AI signal.
+**Detection:** Look for em dashes (`—`), en dashes (`–`), double hyphens (`--`), and **spaced single hyphens (` - `)** used as sentence connectors, parenthetical insertions, or dramatic pauses. All four forms are equally banned. Also look for clusters: two or more dash-interrupted clauses in a single paragraph is a strong AI signal.
 
-**IMPORTANT:** Do NOT replace em dashes with double hyphens (--). Double hyphens are just as recognizable as em dashes and serve the same function. The goal is to eliminate the dash-as-connector pattern entirely, not to swap one form for another. Always replace with commas, periods, colons, parentheses, semicolons, or restructure the sentence.
+**IMPORTANT:** Do NOT swap one dash form for another. Replacing `—` with `--`, or `--` with ` - `, keeps the same offending construct and is just as recognizable as AI output. The goal is to eliminate the dash-as-connector pattern entirely. Always replace with commas, periods, colons, parentheses, semicolons, or restructure the sentence.
 
 **Replacement strategy (in order of preference):**
-1. **Commas** - the most natural replacement in 80% of cases, including parenthetical/incidental clauses (e.g., "the team, which was small, delivered fast")
-2. **Single hyphen with spaces** - for parenthetical asides where commas feel too weak (e.g., "the team - a small one - delivered fast")
-3. **Period + new sentence** - when the dash connects two independent thoughts
-4. **Colon** - when introducing an explanation or list
-5. **Parentheses** - for true parenthetical asides
-6. **Semicolon** - for closely related independent clauses
-7. **Remove entirely** - restructure the sentence to eliminate the need
+1. **Commas** for parenthetical/incidental clauses in roughly 80% of cases (e.g., "the team, which was small, delivered fast"). This is the most natural replacement.
+2. **Period + new sentence** when the dash connects two independent thoughts.
+3. **Colon** when introducing an explanation or list.
+4. **Parentheses** for true parenthetical asides where commas feel too weak.
+5. **Semicolon** for closely related independent clauses.
+6. **Restructure** the sentence to eliminate the aside entirely.
 
-**Never use:** em dashes, en dashes, or double hyphens (--) as connectors or for parenthetical clauses.
+**Never use:** em dashes, en dashes, double hyphens (`--`), or spaced single hyphens (` - `) as connectors or for parenthetical clauses. Hyphenated compounds (`file-ownership`, `multi-agent`) are unrelated and fine.
 
 **Before:**
 > The term is primarily promoted by Dutch institutions--not by the people themselves. You don't say "Netherlands, Europe" as an address--yet this mislabeling continues--even in official documents.
@@ -421,7 +420,7 @@ Avoiding AI patterns is only half the job. Sterile, voiceless writing is just as
    - Uses specific details over vague claims
    - Maintains appropriate tone for context
    - Uses simple constructions (is/are/has) where appropriate
-5. **Em dash elimination pass** -- scan the entire rewritten text for any remaining em dashes, en dashes, or double hyphens used as dashes. Replace every instance using the replacement strategy in Pattern #13. This is a separate, dedicated pass because em dashes are the hardest AI pattern to eliminate and tend to survive earlier rewrites.
+5. **Dash elimination pass.** Scan the entire rewritten text for any remaining em dashes, en dashes, double hyphens (`--`), or spaced single hyphens (` - `) used as connectors or parenthetical brackets. Replace every instance using the replacement strategy in Pattern #13. This is a separate, dedicated pass because dash-asides are the hardest AI pattern to eliminate and tend to survive earlier rewrites.
 6. Present a draft humanized version
 7. Prompt: "What makes the below so obviously AI generated?"
 8. Answer briefly with the remaining tells (if any)

@@ -41,7 +41,7 @@ plugins/
 - Agent body style: terse keyword lists, imperative tone, structured with markdown headers
 - Skills supplementary subdirs: `references/`, `scripts/`, `templates/`, `assets/`, `lib/` as needed
 - No build step or runtime framework - plugins are markdown with optional helper scripts (Python, JS) in skills' `scripts/` subdirs
-- Never use the em dash character anywhere - in code, comments, commit messages, or documentation. Use a regular hyphen `-` or double hyphen `--` instead
+- Avoid the dash-aside construct anywhere (code, comments, commit messages, documentation). The rule targets the *rhetorical pattern* of bracketing a clause between dashes, in any form: `—` (em dash), `--` (double hyphen), or ` - ` (spaced hyphen). All three are banned when used to wrap a parenthetical aside (e.g., "lorem ipsum -- lorem ipsum -- lorem ipsum"). Substituting `--` for `—` is **not** the fix. Rewrite into separate sentences, parentheses, colons, or just delete the aside. Hyphenated compounds (`file-ownership`, `multi-agent`) are unrelated and fine.
 
 ## Marketplace update workflow
 
@@ -92,12 +92,12 @@ When the user asks for "upstream updates" (or similar), this is the default work
    - **Clear win** - new upstream file missing locally, or a bug/fact fix with no local conflict. Pull directly.
    - **Minor refinement** - small wording/metadata changes. Pull if no local frontmatter or content conflicts.
    - **Hard merge** - upstream rewrote a section we also evolved locally. Layer upstream changes onto local; do not overwrite.
-   - **Intentional drift** (do not touch) - local namespace rewrites (`superpowers:` -> `ai-tooling:`), local polish (typo fixes, expanded triggers), style conventions (no em dashes per CLAUDE.md; no emojis in some plugins), local-only additions (custom presets, Ecosystem Integration sections, Context Sharing Pattern in `multi-reviewer-patterns`), `--` replacing upstream's em dash.
+   - **Intentional drift** (do not touch) - local namespace rewrites (`superpowers:` -> `ai-tooling:`), local polish (typo fixes, expanded triggers), style conventions (no dash-aside construct per CLAUDE.md; no emojis in some plugins), local-only additions (custom presets, Ecosystem Integration sections, Context Sharing Pattern in `multi-reviewer-patterns`), upstream dash-asides rewritten to sentences/parens/colons.
 
 3. **Preserve these local customizations** on every merge:
    - Source attribution lines at the top of files
    - Frontmatter: localized `description` (often multiline with `>`), `tools`, `color`, `version`, `model`
-   - Plugin-specific style: no em dashes (use `--`), no emojis in some plugins
+   - Plugin-specific style: no dash-aside construct (rewrite "X — Y — Z" / "X -- Y -- Z" / "X - Y - Z" asides into sentences, parens, or colons), no emojis in some plugins
    - Namespace replacements (`superpowers:X` -> `ai-tooling:X`)
    - Local-only sections (e.g., `## Ecosystem Integration` in agent-teams agents)
 
