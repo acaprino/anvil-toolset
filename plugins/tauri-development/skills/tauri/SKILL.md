@@ -41,12 +41,13 @@ Index for Tauri 2 patterns -- core, desktop, mobile. Each section points to a fo
 - `ci-cd.md` -- provider-agnostic pipeline patterns
 
 ### Mobile
-- `setup-mobile.md` -- Android SDK + iOS Xcode tooling
+- `setup-mobile.md` -- Android SDK + iOS Xcode tooling, pinned versions (AGP 8.11.0 / Gradle 8.14.3 / Kotlin 1.9.25), Gradle 9.0 readiness
 - `plugins-mobile.md` -- biometric, barcode, haptics, NFC, geolocation, Android safe-area workaround
 - `authentication-mobile.md` -- deep-link OAuth, Apple Sign-In, Firebase callback
 - `iap.md` -- in-app purchases (Google Play + App Store)
 - `testing.md` -- emulator, ADB, logcat, WebView debugging (happy path)
 - `debugging-mobile.md` -- iOS Web Inspector, Rust backtrace extraction, store crash logs, troubleshooting decision trees
+- `mobile-stale-builds.md` -- the Cargo `rerun-if-changed` gap that ships stale frontends in APKs; `build.rs` walk pattern + Gradle safety net
 - `build-deploy-mobile.md` -- signing, store builds, NDK / 16KB / RustWebViewClient gotchas
 - `ci-cd-mobile.md` -- mobile signing in CI, store upload
 

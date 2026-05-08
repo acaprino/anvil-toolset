@@ -28,15 +28,23 @@ cargo tauri ios build --open                                       # Open in Xco
 
 Output: `src-tauri/gen/apple/build/`.
 
+## Stale embedded frontend (THE pitfall)
+
+Before any other Android debugging: if your APK shows old UI even after `vite build`, the `.so` is stale. This is a known structural gap in `tauri-build`'s `cargo:rerun-if-changed` tracking, not a Cargo bug or a "clean and retry" issue. The fix lives in your `build.rs`. See `mobile-stale-builds.md` for the full architecture, the three-tier solution (`build.rs` walk + Gradle safety net), and the cache-reset playbook.
+
+The Windows-only "Dev-mode `.so` stale-asset deep-dive" section below is a separate (additional) failure mode where cross-compilation fails on the host and a fresh `.so` cannot be produced. The two problems compound on Windows.
+
 ## Gotchas
 
-- **16KB page size requirement (NDK < 28)**: Google Play rejects AABs not 16-KB-aligned. Add to `.cargo/config.toml`:
-  ```toml
-  [target.aarch64-linux-android]
-  rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
-  [target.armv7-linux-androideabi]
-  rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
-  ```
+- **16KB page size (Google Play deadline 2026-05-31)**: Google Play started enforcing 16-KB alignment on Android 15+ uploads in November 2025, with a community extension to 2026-05-31. Two paths:
+  - **NDK 28+**: produces 16-KB-aligned shared libraries by default, no rustflags needed. Recommended for new projects.
+  - **NDK 27 (LTS)**: keep the explicit linker flag in `.cargo/config.toml`:
+    ```toml
+    [target.aarch64-linux-android]
+    rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
+    [target.armv7-linux-androideabi]
+    rustflags = ["-C", "link-arg=-Wl,-z,max-page-size=16384"]
+    ```
   Symptom on store upload: "App is not 16 KB aligned." Either upgrade to NDK 28+ or apply this rustflag.
 - **iOS local development**: open `src-tauri/gen/apple/[App].xcodeproj` in Xcode → Signing & Capabilities → "Automatically manage signing" → select team. CI uses App Store Connect API key (`APPLE_API_ISSUER`/`APPLE_API_KEY`/`APPLE_API_KEY_PATH`/`APPLE_DEVELOPMENT_TEAM` env vars).
 - **iOS upload from CLI**:
@@ -92,11 +100,13 @@ Windows default is 260 chars; Tauri Android builds easily exceed:
 
 ## Dev-mode `.so` stale-asset deep-dive (Windows)
 
+This section covers the Windows-host cross-compilation chain that prevents a fresh `.so` from being produced at all (Strawberry Perl + OpenSSL). For the general stale-`.so` problem (Cargo cache misses frontend changes on every platform), see `mobile-stale-builds.md` first; this section is for what happens AFTER you fixed Cargo's tracking and the build still fails on Windows.
+
 ### Symptom
 App shows months-old frontend content when launched from Android Studio, even though Gradle rebuilds the frontend.
 
 ### Root cause
-The Rust `.so` was compiled with `tauri android dev` -- in dev mode the .so is configured differently:
+The Rust `.so` was compiled with `tauri android dev`. In dev mode the .so is configured differently:
 
 | Setting | Dev | Build |
 |---------|-----|-------|
@@ -181,6 +191,7 @@ opt-level = 3               # but Tauri core full-speed
 
 ## Related
 
+- `mobile-stale-builds.md` -- the cross-platform stale-bundle bug (Cargo `rerun-if-changed` gap), Gradle safety net, cache reset playbook. **Read this first if your APK shows old UI after a frontend change.**
 - `setup-mobile.md` -- toolchain prerequisites (Strawberry Perl, NDK, Vite mobile config)
 - `build-deploy-desktop.md` -- desktop signing/notarization, updater
 - `ci-cd-mobile.md` -- mobile CI signing + store upload

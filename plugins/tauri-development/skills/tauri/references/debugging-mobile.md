@@ -160,7 +160,18 @@ App Transport Security blocks plaintext by default; if you need to talk to a non
 2. **WebView console empty?** Open Chrome / Safari inspector. A blank console usually means JS threw before any log -- check the Errors tab. A "Refused to load" CSP error is the most common.
 3. **CSP error?** `tauri.conf.json` -> `app.security.csp` -- the dev server origin must be in `connect-src` or unset (`null`) for development.
 4. **Logcat shows panic at startup?** A Rust `setup` hook panicked; the WebView never gets HTML. Find the panic via `RustStderr` (see above).
-5. **Stale `.so`?** Dev rebuilds occasionally embed an old frontend bundle when the Gradle resource task is cached. Fix: `cargo tauri android build --debug && adb install -r ...` or wipe `src-tauri/gen/android/app/build/`.
+5. **Stale `.so` embedding old frontend?** This is the most common Android-only "white screen" cause once the basics check out. The `.so` was rebuilt against an old `dist/` because `tauri-build` only watches the directory path, not file contents (Cargo's directory-form `rerun-if-changed` misses content modifications). One-shot bypass: `touch src-tauri/src/lib.rs` then rebuild. Real fix: walk the frontend dir in `build.rs`. Full architecture and the Gradle safety net in `mobile-stale-builds.md`.
+
+### "Frontend changes don't appear in the app"
+
+You changed the frontend, ran `tauri android dev` or `tauri android build --debug`, the build succeeded, but the device still shows old UI. Walk this in order:
+
+1. **Did Gradle rebuild the Rust crate?** Inspect the build log for `:app:rustBuildArm64Debug` (or the arch you target). If it says `SKIPPED`, Cargo decided the crate had no changes. This is the canonical stale-`.so` symptom.
+2. **Touch `src-tauri/src/lib.rs` and rebuild.** If the device now shows the new UI, the diagnosis is confirmed: Cargo is not tracking your frontend dir as a dependency. Apply the `build.rs` walk pattern in `mobile-stale-builds.md` (Tier 1) so this stops happening on every change.
+3. **Verify `tauri.conf.json` `build.frontendDist`** points at the dir `vite build` actually writes to. If you renamed `dist/` to `public-react/` without updating the config, every build embeds an empty / stale bundle.
+4. **Check for two competing build outputs.** A common multi-crate trap: two different `Cargo.toml` files referencing different `frontendDist` paths, only one of which is current. `cargo metadata` and `grep -r frontendDist src-tauri/` resolve this.
+5. **Cache reset escalation** (smallest hammer first): `cargo clean` inside `src-tauri/` -> `./gradlew clean` inside `src-tauri/gen/android/` -> `rm -rf src-tauri/gen/android/app/build/`. After this, if the next build still embeds stale assets, the bug is in your `build.rs`, not the cache.
+6. **Dev mode versus build mode**: `tauri android dev` serves assets directly from the `.so` (Rust handler). `--debug` / `--apk` builds serve via `WebViewAssetLoader` from APK files. Both fail if the `.so` is stale, but for different reasons. See `mobile-stale-builds.md` for the dev/build mode distinction and the `RustWebViewClient.kt` patch for Windows hosts that cannot cross-compile.
 
 ### "Deep link not firing"
 
@@ -239,6 +250,7 @@ For Sentry / Bugsnag, integrate at the JS layer first (their SDKs cover WebView 
 
 ## Related
 
+- `mobile-stale-builds.md` -- the stale-`.so` Cargo tracking gap; required reading for any "frontend change not visible" bug
 - `testing.md` -- emulator + ADB recipes (the happy path)
 - `setup-mobile.md` -- toolchain prerequisites
 - `build-deploy-mobile.md` -- signing, store builds, R8, dSYM

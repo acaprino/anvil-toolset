@@ -91,7 +91,7 @@ When invoked:
 - Google OAuth blocks WebView login -- must use system browser
 - Symlink errors on Windows host -- enable Developer Mode
 - OpenSSL cross-compile needs Strawberry Perl on Windows
-- `.so` files in dev mode may embed stale frontend assets
+- `.so` files in dev mode (and `--debug` builds) commonly embed stale frontend assets because `tauri-build` only emits a directory-level `cargo:rerun-if-changed` for `frontendDist` and Cargo's directory watch misses file content modifications. Fix: walk the dir in `build.rs` and emit per-file. Full deep-dive in `skills/tauri/references/mobile-stale-builds.md`.
 - `adb uninstall com.your.app` before reinstalling if INSTALL_FAILED
 - Android 13+ needs explicit `POST_NOTIFICATIONS` runtime permission
 - Android 14+ requires foreground service type declarations
@@ -110,13 +110,14 @@ When invoked:
 The full debug surface is in `skills/tauri/references/debugging-mobile.md`. The agent-level checklist:
 
 1. **Reproduce on emulator/simulator first** -- faster iteration, free of device-specific weirdness.
-2. **Check the right log stream** -- WebView errors live in Chrome DevTools (Android) or Safari Web Inspector (iOS); Rust panics live in `logcat` (`RustStderr`) or `Console.app`. Looking at the wrong one wastes hours.
-3. **Enable backtraces** -- set `RUST_BACKTRACE=1` in `lib.rs` for debug builds; release builds need `debug = 1` and `strip = false` in `Cargo.toml` to be readable.
-4. **For store crashes** -- upload the `.dSYM` (iOS) and native debug symbols + `mapping.txt` (Android) on every release. Without them, Play Console / TestFlight stack traces are unusable.
-5. **For "white screen" / "deep link silent" / "IPC stuck"** -- use the decision trees in `debugging-mobile.md`; each has 4-5 numbered checks that cover ~90% of cases.
-6. **For network bugs** -- proxy via mitmproxy or Charles; on Android 7+ this requires `network_security_config.xml` with `<debug-overrides>` to trust the user CA.
-7. **For ANR / performance** -- main-thread CPU via `adb shell dumpsys cpuinfo`, then Android Profiler or Instruments. Sync Tauri commands doing CPU work are the typical cause -- mark them `async`.
-8. **For production telemetry** -- prefer `tauri-plugin-log` over `println!`; add Sentry/Bugsnag SDKs on the JS side for crash + unhandled rejection coverage.
+2. **Rule out stale `.so` first on Android** -- if the device shows old UI after a frontend change, the issue is almost always that Cargo skipped the Rust rebuild. Check the Gradle log for `:app:rustBuild<Arch>Debug` SKIPPED, then either touch `lib.rs` (one-shot) or apply the `build.rs` walk pattern (permanent fix) from `skills/tauri/references/mobile-stale-builds.md`. Spending an hour debugging code that the device never executed is the most common Android time sink.
+3. **Check the right log stream** -- WebView errors live in Chrome DevTools (Android) or Safari Web Inspector (iOS); Rust panics live in `logcat` (`RustStderr`) or `Console.app`. Looking at the wrong one wastes hours.
+4. **Enable backtraces** -- set `RUST_BACKTRACE=1` in `lib.rs` for debug builds; release builds need `debug = 1` and `strip = false` in `Cargo.toml` to be readable.
+5. **For store crashes** -- upload the `.dSYM` (iOS) and native debug symbols + `mapping.txt` (Android) on every release. Without them, Play Console / TestFlight stack traces are unusable.
+6. **For "white screen" / "deep link silent" / "IPC stuck"** -- use the decision trees in `debugging-mobile.md`; each has 4-5 numbered checks that cover ~90% of cases.
+7. **For network bugs** -- proxy via mitmproxy or Charles; on Android 7+ this requires `network_security_config.xml` with `<debug-overrides>` to trust the user CA.
+8. **For ANR / performance** -- main-thread CPU via `adb shell dumpsys cpuinfo`, then Android Profiler or Instruments. Sync Tauri commands doing CPU work are the typical cause -- mark them `async`.
+9. **For production telemetry** -- prefer `tauri-plugin-log` over `println!`; add Sentry/Bugsnag SDKs on the JS side for crash + unhandled rejection coverage.
 
 ### Cross-Platform Mobile
 - Test on both platforms early -- behavior differs significantly
