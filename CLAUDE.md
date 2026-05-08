@@ -126,7 +126,7 @@ When the user asks for "upstream updates" (or similar), this is the default work
 | `react-development` (react-best-practices) | `vercel-labs/agent-skills` - `skills/react-best-practices/` | `plugins/react-development/skills/react-best-practices/SKILL.md`, `plugins/react-development/skills/react-best-practices/references.md`, `plugins/react-development/skills/react-best-practices/rules/*.md` |
 | `digital-marketing` (domain-hunter) | `ReScienceLab/opc-skills` - `skills/domain-hunter/` | `plugins/digital-marketing/skills/domain-hunter/SKILL.md`, `plugins/digital-marketing/skills/domain-hunter/references/registrars.md`, `plugins/digital-marketing/skills/domain-hunter/references/spaceship-api.md` |
 | `prompt-improver` | `severity1/claude-code-prompt-improver` | `plugins/prompt-improver/skills/prompt-improver/SKILL.md`, `plugins/prompt-improver/skills/prompt-improver/references/*.md`, `plugins/prompt-improver/hooks/handlers/improve-prompt.js` |
-| `testing` (tdd) | `mattpocock/skills` - `tdd/` | `plugins/testing/skills/tdd/SKILL.md`, `plugins/testing/skills/tdd/references/tests.md`, `plugins/testing/skills/tdd/references/deep-modules.md`, `plugins/testing/skills/tdd/references/mocking.md`, `plugins/testing/skills/tdd/references/interface-design.md`, `plugins/testing/skills/tdd/references/refactoring.md` |
+| `testing` (tdd) | `mattpocock/skills` - `skills/engineering/tdd/` | `plugins/testing/skills/tdd/SKILL.md`, `plugins/testing/skills/tdd/references/tests.md`, `plugins/testing/skills/tdd/references/deep-modules.md`, `plugins/testing/skills/tdd/references/mocking.md`, `plugins/testing/skills/tdd/references/interface-design.md`, `plugins/testing/skills/tdd/references/refactoring.md` |
 | `docker` (multi-stage-dockerfile) | `github/awesome-copilot` - `skills/multi-stage-dockerfile/SKILL.md` | `plugins/docker/skills/multi-stage-dockerfile/SKILL.md` |
 | `testing` (e2e-testing-patterns) | `wshobson/agents` - `plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md` | `plugins/testing/skills/e2e-testing-patterns/SKILL.md` |
 | `agent-teams` | `wshobson/agents` - `plugins/agent-teams/` | `plugins/agent-teams/agents/*.md`, `plugins/agent-teams/commands/*.md`, `plugins/agent-teams/skills/*/SKILL.md`, `plugins/agent-teams/skills/*/references/*.md` |
@@ -189,17 +189,18 @@ gh api repos/severity1/claude-code-prompt-improver/contents/scripts/improve-prom
   --jq '.content' | base64 -d
 
 # Fetch latest TDD skill files from upstream (mattpocock/skills example)
-gh api repos/mattpocock/skills/contents/tdd/SKILL.md \
+# Note: upstream restructured tdd/ under skills/engineering/tdd/ in 2026
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/SKILL.md \
   --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/tdd/tests.md \
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/tests.md \
   --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/tdd/deep-modules.md \
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/deep-modules.md \
   --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/tdd/mocking.md \
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/mocking.md \
   --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/tdd/interface-design.md \
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/interface-design.md \
   --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/tdd/refactoring.md \
+gh api repos/mattpocock/skills/contents/skills/engineering/tdd/refactoring.md \
   --jq '.content' | base64 -d
 
 # Fetch latest multi-stage-dockerfile SKILL.md from upstream (github/awesome-copilot example)
