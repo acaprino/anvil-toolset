@@ -35,10 +35,10 @@ Docs: https://www.radix-ui.com
 | Need | Route to |
 |------|----------|
 | shadcn/ui components (Radix + Tailwind, pre-composed) | **shadcn-ui** |
-| CSS architecture, modern CSS features | **web-designer** |
-| Page layout composition, grid systems | **ui-layout-designer** agent |
-| Animations, micro-interactions, visual polish | **web-designer** agent |
-| Distinctive visual identity | **frontend** skill |
+| CSS architecture, modern CSS features | **frontend-design** |
+| Page layout composition, grid systems | **frontend-layout** agent |
+| Animations, micro-interactions, visual polish | **frontend-design** agent |
+| Distinctive visual identity | **frontend-css** skill |
 | daisyUI components (different library, class-based) | **daisyui** |
 
 ## Live Component Lookup

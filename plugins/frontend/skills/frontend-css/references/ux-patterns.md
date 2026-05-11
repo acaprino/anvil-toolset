@@ -1,6 +1,6 @@
 # UX Pattern Decision Guide
 
-Sourced from ui-patterns.com -- when to use each pattern, what makes it work, and what kills it. Used by `web-designer` agent.
+Sourced from ui-patterns.com -- when to use each pattern, what makes it work, and what kills it. Used by `frontend-design` agent.
 
 ## Onboarding & Education Patterns
 

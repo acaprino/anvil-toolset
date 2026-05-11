@@ -120,7 +120,7 @@ When the user asks for "upstream updates" (or similar), this is the default work
 | `ai-tooling` (brainstorming) | `obra/superpowers` - `skills/brainstorming/SKILL.md` | `plugins/ai-tooling/skills/brainstorming/SKILL.md` |
 | `ai-tooling` (writing-plans) | `obra/superpowers` - `skills/writing-plans/SKILL.md` | `plugins/ai-tooling/skills/writing-plans/SKILL.md` |
 | `ai-tooling` (executing-plans) | `obra/superpowers` - `skills/executing-plans/SKILL.md` | `plugins/ai-tooling/skills/executing-plans/SKILL.md` |
-| `frontend` (frontend) | `paulirish/dotfiles` - `agents/skills/modern-css/SKILL.md` | `plugins/frontend/skills/frontend/SKILL.md`, `plugins/frontend/skills/frontend/references/argyle-cacadia-2025-deck.md` |
+| `frontend` (frontend-css) | `paulirish/dotfiles` - `agents/skills/modern-css/SKILL.md` | `plugins/frontend/skills/frontend-css/SKILL.md`, `plugins/frontend/skills/frontend-css/references/argyle-cacadia-2025-deck.md` |
 | `deep-dive-analysis` (inspiration) | `gsd-build/get-shit-done` - `agents/gsd-codebase-mapper.md` | `plugins/deep-dive-analysis/commands/deep-dive-analysis.md` (patterns adopted, not direct copy) |
 | `playwright-skill` | `lackeyjb/playwright-skill` - `skills/playwright-skill/` | `plugins/playwright-skill/skills/playwright-skill/SKILL.md`, `plugins/playwright-skill/skills/playwright-skill/API_REFERENCE.md`, `plugins/playwright-skill/skills/playwright-skill/run.js`, `plugins/playwright-skill/skills/playwright-skill/package.json`, `plugins/playwright-skill/skills/playwright-skill/lib/helpers.js` |
 | `react-development` (react-best-practices) | `vercel-labs/agent-skills` - `skills/react-best-practices/` | `plugins/react-development/skills/react-best-practices/SKILL.md`, `plugins/react-development/skills/react-best-practices/references.md`, `plugins/react-development/skills/react-best-practices/rules/*.md` |
@@ -141,7 +141,7 @@ gh api repos/obra/superpowers/contents/skills/brainstorming/SKILL.md \
   --jq '.content' | base64 -d
 
 # Fetch latest SKILL.md from upstream (paulirish/dotfiles example)
-# Local target: plugins/frontend/skills/frontend/SKILL.md and plugins/frontend/skills/frontend/references/argyle-cacadia-2025-deck.md
+# Local target: plugins/frontend/skills/frontend-css/SKILL.md and plugins/frontend/skills/frontend-css/references/argyle-cacadia-2025-deck.md
 gh api repos/paulirish/dotfiles/contents/agents/skills/modern-css/SKILL.md \
   --jq '.content' | base64 -d
 

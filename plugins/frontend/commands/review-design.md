@@ -96,7 +96,7 @@ Fire all agents **in parallel** in a single response (3 in diff mode, 4 in full 
 
 ```
 Task:
-  subagent_type: "web-designer"
+  subagent_type: "frontend-design"
   description: "Full UX and component architecture design audit"
   prompt: |
     Perform a full UX and component architecture audit of this frontend codebase.
@@ -165,7 +165,7 @@ Task:
 
 ```
 Task:
-  subagent_type: "ui-layout-designer"
+  subagent_type: "frontend-layout"
   description: "Layout system, grid, and spatial design audit"
   prompt: |
     Audit the layout system, grid, spacing, and spatial design of this frontend codebase.
@@ -215,7 +215,7 @@ Skip this agent in diff mode. Only run in full mode.
 
 ```
 Task:
-  subagent_type: "web-designer"
+  subagent_type: "frontend-design"
   description: "CSS architecture and modern feature adoption audit"
   prompt: |
     Audit the CSS architecture, modern feature adoption, and stylesheet quality of this frontend codebase.
@@ -285,7 +285,7 @@ Task:
 
 ```
 Task:
-  subagent_type: "web-designer"
+  subagent_type: "frontend-design"
   description: "Visual polish and motion design audit"
   prompt: |
     Audit the visual polish, animation quality, and motion design of this frontend codebase.

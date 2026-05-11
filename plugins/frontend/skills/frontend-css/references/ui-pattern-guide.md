@@ -1,6 +1,6 @@
 # UI Pattern Selection Guide
 
-Sourced from ui-patterns.com -- decision rules for choosing the right component pattern per layout context. Used by `ui-layout-designer` agent.
+Sourced from ui-patterns.com -- decision rules for choosing the right component pattern per layout context. Used by `frontend-layout` agent.
 
 ## Content Display: Cards vs. List vs. Table vs. Gallery vs. Thumbnail
 

@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Custom development workflow agents and skills for code quality, Tauri/Rust development, frontend optimization, AI tooling, and constraint programming optimization",
-    "version": "5.59.0"
+    "version": "5.60.0"
   },
   "plugins": [
     {
@@ -92,8 +92,8 @@
     {
       "name": "frontend",
       "source": "./plugins/frontend",
-      "description": "UI polishing, UX design, comprehensive CSS (BEM, CSS Modules, SASS, accessibility, cross-browser), layout design, daisyUI components, Radix UI primitives and themes, and premium web consulting",
-      "version": "3.10.1",
+      "description": "Unified frontend toolkit: frontend-design (CSS, motion, UX), frontend-layout (grid, breakpoints), frontend-engineer (build), frontend-strategy (consulting workflow), frontend-css (modern CSS reference), and component-library skills (shadcn-ui, daisyUI, Radix UI)",
+      "version": "3.11.0",
       "author": {
         "name": "Alfio"
       },
@@ -103,7 +103,11 @@
         "ux",
         "frontend",
         "css",
-        "web-designer",
+        "frontend-design",
+        "frontend-layout",
+        "frontend-engineer",
+        "frontend-strategy",
+        "frontend-css",
         "shadcn",
         "shadcn-ui",
         "daisyui",
@@ -114,20 +118,19 @@
         "radix-themes",
         "layout-design",
         "product-brief",
-        "web-consultant",
         "strategy",
         "discovery"
       ],
       "category": "frontend",
       "strict": false,
       "agents": [
-        "./agents/web-designer.md",
-        "./agents/ui-layout-designer.md",
+        "./agents/frontend-design.md",
+        "./agents/frontend-layout.md",
         "./agents/frontend-engineer.md"
       ],
       "skills": [
-        "./skills/frontend",
-        "./skills/premium-web-consultant",
+        "./skills/frontend-css",
+        "./skills/frontend-strategy",
         "./skills/shadcn-ui",
         "./skills/daisyui",
         "./skills/radix-ui"

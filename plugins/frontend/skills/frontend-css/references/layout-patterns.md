@@ -1,6 +1,6 @@
 # Layout Patterns Library
 
-CSS layout patterns for common page structures. Used by `ui-layout-designer` agent.
+CSS layout patterns for common page structures. Used by `frontend-layout` agent.
 
 ## Holy Grail
 

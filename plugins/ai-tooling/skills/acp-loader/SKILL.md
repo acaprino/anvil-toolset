@@ -36,7 +36,7 @@ If CLAUDE.md says "don't use TDD" and a skill says "always use TDD," follow the 
 
 Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you -- follow it directly. Never use the Read tool on skill files.
 
-Skills are namespaced by plugin: `plugin-name:skill-name` (e.g., `ai-tooling:brainstorming`, `frontend:frontend`).
+Skills are namespaced by plugin: `plugin-name:skill-name` (e.g., `ai-tooling:brainstorming`, `frontend:frontend-css`).
 
 ---
 
@@ -62,7 +62,7 @@ Before responding to ANY user message, run this check:
    --> ai-tooling:writing-plans to create a plan first
 
 5. Is this frontend/UI work?
-   --> Check: frontend:frontend, frontend:premium-web-consultant,
+   --> Check: frontend:frontend-css, frontend:frontend-strategy,
        frontend:shadcn-ui, frontend:daisyui, frontend:radix-ui, agent-teams:team-design
 
 6. Is this a code review request?

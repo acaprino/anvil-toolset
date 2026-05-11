@@ -62,7 +62,7 @@ If a preset is specified, use these configurations:
 **`fullstack`** -- Full-stack development with specialized layer agents (default: 4 members)
 
 - Spawn 1 `agent-teams:team-lead` + 3 layer-specific agents:
-  - Frontend: `frontend:frontend-engineer` or `frontend:web-designer`
+  - Frontend: `frontend:frontend-engineer` or `frontend:frontend-design`
   - Backend: `python-development:python-engineer` or `agent-teams:team-implementer`
   - Tests: `testing:test-writer` or `python-development:python-test-engineer`
 - Team name default: `fullstack-team`
@@ -138,7 +138,7 @@ If a preset is specified, use these configurations:
 - Spawn analysis specialists:
   - App mapper: `app-analyzer:app-analyzer` (navigation + UX audit)
   - Researcher: `research:deep-researcher` (competitive intelligence)
-  - Designer: `frontend:web-designer` (design system extraction)
+  - Designer: `frontend:frontend-design` (design system extraction)
 - Team name default: `app-analysis-team`
 
 **`tauri`** -- Tauri desktop/mobile development (default: 4 members)
@@ -154,11 +154,11 @@ If a preset is specified, use these configurations:
 
 - Runs in two parallel waves (see `/team-design` for full pipeline):
   - **Design wave** (3 parallel agents):
-    - Design direction: `frontend:web-designer`
-    - Layout: `frontend:ui-layout-designer`
-    - UX patterns: `frontend:web-designer`
+    - Design direction: `frontend:frontend-design`
+    - Layout: `frontend:frontend-layout`
+    - UX patterns: `frontend:frontend-design`
   - **Polish wave** (3-4 parallel agents):
-    - UI polish: `frontend:web-designer`
+    - UI polish: `frontend:frontend-design`
     - Performance: `react-development:react-performance-optimizer`
     - Code review: `senior-review:code-auditor`
     - Security: `senior-review:security-auditor` (optional)
@@ -192,7 +192,7 @@ Before spawning, invoke the relevant skills for the preset to inform team config
 | codebase-mapper | `codebase-mapper:codebase-mapper`, `agent-teams:task-coordination-strategies`, `agent-teams:team-communication-protocols` |
 | app-analysis | `agent-teams:team-composition-patterns` |
 | tauri | `agent-teams:parallel-feature-development`, `tauri-development:tauri`, `agent-teams:task-coordination-strategies` |
-| ui-studio | `ai-tooling:brainstorming`, `frontend:frontend`, `agent-teams:parallel-feature-development`, `agent-teams:team-communication-protocols` |
+| ui-studio | `ai-tooling:brainstorming`, `frontend:frontend-css`, `agent-teams:parallel-feature-development`, `agent-teams:team-communication-protocols` |
 
 ## Phase 2: Team Creation
 
@@ -253,15 +253,15 @@ Use the **most specialized agent** available. The team-lead's Ecosystem Integrat
 | codebase-mapper | reviewer | -- | `codebase-mapper:guide-reviewer` |
 | app-analysis | mapper | -- | `app-analyzer:app-analyzer` |
 | app-analysis | researcher | -- | `research:deep-researcher` |
-| app-analysis | designer | -- | `frontend:web-designer` |
+| app-analysis | designer | -- | `frontend:frontend-design` |
 | tauri | lead | `agent-teams:team-lead` | -- |
 | tauri | rust | -- | `tauri-development:rust-engineer` |
 | tauri | frontend | -- | `frontend:frontend-engineer` |
 | tauri | platform | -- | `tauri-development:tauri-desktop` or `tauri-development:tauri-mobile` |
-| ui-studio | design direction | -- | `frontend:web-designer` |
-| ui-studio | layout | -- | `frontend:ui-layout-designer` |
-| ui-studio | UX patterns | -- | `frontend:web-designer` |
-| ui-studio | polish | -- | `frontend:web-designer` |
+| ui-studio | design direction | -- | `frontend:frontend-design` |
+| ui-studio | layout | -- | `frontend:frontend-layout` |
+| ui-studio | UX patterns | -- | `frontend:frontend-design` |
+| ui-studio | polish | -- | `frontend:frontend-design` |
 | ui-studio | performance | -- | `react-development:react-performance-optimizer` |
 | ui-studio | review | -- | `senior-review:code-auditor` |
 | ui-studio | security | -- | `senior-review:security-auditor` |

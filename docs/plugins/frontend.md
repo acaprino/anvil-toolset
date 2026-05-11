@@ -6,14 +6,14 @@
 
 | Need | Tool | What it does |
 |------|------|------|
-| "What should we build?" | `/frontend:premium-web-consultant` | Strategy and planning |
+| "What should we build?" | `/frontend:frontend-strategy` | Strategy and planning |
 | "Build it from scratch" | `/agent-teams:team-design` | Orchestrates frontend agents |
 | "Improve what exists" | `/agent-teams:team-design` | Audits and redesigns existing code |
 | "Optimize React perf" | [react-development](react-development.md) | React 19 performance |
 
 ## Agents
 
-### `web-designer`
+### `frontend-design`
 
 Web-specific frontend expert: CSS architecture, animations, design systems, UX psychology, accessibility, and visual polish.
 
@@ -24,12 +24,12 @@ Web-specific frontend expert: CSS architecture, animations, design systems, UX p
 
 **Invocation:**
 ```
-Use the web-designer agent to [improve/review/implement] [component/page/design system]
+Use the frontend-design agent to [improve/review/implement] [component/page/design system]
 ```
 
 ---
 
-### `ui-layout-designer`
+### `frontend-layout`
 
 Universal layout specialist for spatial composition across web, desktop, and mobile.
 
@@ -40,7 +40,7 @@ Universal layout specialist for spatial composition across web, desktop, and mob
 
 **Invocation:**
 ```
-Use the ui-layout-designer agent to design [layout/page]
+Use the frontend-layout agent to design [layout/page]
 ```
 
 **Philosophy:** Structure first. Proportions second. Chrome last. Uses 8px spatial system and content-priority-driven layout.
@@ -74,7 +74,7 @@ Use the frontend-engineer agent to build [component/feature/application]
 
 ## Skills
 
-### `frontend`
+### `frontend-css`
 
 Unified web frontend knowledge base -- CSS, UX, UI patterns, layouts, and flows.
 
@@ -94,13 +94,13 @@ Unified web frontend knowledge base -- CSS, UX, UI patterns, layouts, and flows.
 
 ---
 
-### `premium-web-consultant`
+### `frontend-strategy`
 
-Premium web design consultant for the strategy phase before writing any code. Conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and hands off to specialist agents.
+Strategic website planning skill for the discovery phase before writing any code. Conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and hands off to specialist agents.
 
 | | |
 |---|---|
-| **Invoke** | `/frontend:premium-web-consultant` |
+| **Invoke** | `/frontend:frontend-strategy` |
 | **Use for** | Planning a new website or redesign -- website brief, sitemap, design direction, content strategy |
 
 ---

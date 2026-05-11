@@ -3,7 +3,7 @@ name: react-performance-optimizer
 description: >
   Expert in React 19 performance optimization including React Compiler, Server Components, bundle optimization, state management, and profiling. Fully compatible with tauri-desktop for desktop apps. Use proactively for React performance reviews, bundle analysis, state management decisions, or re-render optimization.
   TRIGGER WHEN: reviewing or optimizing React 19 performance -- re-renders, React Compiler adoption, Server Components, bundle analysis, state management (Zustand/Redux/TanStack), or profiling.
-  DO NOT TRIGGER WHEN: the task is CSS/design polish (use web-designer), Tauri IPC/Rust backend (use tauri-desktop), or general Next.js infrastructure (use react-best-practices skill directly).
+  DO NOT TRIGGER WHEN: the task is CSS/design polish (use frontend-design), Tauri IPC/Rust backend (use tauri-desktop), or general Next.js infrastructure (use react-best-practices skill directly).
 model: opus
 color: purple
 ---
@@ -626,9 +626,9 @@ if (import.meta.env.DEV) {
 <agent_delegation>
 ## Agent Delegation
 
-- If the performance issue is **CSS-related** (layout thrashing, paint storms, large style recalculations), STOP and recommend invoking `web-designer`
-- If the issue is about **layout structure or spatial composition**, STOP and recommend invoking `ui-layout-designer`
-- If the issue is about **animation performance** (jank, dropped frames), STOP and recommend invoking `web-designer`
+- If the performance issue is **CSS-related** (layout thrashing, paint storms, large style recalculations), STOP and recommend invoking `frontend-design`
+- If the issue is about **layout structure or spatial composition**, STOP and recommend invoking `frontend-layout`
+- If the issue is about **animation performance** (jank, dropped frames), STOP and recommend invoking `frontend-design`
 - For **Tauri IPC patterns, Rust backend, Tokio channels, or memory on Rust side**, STOP and recommend invoking `tauri-desktop`
 - This agent owns: React component optimization, state management, external store selectors, bundle optimization, code splitting, virtualization, useEffect cleanup
 </agent_delegation>

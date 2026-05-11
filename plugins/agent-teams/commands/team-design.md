@@ -11,7 +11,7 @@ Orchestrate the UI Studio pipeline using parallel agent teams. Phases that are i
 
 Before starting, invoke these skills:
 - `ai-tooling:brainstorming` -- product concept exploration (Phase 1)
-- `frontend:frontend` -- CSS architecture, design systems, UX patterns
+- `frontend:frontend-css` -- CSS architecture, design systems, UX patterns
 - `agent-teams:parallel-feature-development` -- file ownership for build phase
 - `agent-teams:team-communication-protocols` -- coordination between design agents
 
@@ -33,9 +33,9 @@ Phase 1: Brainstorm (sequential -- interactive with user)
          |
          v
 Phase 2-4: PARALLEL DESIGN TEAM (3 agents)
-  - Design Direction (web-designer)
-  - Layout & Structure (ui-layout-designer)
-  - UX Patterns (web-designer)
+  - Design Direction (frontend-design)
+  - Layout & Structure (frontend-layout)
+  - UX Patterns (frontend-design)
          |
          v
 Phase 5: Component Architecture (synthesis -- sequential)
@@ -48,7 +48,7 @@ Phase 7: Execute Plan (sequential, batch checkpoints)
          |
          v
 Phase 8-10: PARALLEL POLISH TEAM (3 agents)
-  - UI Polish (web-designer)
+  - UI Polish (frontend-design)
   - React Performance (react-performance-optimizer)
   - Code Review (code-auditor + security-auditor)
 ```
@@ -73,19 +73,19 @@ Spawn a design team with 3 specialists working simultaneously:
 2. Spawn 3 agents in parallel:
 
 **Agent 1: Design Direction**
-- `subagent_type`: `frontend:web-designer`
+- `subagent_type`: `frontend:frontend-design`
 - Task: Establish aesthetic direction, typography, color palette, motion principles, spacing scale
 - Input: product brief from `.ui-studio/01-brief.md`
 - Output: `.ui-studio/02-design-direction.md`
 
 **Agent 2: Layout & Structure**
-- `subagent_type`: `frontend:ui-layout-designer`
+- `subagent_type`: `frontend:frontend-layout`
 - Task: Choose layout pattern, define grid system, breakpoint strategy, responsive behavior
 - Input: product brief from `.ui-studio/01-brief.md`
 - Output: `.ui-studio/03-layout.md`
 
 **Agent 3: UX Patterns**
-- `subagent_type`: `frontend:web-designer`
+- `subagent_type`: `frontend:frontend-design`
 - Task: Design interaction patterns, user flows, state handling (loading/empty/error), navigation, a11y
 - Input: product brief from `.ui-studio/01-brief.md`
 - Output: `.ui-studio/04-ux-patterns.md`
@@ -126,7 +126,7 @@ Use `ai-tooling:executing-plans` skill:
 3. After each batch: show progress, wait for user feedback
 4. Spawn specialized implementers based on task type:
    - React components: `frontend:frontend-engineer`
-   - CSS/styling: `frontend:web-designer`
+   - CSS/styling: `frontend:frontend-design`
    - Tests: `testing:test-writer`
 5. Output: `.ui-studio/08-execution-log.md`
 
@@ -138,7 +138,7 @@ Spawn a polish/review team with 3 specialists working simultaneously:
 2. Spawn 3 agents in parallel:
 
 **Agent 1: UI Polish**
-- `subagent_type`: `frontend:web-designer`
+- `subagent_type`: `frontend:frontend-design`
 - Task: Add micro-interactions, hover/focus states, loading skeletons, respect prefers-reduced-motion
 - Input: product brief + implemented component files
 - Output: `.ui-studio/09-polish-log.md`

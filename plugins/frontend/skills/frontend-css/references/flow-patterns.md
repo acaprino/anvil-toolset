@@ -1,6 +1,6 @@
 # Flow & Onboarding Layout Patterns
 
-Spatial structure for guided, sequential, and focused-attention UIs. Used by `ui-layout-designer` agent.
+Spatial structure for guided, sequential, and focused-attention UIs. Used by `frontend-layout` agent.
 
 ## Step Indicator / Progress Bar
 

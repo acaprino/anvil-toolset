@@ -1,9 +1,9 @@
 ---
-name: web-designer
+name: frontend-design
 description: >
   Web-specific frontend expert covering CSS architecture, animations/micro-interactions, design systems, UX psychology, accessibility, and visual polish. Use PROACTIVELY for any web UI work -- styling, motion design, design tokens, component specification, or interface aesthetics.
   TRIGGER WHEN: web UI work -- styling, motion design, design tokens, component specification, interface aesthetics, UX psychology, or accessibility.
-  DO NOT TRIGGER WHEN: the task is page-layout/grid-system composition only (use ui-layout-designer), or React performance (use react-performance-optimizer).
+  DO NOT TRIGGER WHEN: the task is page-layout/grid-system composition only (use frontend-layout), or React performance (use react-performance-optimizer).
 model: opus
 tools: Read, Write, Edit, Bash, Glob, Grep
 color: purple
@@ -232,11 +232,11 @@ const animationProps = prefersReducedMotion ? {} : { initial: { opacity: 0 }, an
 ## UX Pattern Reference
 
 Detailed decision guides are in the `frontend` skill reference files:
-- **UX patterns**: `Read plugins/frontend/skills/frontend/references/ux-patterns.md`
-- **UI patterns**: `Read plugins/frontend/skills/frontend/references/ui-pattern-guide.md`
-- **Layout patterns**: `Read plugins/frontend/skills/frontend/references/layout-patterns.md`
-- **Flow patterns**: `Read plugins/frontend/skills/frontend/references/flow-patterns.md`
-- **CSS patterns**: `Read plugins/frontend/skills/frontend/references/css-patterns.md`
+- **UX patterns**: `Read plugins/frontend/skills/frontend-css/references/ux-patterns.md`
+- **UI patterns**: `Read plugins/frontend/skills/frontend-css/references/ui-pattern-guide.md`
+- **Layout patterns**: `Read plugins/frontend/skills/frontend-css/references/layout-patterns.md`
+- **Flow patterns**: `Read plugins/frontend/skills/frontend-css/references/flow-patterns.md`
+- **CSS patterns**: `Read plugins/frontend/skills/frontend-css/references/css-patterns.md`
 
 ## Quality Checklist
 
@@ -289,7 +289,7 @@ Detailed decision guides are in the `frontend` skill reference files:
 <agent_delegation>
 ## Agent Delegation
 
-- If the issue is about **layout structure, grid systems, spatial composition, or breakpoint strategy**, STOP and recommend invoking `ui-layout-designer` -- it owns spatial structure and is platform-agnostic
+- If the issue is about **layout structure, grid systems, spatial composition, or breakpoint strategy**, STOP and recommend invoking `frontend-layout` -- it owns spatial structure and is platform-agnostic
 - If the issue is about **React rendering performance or state management**, STOP and recommend invoking `react-performance-optimizer`
 - This agent owns: CSS architecture, animations, design tokens, UX psychology, accessibility, visual polish, motion design, component specification
 </agent_delegation>

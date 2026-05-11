@@ -1,5 +1,5 @@
 ---
-name: frontend
+name: frontend-css
 description: >
   Unified web frontend knowledge base covering CSS architecture, UX psychology, UI components, distinctive aesthetics, and interface design generation.
   TRIGGER WHEN: working on web styling, design systems, component decisions, responsive strategy, distinctive frontend aesthetics, or exploring multiple interface designs.

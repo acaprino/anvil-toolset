@@ -54,7 +54,7 @@ RULE: Always prefer a marketplace specialist over a generic team agent.
 | `python-development:python-test-engineer` | team-implementer (Python tests) | pytest TDD |
 | `tauri-development:rust-engineer` | team-implementer (Rust) | Rust ownership, async, FFI |
 | `frontend:frontend-engineer` | team-implementer (frontend) | Frontend design + implementation |
-| `frontend:web-designer` | team-implementer (CSS/UI) | Styling, animations, design |
+| `frontend:frontend-design` | team-implementer (CSS/UI) | Styling, animations, design |
 | `tauri-development:tauri-desktop` | team-implementer (Tauri) | Tauri IPC, WebView, bundling |
 | `tauri-development:tauri-mobile` | team-implementer (mobile) | Tauri mobile plugins, signing |
 | `testing:test-writer` | team-implementer (tests) | Language-agnostic test generation |

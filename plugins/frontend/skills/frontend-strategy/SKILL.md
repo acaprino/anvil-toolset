@@ -1,12 +1,12 @@
 ---
-name: premium-web-consultant
+name: frontend-strategy
 description: >
-  Premium web design consultant that conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and orchestrates web-designer, ui-layout-designer, seo-specialist, and content-marketer agents automatically.
+  Strategic website planning skill that conducts structured client discovery, produces professional deliverables (website brief, sitemap, design direction, content strategy), and orchestrates frontend-design, frontend-layout, seo-specialist, and content-marketer agents automatically.
   TRIGGER WHEN: planning a new website or redesign before any code is written.
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 ---
 
-# Premium Web Consultant
+# Frontend Strategy
 
 Strategic website planning skill. Bridges the gap between "I need a website" and writing code. Produces professional strategy documents through structured discovery, then orchestrates specialist agents at defined handoff points.
 
@@ -143,7 +143,7 @@ Sections:
 
 ### HANDOFF SEQUENCE: IA Validation -> Layout Design
 
-**Step 1: web-designer**
+**Step 1: frontend-design**
 
 ```
 HANDOFF
@@ -161,7 +161,7 @@ Ask:      Validate this information architecture against the target
 -------------------------------
 ```
 
-**Step 2: ui-layout-designer** (receives optimized IA from Step 1)
+**Step 2: frontend-layout** (receives optimized IA from Step 1)
 
 ```
 HANDOFF
@@ -221,7 +221,7 @@ Ask:      Define the CSS architecture to implement this design
 -------------------------------
 ```
 
-Invoke `web-designer` agent. Record CSS architecture decisions in the design direction document.
+Invoke `frontend-design` agent. Record CSS architecture decisions in the design direction document.
 
 ---
 
@@ -339,13 +339,13 @@ This prevents each specialist from solving the wrong problem.
 | Phase | Agent | Plugin | Purpose |
 |-------|-------|--------|---------|
 | 1 | seo-specialist | digital-marketing | Competitor SEO analysis |
-| 2 | web-designer | frontend | IA validation, user flows, conversion funnels |
-| 2 | ui-layout-designer | frontend | Page layout, grid systems, responsive breakpoints |
-| 3 | web-designer | frontend | CSS architecture, spacing, typography, responsive |
+| 2 | frontend-design | frontend | IA validation, user flows, conversion funnels |
+| 2 | frontend-layout | frontend | Page layout, grid systems, responsive breakpoints |
+| 3 | frontend-design | frontend | CSS architecture, spacing, typography, responsive |
 | 4 | content-marketer | digital-marketing | Per-page messaging, CTA strategy |
 | 4 | seo-specialist | digital-marketing | Keyword mapping, meta suggestions |
 
 Notes:
 - SEO specialist invoked twice: Phase 1 for competitive analysis, Phase 4 for keyword mapping (needs sitemap from Phase 2)
-- Phase 2 agents run sequentially: web-designer validates IA first, then ui-layout-designer uses the optimized output
+- Phase 2 agents run sequentially: frontend-design validates IA first, then frontend-layout uses the optimized output
 - After Phase 5, hand off to the `frontend-engineer` agent for implementation

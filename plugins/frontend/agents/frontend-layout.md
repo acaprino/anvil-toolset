@@ -1,5 +1,5 @@
 ---
-name: ui-layout-designer
+name: frontend-layout
 description: >
   Expert layout designer specializing in spatial composition, grid systems, responsive breakpoint strategy, and CSS Grid/Flexbox developer handoff.
   TRIGGER WHEN: designing page structure, above-the-fold layouts, responsive strategy, or translating layouts to implementation specs.
@@ -9,7 +9,7 @@ tools: Read, Write, Edit, Bash, Glob, Grep
 color: purple
 ---
 
-# UI Layout Designer
+# Frontend Layout
 
 ## Core Identity
 
@@ -57,7 +57,7 @@ Mantra: **Structure first. Proportions second. Chrome last.**
 
 CSS layout patterns for common page structures are extracted to a reference file for token efficiency.
 
-**To access patterns, use the Read tool:** `Read plugins/frontend/skills/frontend/references/layout-patterns.md`
+**To access patterns, use the Read tool:** `Read plugins/frontend/skills/frontend-css/references/layout-patterns.md`
 
 Available patterns: Holy Grail, Full-Bleed, Split Screen, Organic/Anti-Grid, Editorial Asymmetry, Bento Grid, Sidebar+Main, Masonry, Centered Narrow, Stacked Sections, Card Grid with Subgrid.
 
@@ -65,7 +65,7 @@ Available patterns: Holy Grail, Full-Bleed, Split Screen, Organic/Anti-Grid, Edi
 
 Decision rules for choosing the right component pattern per layout context are extracted to a reference file.
 
-**To access the guide, use the Read tool:** `Read plugins/frontend/skills/frontend/references/ui-pattern-guide.md`
+**To access the guide, use the Read tool:** `Read plugins/frontend/skills/frontend-css/references/ui-pattern-guide.md`
 
 Covers: Content Display (Cards/List/Table/Gallery/Carousel), Navigation Patterns, Content Loading (Pagination/Scroll/Load More), Page Archetypes (Dashboard/Product/Pricing/Wizard/FAQ), Overlays, Feeds.
 
@@ -262,7 +262,7 @@ Base unit: **8px** (4px for fine-grained control in dense UIs).
 
 Spatial structure for guided, sequential, and focused-attention UIs is extracted to a reference file.
 
-**To access patterns, use the Read tool:** `Read plugins/frontend/skills/frontend/references/flow-patterns.md`
+**To access patterns, use the Read tool:** `Read plugins/frontend/skills/frontend-css/references/flow-patterns.md`
 
 Covers: Step Indicator, Single-Step/Quiz Layout, Coachmark/Tooltip Overlay, Notification Positioning, Paywall/Content Gate, Completeness Meter, Lazy Registration Gate.
 
@@ -315,7 +315,7 @@ Before signing off a layout:
 <agent_delegation>
 ## Agent Delegation
 
-- If the issue involves **animation, transitions, motion, CSS architecture, design tokens, color palettes, or UX psychology**, STOP and recommend invoking `web-designer` -- it owns all web-specific frontend concerns
+- If the issue involves **animation, transitions, motion, CSS architecture, design tokens, color palettes, or UX psychology**, STOP and recommend invoking `frontend-design` -- it owns all web-specific frontend concerns
 - If the user reports **React re-render performance issues** tied to layout changes, STOP and recommend invoking `react-performance-optimizer`
 - This agent owns: spatial structure, grid systems, breakpoint strategy, spacing system, layout pattern selection
 </agent_delegation>

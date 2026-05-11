@@ -48,7 +48,7 @@ If none of these apply, a skill is the right choice.
 
 ### frontend (4 agents -> 2 agents + skill restructure)
 - **Before:** 4 agents doing overlapping work, CSS knowledge buried in an agent prompt
-- **After:** 2 focused agents (ui-ux-designer, ui-layout-designer) + component library skills as separate alternatives (shadcn-ui, daisyui, radix-ui) + css-master skill for CSS knowledge
+- **After:** 3 focused agents (frontend-design, frontend-layout, frontend-engineer) + frontend-strategy skill for consulting workflows + component library skills as separate alternatives (shadcn-ui, daisyui, radix-ui) + frontend-css skill for CSS knowledge
 - **Why:** CSS knowledge is recipes/conventions (skill territory). Component libraries are alternative knowledge bases (separate skills, not merged). Layout and UX design need isolation and specialist personas (agents).
 
 ## Anti-patterns

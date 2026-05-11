@@ -118,8 +118,8 @@ When spawning teammates, choose the most specialized agent available:
 | React/frontend | `frontend:frontend-engineer` | Frontend architecture + implementation |
 | Tauri desktop | `tauri-development:tauri-desktop` | Tauri IPC, WebView, window management |
 | Tauri mobile | `tauri-development:tauri-mobile` | Mobile plugins, signing, emulator testing |
-| CSS/UI design | `frontend:web-designer` | Styling, animations, design systems |
-| Layout | `frontend:ui-layout-designer` | Grid, responsive breakpoints, spatial |
+| CSS/UI design | `frontend:frontend-design` | Styling, animations, design systems |
+| Layout | `frontend:frontend-layout` | Grid, responsive breakpoints, spatial |
 
 **Testing** -- instead of generic `team-implementer` for test tasks:
 | Context | Specialized Agent | When |
@@ -146,7 +146,7 @@ When spawning teammates, choose the most specialized agent available:
 Include relevant skill references in teammate prompts:
 - Python work: `python-development:python-tdd`, `python-development:async-python-patterns`
 - React work: `react-development:react-best-practices`
-- Frontend work: `frontend:frontend`, plus component lib (`frontend:shadcn-ui`, `frontend:daisyui`, `frontend:radix-ui`)
+- Frontend work: `frontend:frontend-css`, plus component lib (`frontend:shadcn-ui`, `frontend:daisyui`, `frontend:radix-ui`)
 - Tauri work: `tauri-development:tauri`
 - Review work: `senior-review:defect-taxonomy`
 - Platform work: `platform-engineering:platform-engineering`

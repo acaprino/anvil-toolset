@@ -38,7 +38,7 @@ Use the team-lead agent to coordinate [task]
 - Builds dependency graphs using blockedBy/blocks relationships
 - Monitors progress at milestones, not every step
 
-**Ecosystem integration:** The lead always selects specialized marketplace agents over generic team agents when the task matches. Full mapping covers code review (security-auditor, code-auditor, distributed-flow-auditor, ui-race-auditor, platform-reviewer), implementation (python-engineer, rust-engineer, frontend-engineer, tauri-desktop, web-designer), testing (test-writer, python-test-engineer), research (deep-researcher, quick-searcher, codebase-explorer), and documentation (documentation-engineer).
+**Ecosystem integration:** The lead always selects specialized marketplace agents over generic team agents when the task matches. Full mapping covers code review (security-auditor, code-auditor, distributed-flow-auditor, ui-race-auditor, platform-reviewer), implementation (python-engineer, rust-engineer, frontend-engineer, tauri-desktop, frontend-design), testing (test-writer, python-test-engineer), research (deep-researcher, quick-searcher, codebase-explorer), and documentation (documentation-engineer).
 
 ---
 
@@ -141,9 +141,9 @@ Spawn an agent team using preset configurations or custom composition.
 | `security` | 4 | security-auditor + platform-reviewer + distributed-flow-auditor + security-auditor (separate scope) |
 | `migration` | 4 | team-lead + 2 specialized implementers + code-auditor (verifier) |
 | `docs` | 3 | codebase-explorer + documentation-engineer + code-auditor (accuracy verifier) |
-| `app-analysis` | 3 | app-analyzer + deep-researcher + web-designer |
+| `app-analysis` | 3 | app-analyzer + deep-researcher + frontend-design |
 | `tauri` | 4 | team-lead + rust-engineer + frontend-engineer + tauri-desktop/tauri-mobile |
-| `ui-studio` | 3+3 | Design wave (web-designer x2 + ui-layout-designer), then polish wave (web-designer + react-performance-optimizer + code-auditor) |
+| `ui-studio` | 3+3 | Design wave (frontend-design x2 + frontend-layout), then polish wave (frontend-design + react-performance-optimizer + code-auditor) |
 
 ---
 
@@ -423,7 +423,7 @@ A defining feature of this plugin is its deep integration with the broader marke
 
 **Review tasks** delegate to `senior-review` agents (security-auditor, code-auditor, distributed-flow-auditor, ui-race-auditor) and `platform-engineering:platform-reviewer`.
 
-**Implementation tasks** delegate to `python-development:python-engineer`, `frontend:frontend-engineer`, `tauri-development:rust-engineer`, `tauri-development:tauri-desktop`, `frontend:web-designer`, and `frontend:ui-layout-designer`.
+**Implementation tasks** delegate to `python-development:python-engineer`, `frontend:frontend-engineer`, `tauri-development:rust-engineer`, `tauri-development:tauri-desktop`, `frontend:frontend-design`, and `frontend:frontend-layout`.
 
 **Testing tasks** delegate to `testing:test-writer` and `python-development:python-test-engineer`.
 
@@ -446,4 +446,4 @@ The generic team-reviewer, team-implementer, and team-debugger agents are used o
 
 ---
 
-**Related:** [senior-review](senior-review.md) (specialized review agents) | [ai-tooling](ai-tooling.md) (brainstorming, planning, execution skills) | [frontend](frontend.md) (web-designer, ui-layout-designer, frontend-engineer) | [research](research.md) (deep-researcher, quick-searcher)
+**Related:** [senior-review](senior-review.md) (specialized review agents) | [ai-tooling](ai-tooling.md) (brainstorming, planning, execution skills) | [frontend](frontend.md) (frontend-design, frontend-layout, frontend-engineer) | [research](research.md) (deep-researcher, quick-searcher)

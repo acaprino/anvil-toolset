@@ -347,7 +347,7 @@ explorer (context brief) -> tech-writer (docs) -> doc-verifier (accuracy check)
 ### Configuration
 
 - **Team Size**: 3
-- **Agent Types**: `app-analyzer:app-analyzer` + `research:deep-researcher` + `frontend:web-designer`
+- **Agent Types**: `app-analyzer:app-analyzer` + `research:deep-researcher` + `frontend:frontend-design`
 - **Display Mode**: tmux recommended
 
 ### Members
@@ -356,7 +356,7 @@ explorer (context brief) -> tech-writer (docs) -> doc-verifier (accuracy check)
 | -------------- | ----------------- | --------------------------------------------- |
 | app-mapper     | app-analyzer      | Navigation mapping + UX audit via ADB/browser |
 | intel-researcher | deep-researcher | Competitive intelligence + market research    |
-| design-analyst | web-designer      | Design system extraction + UI pattern catalog |
+| design-analyst | frontend-design   | Design system extraction + UI pattern catalog |
 
 ## Tauri Team Preset
 

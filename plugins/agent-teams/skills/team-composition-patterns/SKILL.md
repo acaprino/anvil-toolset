@@ -99,7 +99,7 @@ Best practices for composing multi-agent teams, selecting team sizes, choosing a
 ### App Analysis Team
 
 - **Size**: 3 (mapper + researcher + designer)
-- **Agents**: 1x `app-analyzer:app-analyzer` + 1x `research:deep-researcher` + 1x `frontend:web-designer`
+- **Agents**: 1x `app-analyzer:app-analyzer` + 1x `research:deep-researcher` + 1x `frontend:frontend-design`
 - **Use when**: Competitive app analysis, navigation mapping, design system extraction
 
 ### Tauri Team
@@ -111,8 +111,8 @@ Best practices for composing multi-agent teams, selecting team sizes, choosing a
 ### UI Studio Team
 
 - **Size**: 3+3 (design wave + polish wave, spawned sequentially)
-- **Design wave**: 1x `frontend:web-designer` (direction) + 1x `frontend:ui-layout-designer` (layout) + 1x `frontend:web-designer` (UX)
-- **Polish wave**: 1x `frontend:web-designer` (polish) + 1x `react-development:react-performance-optimizer` (perf) + 1x `senior-review:code-auditor` (review)
+- **Design wave**: 1x `frontend:frontend-design` (direction) + 1x `frontend:frontend-layout` (layout) + 1x `frontend:frontend-design` (UX)
+- **Polish wave**: 1x `frontend:frontend-design` (polish) + 1x `react-development:react-performance-optimizer` (perf) + 1x `senior-review:code-auditor` (review)
 - **Use when**: Building new UI from scratch or major redesigns
 
 ## Agent Type Selection
