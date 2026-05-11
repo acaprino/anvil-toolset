@@ -14,6 +14,29 @@ This skill provides a reference for writing modern, robust, and efficient CSS.
 
 ---
 
+## References Library
+
+For deeper coverage of specific topics, consult the files under `references/`:
+
+| File | Topic |
+|------|-------|
+| `typography.md` | Vertical rhythm, modular scales, font selection, web font loading, fluid type, OpenType features |
+| `color-and-contrast.md` | OKLCH color spaces, tinted neutrals, palette structure, WCAG, dark mode, theming |
+| `motion-design.md` | Duration rules, easing curves, premium motion materials, reduced motion, perceived performance |
+| `heuristics-scoring.md` | Nielsen's 10 heuristics with 0-4 scoring rubric and P0-P3 severity |
+| `cognitive-load.md` | Intrinsic/extraneous/germane load, working memory rule, 8 common violations |
+| `personas.md` | 5 design-critique archetypes (Alex/Jordan/Sam/Riley/Casey) |
+| `css-patterns.md` | Container queries, color manipulation, SASS, BEM, CSS Modules, focus, vendor prefixes, responsive images, plus a **Responsive Design Foundations** section (mobile-first, breakpoints, pointer detection, safe areas) |
+| `layout-patterns.md` | Holy Grail, Split, Bento, Editorial Asymmetry, Masonry, Card Grid recipes, plus a **Spatial Design Principles** section (4pt spacing, hierarchy, container queries, optical adjustments) |
+| `ui-pattern-guide.md` | Cards/list/table/gallery decisions, navigation, pagination, modals, blank slate, plus an **Interaction Design** section (8 states, focus rings, Popover API, anchor positioning, keyboard nav) |
+| `ux-patterns.md` | Onboarding, trust/social proof, persuasion, paywalls, chunking, plus a **UX Writing** section (button labels, error messages, voice/tone, i18n, terminology) |
+| `flow-patterns.md` | User flow recipes |
+| `argyle-cacadia-2025-deck.md` | Adam Argyle CSS Wrapped 2025 deck (offline copy) |
+
+Several references and merged sections are derived from `pbakaus/impeccable` (Apache-2.0); see attribution headers inside each file.
+
+---
+
 ## Layout & Responsive Design
 
 ### Container Queries

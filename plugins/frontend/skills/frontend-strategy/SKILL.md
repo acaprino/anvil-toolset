@@ -183,7 +183,7 @@ Run these agents sequentially - UX validates and optimizes flows first, then lay
 
 ## Phase 3: Design Direction
 
-Visual identity phase. Use the `references/design-direction-template.md` template.
+Visual identity phase. Use the `references/design-direction-template.md` template. For brand-led surfaces (landing pages, campaign pages, marketing sites, portfolios), also consult `references/brand-register.md` for font selection procedure, reflex-reject lists, color strategy (Restrained / Committed / Full palette / Drenched), and brand bans.
 
 Sections:
 - Color palette (role, hex value, usage rules - primary, secondary, accent, neutral, semantic)

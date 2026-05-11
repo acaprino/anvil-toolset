@@ -132,6 +132,7 @@ When the user asks for "upstream updates" (or similar), this is the default work
 | `agent-teams` | `wshobson/agents` - `plugins/agent-teams/` | `plugins/agent-teams/agents/*.md`, `plugins/agent-teams/commands/*.md`, `plugins/agent-teams/skills/*/SKILL.md`, `plugins/agent-teams/skills/*/references/*.md` |
 | `senior-review` (semantic-interconnect-mapper) | `wshobson/agents` - `plugins/agent-orchestration/agents/context-manager.md` (pattern cherry-picked, not a direct copy) | `plugins/senior-review/agents/semantic-interconnect-mapper.md` |
 | `typescript-development` (mastering-typescript) | `SpillwaveSolutions/mastering-typescript-skill` - `mastering-typescript/` | `plugins/typescript-development/skills/mastering-typescript/SKILL.md`, `plugins/typescript-development/skills/mastering-typescript/references/*.md`, `plugins/typescript-development/skills/mastering-typescript/scripts/validate-setup.sh`, `plugins/typescript-development/skills/mastering-typescript/assets/tsconfig-template.json`, `plugins/typescript-development/skills/mastering-typescript/assets/eslint-template.js` |
+| `frontend` (impeccable cherry-pick, Apache-2.0) | `pbakaus/impeccable` - `skill/reference/` | New files: `plugins/frontend/skills/frontend-css/references/{typography,color-and-contrast,motion-design,heuristics-scoring,cognitive-load,personas}.md`, `plugins/frontend/skills/frontend-strategy/references/brand-register.md`. Merged sections (appended, delimited by attribution comment): `plugins/frontend/skills/frontend-css/references/{layout-patterns,ui-pattern-guide,css-patterns,ux-patterns}.md` |
 
 ### How to sync a plugin
 
@@ -255,6 +256,20 @@ gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-ty
   --jq '.content' | base64 -d
 gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/assets/eslint-template.js \
   --jq '.content' | base64 -d
+
+# Fetch latest Impeccable reference files from upstream (pbakaus/impeccable, Apache-2.0)
+# Local targets:
+#   - plugins/frontend/skills/frontend-css/references/ (new files: typography, color-and-contrast,
+#     motion-design, heuristics-scoring, cognitive-load, personas)
+#   - plugins/frontend/skills/frontend-strategy/references/brand-register.md (renamed from upstream `brand.md`)
+#   - Merged appended sections (delimited by attribution comment) inside
+#     plugins/frontend/skills/frontend-css/references/{layout-patterns,ui-pattern-guide,css-patterns,ux-patterns}.md
+#     fed by upstream {spatial-design, interaction-design, responsive-design, ux-writing}.md respectively.
+# Apache-2.0: preserve the attribution comment at the top of each derived file or section.
+for ref in typography color-and-contrast spatial-design motion-design interaction-design responsive-design ux-writing heuristics-scoring cognitive-load personas brand; do
+  gh api "repos/pbakaus/impeccable/contents/skill/reference/$ref.md" \
+    --jq '.content' | base64 -d
+done
 ```
 
 Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file), bump the plugin version, bump `metadata.version`, and commit + push.
