@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code Daodan -- 39 plugins that augment Claude Code into a specialized toolkit. Agents, skills, and commands for code quality, Tauri/Rust development, frontend, AI tooling, scraping, trading, observability, and constraint programming.",
-    "version": "6.1.1"
+    "version": "6.1.2"
   },
   "plugins": [
     {
