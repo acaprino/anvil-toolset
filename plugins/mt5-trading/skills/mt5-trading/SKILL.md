@@ -50,8 +50,8 @@ Then harden incrementally:
 
 | Decision | Default | Upgrade When |
 |----------|---------|-------------|
-| Library | Official MetaTrader5 | Need async -- aiomql; need true streaming -- ZeroMQ bridge |
-| Event model | Polling (1-5s interval) | Tick-sensitive -- poll 100-250ms; true events -- ZeroMQ EA bridge |
+| Library | Official MetaTrader5 | Need async: aiomql. Need true streaming: ZeroMQ bridge |
+| Event model | Polling (1-5s interval) | Tick-sensitive: poll 100-250ms. True events: ZeroMQ EA bridge |
 | Fill mode | Detect dynamically per symbol | Never hardcode -- changes between brokers/symbols |
 | Account mode | Hedging (most forex brokers) | Check account_info().margin_mode at startup |
 | Data caching | Parquet + Zstandard | Tick data -- partition by day/month |

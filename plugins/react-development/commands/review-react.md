@@ -80,7 +80,7 @@ Task:
     [paste sampled components, state management files, and config -- NOT stylesheets]
 
     ## Product Brief (if available)
-    [paste brief content -- especially performance budget and stack info -- or "No product brief found"]
+    [paste brief content (especially performance budget and stack info) or "No product brief found"]
 
     ## Linter Output (if available)
     [paste ESLint JSON report if captured in Step 1.5, or "No linter output available"]

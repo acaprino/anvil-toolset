@@ -33,7 +33,7 @@ Sourced from ui-patterns.com -- when to use each pattern, what makes it work, an
 **Lazy Registration** (try-before-commit)
 - Use when: users need to evaluate before trusting; registration requires sensitive info; competitive comparison expected
 - Works via loss aversion: once users invest effort (data entry, curation), registration preserves their work
-- Two modes: shopping-cart (light -- accumulate before committing) vs. auto-generated anonymous account (heavy -- full session persistence)
+- Two modes: shopping-cart (light, accumulates before committing) vs. auto-generated anonymous account (heavy, full session persistence)
 - Avoid when: registration is already minimal; you need accountable users immediately
 
 **Completeness Meter** (progress bar toward 100% profile/setup)

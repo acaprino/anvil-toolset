@@ -89,7 +89,7 @@ pnpm dlx shadcn@latest add https://your-registry.com/r/hello-world.json
 
 ## registry:base (CLI v4)
 
-Bundle an entire design system -- components, dependencies, CSS variables, fonts, and config -- in a single installable unit:
+Bundle an entire design system (components, dependencies, CSS variables, fonts, and config) in a single installable unit:
 
 ```json
 {

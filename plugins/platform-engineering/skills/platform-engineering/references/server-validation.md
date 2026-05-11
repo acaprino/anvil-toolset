@@ -1,6 +1,6 @@
 # Server-Side Validation
 
-The single most important security rule across every platform: **the client is untrusted territory**. Frontend validation exists only to improve UX. Every check -- data type, length, range, format, business logic, authorization -- must be enforced server-side. Attackers bypass client-side validation trivially using browser DevTools, intercepting proxies like Burp Suite, or direct API calls via curl.
+The single most important security rule across every platform: **the client is untrusted territory**. Frontend validation exists only to improve UX. Every check (data type, length, range, format, business logic, authorization) must be enforced server-side. Attackers bypass client-side validation trivially using browser DevTools, intercepting proxies like Burp Suite, or direct API calls via curl.
 
 ## MUST
 

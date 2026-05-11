@@ -2,7 +2,7 @@
 
 The web scraping landscape has undergone a fundamental shift since 2024. **Behavioral biometrics now outweigh fingerprinting** as the primary bot detection vector, TLS fingerprinting has migrated from JA3 to JA4+, and an entirely new category of **agentic AI scrapers** has emerged with tools like Browser Use (84K GitHub stars) and Crawl4AI (51K stars) redefining what "scraping" means. The old playbook of `requests` + `BeautifulSoup` + free proxies is functionally dead against any protected target. Success in 2026 demands a layered approach: TLS-fingerprint-matched HTTP clients, stealth browser automation, residential proxies, behavioral simulation, and increasingly, LLM-driven extraction that survives DOM changes without selector maintenance.
 
-This guide covers every major development across 12 areas -- from browser stealth and TLS impersonation to legal precedent and observability -- with specific library versions, GitHub URLs, code examples, and a clear distinction between what's genuinely new and what was already established.
+This guide covers every major development across 12 areas (from browser stealth and TLS impersonation to legal precedent and observability), with specific library versions, GitHub URLs, code examples, and a clear distinction between what's genuinely new and what was already established.
 
 ---
 

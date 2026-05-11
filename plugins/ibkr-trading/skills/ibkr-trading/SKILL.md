@@ -54,6 +54,6 @@ Then harden incrementally:
 | Live data | reqRealTimeBars (5s bars) | Need tick precision -- reqTickByTickData (max 3) |
 | Chart data | keepUpToDate | Network-sensitive env -- reqRealTimeBars + aggregation |
 | Historical data | reqHistoricalData + throttle | Bulk backfill -- chunked requests with Semaphore |
-| Order type | Bracket (parent+TP+SL) | Need trailing -- TRAIL; need algo -- Adaptive |
+| Order type | Bracket (parent+TP+SL) | Need trailing: TRAIL. Need algo: Adaptive |
 | Lifecycle mgmt | IBC + Task Scheduler | Docker available -- gnzsnz/ib-gateway-docker |
-| whatToShow | TRADES | Forex -- MIDPOINT; backtesting -- ADJUSTED_LAST |
+| whatToShow | TRADES | Forex: MIDPOINT. Backtesting: ADJUSTED_LAST |

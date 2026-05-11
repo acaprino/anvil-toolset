@@ -1,5 +1,5 @@
 ---
-description: Audit Stripe webhook setup -- endpoints, signature verification, idempotency, event coverage -- against the `webhooks-production.md` checklist. Report-only.
+description: Audit Stripe webhook setup (endpoints, signature verification, idempotency, event coverage) against the `webhooks-production.md` checklist. Report-only.
 argument-hint: "[--features trials,entitlements,meters,connect] [--account acct_xxx]"
 ---
 
