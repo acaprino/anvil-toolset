@@ -33,6 +33,9 @@ For deeper coverage of specific topics, consult the files under `references/`:
 | `flow-patterns.md` | User flow recipes |
 | `argyle-cacadia-2025-deck.md` | Adam Argyle CSS Wrapped 2025 deck (offline copy) |
 | `token-architecture.md` | Three-layer token system (primitive -> semantic -> component), naming convention, file organization, W3C DTCG alignment |
+| `primitive-tokens.md` | Layer 1 reference: raw color scales (gray/blue/status), 4px spacing scale, type scale, radius, shadow, motion, z-index |
+| `semantic-tokens.md` | Layer 2 reference: purpose-based aliases (background/foreground, primary/secondary/muted/accent/destructive, status, border/ring), dark-mode overrides |
+| `component-tokens.md` | Layer 3 reference: component-scoped tokens (button, input, card, badge, alert, dialog, table) referencing the semantic layer |
 | `component-specs.md` | Component spec tables (button, input, card, badge, alert, dialog, table) with variants, sizes, states, anatomy |
 | `states-and-variants.md` | Interactive states (default/hover/focus/active/disabled/loading), state priority, transitions, focus rings, error states, variant patterns, ARIA |
 | `tailwind-integration.md` | CSS variables + Tailwind config recipe, HSL opacity format, component classes, shadcn/ui alignment |

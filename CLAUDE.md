@@ -229,7 +229,8 @@ When the user asks for "upstream updates" (or similar), this is the default work
 | `senior-review` (semantic-interconnect-mapper) | `wshobson/agents` - `plugins/agent-orchestration/agents/context-manager.md` (pattern cherry-picked, not a direct copy) | `plugins/senior-review/agents/semantic-interconnect-mapper.md` |
 | `typescript-development` (mastering-typescript) | `SpillwaveSolutions/mastering-typescript-skill` - `mastering-typescript/` | `plugins/typescript-development/skills/mastering-typescript/SKILL.md`, `plugins/typescript-development/skills/mastering-typescript/references/*.md`, `plugins/typescript-development/skills/mastering-typescript/scripts/validate-setup.sh`, `plugins/typescript-development/skills/mastering-typescript/assets/tsconfig-template.json`, `plugins/typescript-development/skills/mastering-typescript/assets/eslint-template.js` |
 | `frontend` (impeccable cherry-pick, Apache-2.0) | `pbakaus/impeccable` - `skill/reference/` | New files: `plugins/frontend/skills/frontend-css/references/{typography,color-and-contrast,motion-design,heuristics-scoring,cognitive-load,personas}.md`, `plugins/frontend/skills/frontend-strategy/references/brand-register.md`. Merged sections (appended, delimited by attribution comment): `plugins/frontend/skills/frontend-css/references/{layout-patterns,ui-pattern-guide,css-patterns,ux-patterns}.md` |
-| `frontend` (ui-ux-pro-max cherry-pick, MIT) | `nextlevelbuilder/ui-ux-pro-max-skill` - `.claude/skills/design-system/references/` | `plugins/frontend/skills/frontend-css/references/{token-architecture,component-specs,states-and-variants,tailwind-integration}.md` |
+| `frontend` (ui-ux-pro-max cherry-pick, MIT) | `nextlevelbuilder/ui-ux-pro-max-skill` - `.claude/skills/design-system/references/` | `plugins/frontend/skills/frontend-css/references/{token-architecture,primitive-tokens,semantic-tokens,component-tokens,component-specs,states-and-variants,tailwind-integration}.md` |
+| `frontend` (NOTICE propagation, Apache-2.0 / MIT) | `pbakaus/impeccable` - `NOTICE.md` | `plugins/frontend/NOTICE.md` (consolidated upstream NOTICE chain: Impeccable -> Anthropic frontend-design + ehmo/typecraft-guide-skill, plus ui-ux-pro-max-skill MIT acknowledgement). The `ehmo/typecraft-guide-skill` lineage is also reflected in the attribution header of `plugins/frontend/skills/frontend-css/references/typography.md`. |
 
 ### How to sync a plugin
 
@@ -369,15 +370,21 @@ for ref in typography color-and-contrast spatial-design motion-design interactio
 done
 
 # Fetch latest UI/UX Pro Max design-system deliverable references (nextlevelbuilder/ui-ux-pro-max-skill, MIT)
-# Local targets: plugins/frontend/skills/frontend-css/references/{token-architecture,component-specs,states-and-variants,tailwind-integration}.md
+# Local targets: plugins/frontend/skills/frontend-css/references/{token-architecture,primitive-tokens,semantic-tokens,component-tokens,component-specs,states-and-variants,tailwind-integration}.md
 # MIT: preserve the attribution comment at the top of each derived file.
 # Skipped intentionally: main ui-ux-pro-max SKILL.md (overlaps with our local content),
 # brand sub-skill (we have brand-register.md from Impeccable), slide-generation system (out of scope),
 # CSV catalogs in src/ui-ux-pro-max/data/ (bloat, not documentation), CLI scripts (no runtime).
-for ref in token-architecture component-specs states-and-variants tailwind-integration; do
+for ref in token-architecture primitive-tokens semantic-tokens component-tokens component-specs states-and-variants tailwind-integration; do
   gh api "repos/nextlevelbuilder/ui-ux-pro-max-skill/contents/.claude/skills/design-system/references/$ref.md" \
     --jq '.content' | base64 -d
 done
+
+# Fetch latest NOTICE.md from Impeccable (Apache-2.0 4(d) attribution propagation)
+# Local target: plugins/frontend/NOTICE.md (consolidates the upstream attribution chain
+# for Impeccable, Anthropic frontend-design, ehmo/typecraft-guide-skill, and ui-ux-pro-max-skill).
+gh api repos/pbakaus/impeccable/contents/NOTICE.md \
+  --jq '.content' | base64 -d
 ```
 
 Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file), bump the plugin version, bump `metadata.version`, and commit + push.

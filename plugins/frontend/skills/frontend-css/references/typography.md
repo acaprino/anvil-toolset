@@ -2,6 +2,18 @@
 Portions of this file are derived from pbakaus/impeccable
 (https://github.com/pbakaus/impeccable), Apache License 2.0.
 Snapshot 2026-05-11.
+
+Additional tactical guidance inside this file originates from
+ehmo/typecraft-guide-skill (https://github.com/ehmo/typecraft-guide-skill)
+and was merged into Impeccable upstream at the author's request, then
+vendored here through Impeccable. Topics include: dark-mode weight/tracking
+compensation, `font-display: optional` vs `swap`, preload-critical-weight-only,
+variable fonts for 3+ weights, `clamp()` max-to-min ratio bound, responsive
+measure/container coupling, `text-wrap: balance` / `pretty`,
+`font-optical-sizing: auto`, ALL-CAPS tracking quantification, and the
+paragraph-rhythm rule (space OR indent, never both).
+
+See plugins/frontend/NOTICE.md for the full upstream attribution chain.
 -->
 
 # Typography
