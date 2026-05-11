@@ -32,8 +32,12 @@ For deeper coverage of specific topics, consult the files under `references/`:
 | `ux-patterns.md` | Onboarding, trust/social proof, persuasion, paywalls, chunking, plus a **UX Writing** section (button labels, error messages, voice/tone, i18n, terminology) |
 | `flow-patterns.md` | User flow recipes |
 | `argyle-cacadia-2025-deck.md` | Adam Argyle CSS Wrapped 2025 deck (offline copy) |
+| `token-architecture.md` | Three-layer token system (primitive -> semantic -> component), naming convention, file organization, W3C DTCG alignment |
+| `component-specs.md` | Component spec tables (button, input, card, badge, alert, dialog, table) with variants, sizes, states, anatomy |
+| `states-and-variants.md` | Interactive states (default/hover/focus/active/disabled/loading), state priority, transitions, focus rings, error states, variant patterns, ARIA |
+| `tailwind-integration.md` | CSS variables + Tailwind config recipe, HSL opacity format, component classes, shadcn/ui alignment |
 
-Several references and merged sections are derived from `pbakaus/impeccable` (Apache-2.0); see attribution headers inside each file.
+Several references and merged sections are derived from `pbakaus/impeccable` (Apache-2.0) and `nextlevelbuilder/ui-ux-pro-max-skill` (MIT); see attribution headers inside each file.
 
 ---
 

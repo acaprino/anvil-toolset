@@ -185,6 +185,12 @@ Run these agents sequentially - UX validates and optimizes flows first, then lay
 
 Visual identity phase. Use the `references/design-direction-template.md` template. For brand-led surfaces (landing pages, campaign pages, marketing sites, portfolios), also consult `references/brand-register.md` for font selection procedure, reflex-reject lists, color strategy (Restrained / Committed / Full palette / Drenched), and brand bans.
 
+For the deliverable layer (the artifacts handed to engineering), consult `plugins/frontend/skills/frontend-css/references/`:
+- `token-architecture.md` for the three-layer token system (primitive -> semantic -> component) that backs the color palette and spacing scale
+- `component-specs.md` for variant + size + state tables on the core components named in the design direction
+- `states-and-variants.md` for the standard interactive-state matrix and focus-ring spec
+- `tailwind-integration.md` if the target codebase uses Tailwind (also aligns with shadcn/ui)
+
 Sections:
 - Color palette (role, hex value, usage rules - primary, secondary, accent, neutral, semantic)
 - Typography (specific font families, scale, weights, line heights)

@@ -229,6 +229,7 @@ When the user asks for "upstream updates" (or similar), this is the default work
 | `senior-review` (semantic-interconnect-mapper) | `wshobson/agents` - `plugins/agent-orchestration/agents/context-manager.md` (pattern cherry-picked, not a direct copy) | `plugins/senior-review/agents/semantic-interconnect-mapper.md` |
 | `typescript-development` (mastering-typescript) | `SpillwaveSolutions/mastering-typescript-skill` - `mastering-typescript/` | `plugins/typescript-development/skills/mastering-typescript/SKILL.md`, `plugins/typescript-development/skills/mastering-typescript/references/*.md`, `plugins/typescript-development/skills/mastering-typescript/scripts/validate-setup.sh`, `plugins/typescript-development/skills/mastering-typescript/assets/tsconfig-template.json`, `plugins/typescript-development/skills/mastering-typescript/assets/eslint-template.js` |
 | `frontend` (impeccable cherry-pick, Apache-2.0) | `pbakaus/impeccable` - `skill/reference/` | New files: `plugins/frontend/skills/frontend-css/references/{typography,color-and-contrast,motion-design,heuristics-scoring,cognitive-load,personas}.md`, `plugins/frontend/skills/frontend-strategy/references/brand-register.md`. Merged sections (appended, delimited by attribution comment): `plugins/frontend/skills/frontend-css/references/{layout-patterns,ui-pattern-guide,css-patterns,ux-patterns}.md` |
+| `frontend` (ui-ux-pro-max cherry-pick, MIT) | `nextlevelbuilder/ui-ux-pro-max-skill` - `.claude/skills/design-system/references/` | `plugins/frontend/skills/frontend-css/references/{token-architecture,component-specs,states-and-variants,tailwind-integration}.md` |
 
 ### How to sync a plugin
 
@@ -364,6 +365,17 @@ gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-ty
 # Apache-2.0: preserve the attribution comment at the top of each derived file or section.
 for ref in typography color-and-contrast spatial-design motion-design interaction-design responsive-design ux-writing heuristics-scoring cognitive-load personas brand; do
   gh api "repos/pbakaus/impeccable/contents/skill/reference/$ref.md" \
+    --jq '.content' | base64 -d
+done
+
+# Fetch latest UI/UX Pro Max design-system deliverable references (nextlevelbuilder/ui-ux-pro-max-skill, MIT)
+# Local targets: plugins/frontend/skills/frontend-css/references/{token-architecture,component-specs,states-and-variants,tailwind-integration}.md
+# MIT: preserve the attribution comment at the top of each derived file.
+# Skipped intentionally: main ui-ux-pro-max SKILL.md (overlaps with our local content),
+# brand sub-skill (we have brand-register.md from Impeccable), slide-generation system (out of scope),
+# CSV catalogs in src/ui-ux-pro-max/data/ (bloat, not documentation), CLI scripts (no runtime).
+for ref in token-architecture component-specs states-and-variants tailwind-integration; do
+  gh api "repos/nextlevelbuilder/ui-ux-pro-max-skill/contents/.claude/skills/design-system/references/$ref.md" \
     --jq '.content' | base64 -d
 done
 ```

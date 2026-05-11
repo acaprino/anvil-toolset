@@ -250,6 +250,12 @@ Detailed guides live in `plugins/frontend/skills/frontend-css/references/`. Read
 - **Flow patterns** (`flow-patterns.md`): user flow recipes
 - **CSS patterns** (`css-patterns.md`): container queries / color-mix / SASS migration / BEM / CSS Modules / focus management + **Responsive Foundations** section (mobile-first, content-driven breakpoints, pointer detection, safe areas)
 
+### Design system deliverables
+- **Token architecture** (`token-architecture.md`): three-layer token system (primitive -> semantic -> component), naming convention, dark mode override, W3C DTCG alignment. Read before proposing a token system.
+- **Component specs** (`component-specs.md`): variant + size + state tables for button, input, card, badge, alert, dialog, table. Read for component-spec handoff.
+- **States and variants** (`states-and-variants.md`): standard transitions, focus ring spec, disabled / loading / error treatments, color and size variant patterns, ARIA state markup. Read when specifying interactive component behavior.
+- **Tailwind integration** (`tailwind-integration.md`): CSS-variable + Tailwind theme config recipe, HSL opacity format, component classes via `@apply`, shadcn/ui alignment. Read when the target codebase uses Tailwind.
+
 ## Quality Checklist
 
 **CSS:**
