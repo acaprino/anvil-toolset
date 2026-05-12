@@ -5,8 +5,8 @@
     "email": ""
   },
   "metadata": {
-    "description": "Claude Code Daodan -- 41 plugins that augment Claude Code into a specialized toolkit. Agents, skills, and commands for code quality, Tauri/Rust development, frontend, AI tooling, scraping, trading, observability, reverse engineering, and constraint programming.",
-    "version": "6.5.2"
+    "description": "Claude Code Daodan -- 42 plugins that augment Claude Code into a specialized toolkit. Agents, skills, and commands for code quality, Tauri/Rust development, frontend, AI tooling, scraping, trading, observability, reverse engineering, constraint programming, and libGDX game development.",
+    "version": "6.6.0"
   },
   "plugins": [
     {
@@ -1197,6 +1197,51 @@
       ],
       "commands": [
         "./commands/mt5-audit.md"
+      ]
+    },
+    {
+      "name": "libgdx-development",
+      "source": "./plugins/libgdx-development",
+      "description": "libGDX cross-platform game development -- project generation via gdx-liftoff, rendering pipeline (SpriteBatch, TextureAtlas, viewports), Scene2D + Ashley ECS architecture, Box2D physics, AssetManager lifecycle, Screen management, Tiled maps, and deployment to Desktop (LWJGL3), Android, iOS (RoboVM), and HTML5 (GWT/TeaVM); includes libGDX 1.14.0 migration notes and a /libgdx-audit command",
+      "version": "1.0.0",
+      "author": {
+        "name": "Alfio"
+      },
+      "license": "MIT",
+      "keywords": [
+        "libgdx",
+        "game-development",
+        "gamedev",
+        "2d",
+        "3d",
+        "java-game",
+        "kotlin-game",
+        "scene2d",
+        "ashley-ecs",
+        "box2d",
+        "gdx-liftoff",
+        "lwjgl3",
+        "android-game",
+        "ios-game",
+        "html5-game",
+        "robovm",
+        "gwt",
+        "teavm",
+        "tiled",
+        "spritebatch",
+        "asset-manager",
+        "opengl"
+      ],
+      "category": "development",
+      "strict": false,
+      "agents": [
+        "./agents/libgdx-architect.md"
+      ],
+      "skills": [
+        "./skills/libgdx-development"
+      ],
+      "commands": [
+        "./commands/libgdx-audit.md"
       ]
     },
     {
