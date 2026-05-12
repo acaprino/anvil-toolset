@@ -237,210 +237,34 @@ When the user asks for "upstream updates" (or similar), this is the default work
 
 ### How to sync a plugin
 
+The sync table above gives the upstream repo and the local target files. Single-file pattern:
+
 ```bash
-# Fetch latest SKILL.md from upstream (obra/superpowers example)
-gh api repos/obra/superpowers/contents/skills/brainstorming/SKILL.md \
-  --jq '.content' | base64 -d
+gh api "repos/<owner>/<repo>/contents/<upstream-path>" --jq '.content' | base64 -d
+```
 
-# Fetch latest SKILL.md from upstream (paulirish/dotfiles example)
-# Local target: plugins/frontend/skills/frontend-css/SKILL.md and plugins/frontend/skills/frontend-css/references/argyle-cacadia-2025-deck.md
-gh api repos/paulirish/dotfiles/contents/agents/skills/modern-css/SKILL.md \
-  --jq '.content' | base64 -d
+For directories, list children first then iterate:
 
-# Fetch latest gsd-codebase-mapper.md from upstream (gsd-build/get-shit-done example)
-gh api repos/gsd-build/get-shit-done/contents/agents/gsd-codebase-mapper.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest playwright-skill files from upstream (lackeyjb/playwright-skill example)
-gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/SKILL.md \
-  --jq '.content' | base64 -d
-gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/run.js \
-  --jq '.content' | base64 -d
-gh api repos/lackeyjb/playwright-skill/contents/skills/playwright-skill/lib/helpers.js \
-  --jq '.content' | base64 -d
-
-# Fetch latest react-best-practices from upstream (vercel-labs/agent-skills example)
-# Local target: plugins/react-development/skills/react-best-practices/
-gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/SKILL.md \
-  --jq '.content' | base64 -d
-gh api repos/vercel-labs/agent-skills/contents/skills/react-best-practices/AGENTS.md \
-  --jq '.content' | base64 -d  # saved locally as references.md
-# For rules: iterate all files in skills/react-best-practices/rules/
-
-# Fetch latest domain-hunter files from upstream (ReScienceLab/opc-skills example)
-# NOTE: Upstream Step 3 uses dedicated Twitter/Reddit Python scripts - replace with WebSearch
-# queries targeting site:x.com and site:reddit.com when syncing
-gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/SKILL.md \
-  --jq '.content' | base64 -d
-gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/references/registrars.md \
-  --jq '.content' | base64 -d
-gh api repos/ReScienceLab/opc-skills/contents/skills/domain-hunter/references/spaceship-api.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest prompt-improver files from upstream (severity1/claude-code-prompt-improver example)
-gh api repos/severity1/claude-code-prompt-improver/contents/skills/prompt-improver/SKILL.md \
-  --jq '.content' | base64 -d
-gh api repos/severity1/claude-code-prompt-improver/contents/skills/prompt-improver/references/question-patterns.md \
-  --jq '.content' | base64 -d
-gh api repos/severity1/claude-code-prompt-improver/contents/skills/prompt-improver/references/research-strategies.md \
-  --jq '.content' | base64 -d
-gh api repos/severity1/claude-code-prompt-improver/contents/skills/prompt-improver/references/examples.md \
-  --jq '.content' | base64 -d
-# NOTE: upstream uses Python (scripts/improve-prompt.py), local version is JS (hooks/handlers/improve-prompt.js)
-gh api repos/severity1/claude-code-prompt-improver/contents/scripts/improve-prompt.py \
-  --jq '.content' | base64 -d
-
-# Fetch latest TDD skill files from upstream (mattpocock/skills example)
-# Note: upstream restructured tdd/ under skills/engineering/tdd/ in 2026
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/SKILL.md \
-  --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/tests.md \
-  --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/deep-modules.md \
-  --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/mocking.md \
-  --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/interface-design.md \
-  --jq '.content' | base64 -d
-gh api repos/mattpocock/skills/contents/skills/engineering/tdd/refactoring.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest multi-stage-dockerfile SKILL.md from upstream (github/awesome-copilot example)
-gh api repos/github/awesome-copilot/contents/skills/multi-stage-dockerfile/SKILL.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest e2e-testing-patterns SKILL.md from upstream (wshobson/agents example)
-gh api repos/wshobson/agents/contents/plugins/developer-essentials/skills/e2e-testing-patterns/SKILL.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest agent-teams files from upstream (wshobson/agents example)
-# Agents
-for agent in team-lead team-reviewer team-debugger team-implementer; do
-  gh api "repos/wshobson/agents/contents/plugins/agent-teams/agents/$agent.md" \
-    --jq '.content' | base64 -d
-done
-# Commands
-for cmd in team-spawn team-review team-debug team-feature team-delegate team-status team-shutdown; do
-  gh api "repos/wshobson/agents/contents/plugins/agent-teams/commands/$cmd.md" \
-    --jq '.content' | base64 -d
-done
-# Skills (SKILL.md + references/)
-for skill in multi-reviewer-patterns parallel-debugging parallel-feature-development task-coordination-strategies team-communication-protocols team-composition-patterns; do
-  gh api "repos/wshobson/agents/contents/plugins/agent-teams/skills/$skill/SKILL.md" \
-    --jq '.content' | base64 -d
-  # List and fetch references
-  gh api "repos/wshobson/agents/contents/plugins/agent-teams/skills/$skill/references" \
-    --jq '.[].name' | while read ref; do
-    gh api "repos/wshobson/agents/contents/plugins/agent-teams/skills/$skill/references/$ref" \
-      --jq '.content' | base64 -d
-  done
-done
-
-# Fetch upstream context-manager as reference for semantic-interconnect-mapper (pattern only, not direct copy)
-# Local target: plugins/senior-review/agents/semantic-interconnect-mapper.md
-gh api repos/wshobson/agents/contents/plugins/agent-orchestration/agents/context-manager.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest mastering-typescript files from upstream (SpillwaveSolutions/mastering-typescript-skill example)
-# Local target: plugins/typescript-development/skills/mastering-typescript/
-gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/SKILL.md \
-  --jq '.content' | base64 -d
-# References
-for ref in type-system generics enterprise-patterns react-integration nestjs-integration toolchain; do
-  gh api "repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/references/$ref.md" \
-    --jq '.content' | base64 -d
-done
-# Scripts and assets
-gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/scripts/validate-setup.sh \
-  --jq '.content' | base64 -d
-gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/assets/tsconfig-template.json \
-  --jq '.content' | base64 -d
-gh api repos/SpillwaveSolutions/mastering-typescript-skill/contents/mastering-typescript/assets/eslint-template.js \
-  --jq '.content' | base64 -d
-
-# Fetch latest Impeccable reference files from upstream (pbakaus/impeccable, Apache-2.0)
-# Local targets:
-#   - plugins/frontend/skills/frontend-css/references/ (new files: typography, color-and-contrast,
-#     motion-design, heuristics-scoring, cognitive-load, personas)
-#   - plugins/frontend/skills/frontend-strategy/references/brand-register.md (renamed from upstream `brand.md`)
-#   - Merged appended sections (delimited by attribution comment) inside
-#     plugins/frontend/skills/frontend-css/references/{layout-patterns,ui-pattern-guide,css-patterns,ux-patterns}.md
-#     fed by upstream {spatial-design, interaction-design, responsive-design, ux-writing}.md respectively.
-# Apache-2.0: preserve the attribution comment at the top of each derived file or section.
-for ref in typography color-and-contrast spatial-design motion-design interaction-design responsive-design ux-writing heuristics-scoring cognitive-load personas brand; do
-  gh api "repos/pbakaus/impeccable/contents/skill/reference/$ref.md" \
-    --jq '.content' | base64 -d
-done
-
-# Fetch latest UI/UX Pro Max design-system deliverable references (nextlevelbuilder/ui-ux-pro-max-skill, MIT)
-# Local targets: plugins/frontend/skills/frontend-css/references/{token-architecture,primitive-tokens,semantic-tokens,component-tokens,component-specs,states-and-variants,tailwind-integration}.md
-# MIT: preserve the attribution comment at the top of each derived file.
-# Skipped intentionally: main ui-ux-pro-max SKILL.md (overlaps with our local content),
-# brand sub-skill (we have brand-register.md from Impeccable), slide-generation system (out of scope),
-# CSV catalogs in src/ui-ux-pro-max/data/ (bloat, not documentation), CLI scripts (no runtime).
-for ref in token-architecture primitive-tokens semantic-tokens component-tokens component-specs states-and-variants tailwind-integration; do
-  gh api "repos/nextlevelbuilder/ui-ux-pro-max-skill/contents/.claude/skills/design-system/references/$ref.md" \
-    --jq '.content' | base64 -d
-done
-
-# Fetch latest NOTICE.md from Impeccable (Apache-2.0 4(d) attribution propagation)
-# Local target: plugins/frontend/NOTICE.md (consolidates the upstream attribution chain
-# for Impeccable, Anthropic frontend-design, ehmo/typecraft-guide-skill, and ui-ux-pro-max-skill).
-gh api repos/pbakaus/impeccable/contents/NOTICE.md \
-  --jq '.content' | base64 -d
-
-# Fetch latest reverse-engineering plugin files from upstream (wshobson/agents example)
-# Local target: plugins/reverse-engineering/
-# MIT: preserve the attribution comment immediately after the YAML frontmatter in each file.
-for agent in firmware-analyst malware-analyst reverse-engineer; do
-  gh api "repos/wshobson/agents/contents/plugins/reverse-engineering/agents/$agent.md" \
-    --jq '.content' | base64 -d
-done
-for skill in anti-reversing-techniques binary-analysis-patterns memory-forensics protocol-reverse-engineering; do
-  gh api "repos/wshobson/agents/contents/plugins/reverse-engineering/skills/$skill/SKILL.md" \
-    --jq '.content' | base64 -d
-done
-gh api "repos/wshobson/agents/contents/plugins/reverse-engineering/skills/anti-reversing-techniques/references/advanced-techniques.md" \
-  --jq '.content' | base64 -d
-
-# Fetch latest codebase-cleanup commands from upstream (wshobson/agents example, MIT cherry-pick)
-# Local target: plugins/codebase-cleanup/commands/
-# MIT: preserve the attribution comment immediately after the YAML frontmatter in each file.
-# Skipped intentionally: agents/code-reviewer.md and agents/test-automator.md
-#   (heavy overlap with senior-review/code-auditor + security-auditor + code-review,
-#   and with testing/tdd + python-development/python-tdd; vendoring them would create
-#   duplicate routing).
-# Adaptation on sync: rewrite the upstream single-line `description:` into the local
-# `description: >` multiline form with TRIGGER WHEN / DO NOT TRIGGER WHEN sections,
-# strip emojis from `deps-audit.md`, and normalize license-description strings
-# (`'Copyleft - requires source code disclosure'` -> `'Copyleft: requires source code disclosure'`).
-for cmd in deps-audit refactor-clean tech-debt; do
-  gh api "repos/wshobson/agents/contents/plugins/codebase-cleanup/commands/$cmd.md" \
-    --jq '.content' | base64 -d
-done
-
-# Fetch latest kotlin-specialist files from upstream (Jeffallan/claude-skills, MIT full vendor)
-# Local target: plugins/kotlin-development/skills/kotlin-specialist/
-# MIT: preserve the attribution comment immediately after the YAML frontmatter on SKILL.md
-# and at the top of every reference file.
-# Adaptation on sync: strip upstream extra frontmatter fields (license, metadata.author,
-# version, domain, triggers, role, scope, output-format, related-skills); keep only
-# `name` and `description` in local frontmatter; rewrite the upstream single-paragraph
-# `description` into local `description: >` multiline form with TRIGGER WHEN /
-# DO NOT TRIGGER WHEN routing. Drop the upstream `[Documentation](https://jeffallan.github.io/...)`
-# link at the bottom of SKILL.md. Preserve single-connector em-dashes ("X — Y") inside
-# code comments (they are NOT bracketed asides; the dash-aside rule does not apply).
-gh api repos/Jeffallan/claude-skills/contents/skills/kotlin-specialist/SKILL.md \
-  --jq '.content' | base64 -d
-for ref in coroutines-flow multiplatform-kmp android-compose ktor-server dsl-idioms; do
-  gh api "repos/Jeffallan/claude-skills/contents/skills/kotlin-specialist/references/$ref.md" \
-    --jq '.content' | base64 -d
+```bash
+gh api "repos/<owner>/<repo>/contents/<dir>" --jq '.[].name' | while read f; do
+  gh api "repos/<owner>/<repo>/contents/<dir>/$f" --jq '.content' | base64 -d
 done
 ```
 
-Then compare with the local file, apply upstream changes while preserving local additions (source attribution line at top of each file), bump the plugin version, bump `metadata.version`, and commit + push.
+After fetching, compare with the local file, apply changes while preserving local additions (attribution headers, frontmatter conventions, namespace replacements, no-dash-aside style), bump the plugin and `metadata.version`, commit + push.
 
-**Important:** Upstream superpowers skills reference other superpowers skills we don't have (e.g. `superpowers:using-git-worktrees`, `superpowers:finishing-a-development-branch`, `superpowers:subagent-driven-development`). When syncing, replace `superpowers:` skill references with either our local `ai-tooling:` equivalents or generic guidance describing the same action. Keep `docs/plans/` path (not upstream's `docs/superpowers/plans/`).
+**Non-obvious per-plugin sync notes** (read alongside the sync table):
+
+- **`prompt-improver`**: upstream ships `scripts/improve-prompt.py`; the local handler is JS at `plugins/prompt-improver/hooks/handlers/improve-prompt.js`. Re-port logic, never copy the Python file as-is.
+- **`domain-hunter`**: upstream Step 3 uses dedicated Twitter/Reddit Python scripts. Replace with `WebSearch` queries targeting `site:x.com` / `site:reddit.com`.
+- **`mattpocock/skills` (tdd)**: upstream restructured `tdd/` under `skills/engineering/tdd/` in 2026. Old top-level paths return 404.
+- **`agent-teams`**: after every sync, `Grep` all agent-teams files for stale tool names and rewrite: `` `Teammate` `` to `` `TeamCreate` ``, `Task tool to spawn` to `Agent tool`, `spawnTeam` to `TeamCreate`, cleanup `Teammate` reference to `TeamDelete`.
+- **`pbakaus/impeccable` (Apache-2.0)**: preserve `NOTICE.md` chain in `plugins/frontend/NOTICE.md`. Some upstream files become new local files; others are appended as delimited sections inside existing files. The sync table row spells out the exact split.
+- **`nextlevelbuilder/ui-ux-pro-max-skill`**: skipped intentionally and must remain skipped: main SKILL.md (overlap), brand sub-skill (we have `brand-register.md`), slide-generation, CSV data catalogs, CLI scripts.
+- **`wshobson/agents` (codebase-cleanup)**: commands only. `agents/code-reviewer.md` and `agents/test-automator.md` are intentionally NOT vendored (overlap with `senior-review/*` and `testing/*`).
+- **`wshobson/agents` (agent-teams / reverse-engineering / codebase-cleanup)**: upstream `description:` is a single line. Rewrite into local `description: >` multiline with TRIGGER WHEN / DO NOT TRIGGER WHEN. Strip emojis where the destination plugin has none. Normalize ``'Copyleft - requires...'`` to ``'Copyleft: requires...'``.
+- **`Jeffallan/claude-skills` (kotlin)**: strip extra upstream frontmatter fields (`license`, `metadata.author`, `version`, `domain`, `triggers`, `role`, `scope`, `output-format`, `related-skills`). Drop the trailing `[Documentation](https://jeffallan.github.io/...)` link. Preserve single-connector em-dashes (`X — Y`) inside code comments; they are not bracketed asides.
+- **Superpowers cross-references**: upstream references skills we do not vendor (e.g. `superpowers:using-git-worktrees`, `superpowers:finishing-a-development-branch`, `superpowers:subagent-driven-development`). Replace with local `ai-tooling:` equivalents or generic guidance. Keep `docs/plans/` (not upstream's `docs/superpowers/plans/`).
 
 ---
 
