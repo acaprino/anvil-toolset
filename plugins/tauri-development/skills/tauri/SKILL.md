@@ -50,6 +50,8 @@ Index for Tauri 2 patterns -- core, desktop, mobile. Each section points to a fo
 - `mobile-stale-builds.md` -- the Cargo `rerun-if-changed` gap that ships stale frontends in APKs; `build.rs` walk pattern + Gradle safety net
 - `build-deploy-mobile.md` -- signing, store builds, NDK / 16KB / RustWebViewClient gotchas
 - `ci-cd-mobile.md` -- mobile signing in CI, store upload
+- `distribution-android.md` -- Play Console submission, keystore, Play App Signing, common rejections
+- `distribution-ios.md` -- App Store Connect, certificates and provisioning, Info.plist usage descriptions, TestFlight, App Privacy
 
 ### Specialized
 - `high-frequency-ui.md` -- streaming/trading UI composition (atomic state, virtualization, rust-lld)
