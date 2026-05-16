@@ -4,11 +4,12 @@ description: >
   Structured messaging protocols for agent team communication including message
   type selection, plan approval, shutdown procedures, and anti-patterns to avoid.
   Use this skill when establishing communication norms for a newly spawned team,
-  when deciding whether to send a direct message or a broadcast, when a team-lead
-  needs to review and approve an implementer's plan before work begins, when
+  when deciding which message type to use (broadcast was removed; address
+  recipients individually), when a team-lead needs to review and approve an
+  implementer's plan before work begins, when
   orchestrating a graceful team shutdown after all tasks are complete, or when
   debugging why teammates are not coordinating correctly at integration points.
-version: 1.0.2
+version: 1.1.0
 ---
 
 # Team Communication Protocols
@@ -18,7 +19,7 @@ Protocols for effective communication between agent teammates, including message
 ## When to Use This Skill
 
 - Establishing communication norms for a new team
-- Choosing between message types (message, broadcast, shutdown_request)
+- Choosing between message types (message, shutdown_request; broadcast was removed in 2026)
 - Handling plan approval workflows
 - Managing graceful team shutdown
 - Discovering teammate identities and capabilities
@@ -40,21 +41,13 @@ Send to a single specific teammate:
 
 **Use for**: Task updates, coordination, questions, integration notifications.
 
-### `broadcast` -- Use Sparingly
+### `broadcast` -- Removed in 2026
 
-Send to ALL teammates simultaneously:
+Broadcast was removed from `SendMessageTool` in 2026. There is no built-in fan-out anymore.
 
-```json
-{
-  "type": "broadcast",
-  "content": "Critical: shared types file has been updated. Pull latest before continuing.",
-  "summary": "Shared types updated"
-}
-```
+**To reach multiple teammates**, send one `message` per recipient by name. For critical shared-resource changes affecting everyone (e.g., updated interface contract), iterate the team config in `~/.claude/teams/{team-name}/config.json` and emit one targeted message per teammate name.
 
-**Use ONLY for**: Critical blockers affecting everyone, major changes to shared resources.
-
-**Why sparingly?**: Each broadcast sends N separate messages (one per teammate), consuming API resources proportional to team size.
+This is the same network cost as the old broadcast (broadcasts already expanded to N messages internally), but it is now explicit, which makes coordination logic auditable.
 
 ### `shutdown_request` -- Graceful Termination
 
@@ -74,7 +67,7 @@ The teammate responds with `shutdown_response` (approve or reject with reason).
 
 | Anti-Pattern                            | Problem                                  | Better Approach                        |
 | --------------------------------------- | ---------------------------------------- | -------------------------------------- |
-| Broadcasting routine updates            | Wastes resources, noise                  | Direct message to affected teammate    |
+| Trying to use the removed `broadcast`   | Tool returns an error in 2026+           | Send one `message` per recipient       |
 | Sending JSON status messages            | Not designed for structured data         | Use TaskUpdate to update task status   |
 | Not communicating at integration points | Teammates build against stale interfaces | Message when your interface is ready   |
 | Micromanaging via messages              | Overwhelms teammates, slows work         | Check in at milestones, not every step |
@@ -166,8 +159,8 @@ Find team members by reading the config file:
 **A teammate is not responding to messages.**
 Check the teammate's task status. If it is idle, it may have completed its task and is waiting to be assigned new work or shut down. If it is still active, it may be mid-execution and will process messages once the current operation finishes.
 
-**The lead is sending broadcasts for every status update.**
-This is a common anti-pattern. Broadcasts are expensive -- each one sends N messages. Use direct messages (`type: "message"`) for point-to-point updates. Reserve broadcasts for critical shared-resource changes like an updated interface contract.
+**The lead is trying to use `broadcast` and getting tool errors.**
+Broadcast was removed from `SendMessageTool` in 2026. Update the lead's instructions to address recipients individually. For shared-resource updates, iterate the team config and emit one `message` per teammate name.
 
 **A teammate rejected a shutdown request unexpectedly.**
 The teammate is still working. Check the rejection reason in the `shutdown_response` content field, wait for the work to finish, then retry. Never force-terminate a teammate that has unsaved work.

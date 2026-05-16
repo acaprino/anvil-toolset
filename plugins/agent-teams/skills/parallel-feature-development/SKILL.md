@@ -171,10 +171,10 @@ A file was assigned to two agents, or a config/index file (e.g., `index.ts`, `__
 Use a staging interface: the finished implementer writes a stub or mock of the downstream dependency so the other implementer can continue working. Replace with the real implementation at integration time.
 
 **The feature decomposition turned out wrong mid-stream.**
-Stop new work, have the lead redistribute files, and communicate the change via broadcast. Sunk cost on partially written code is acceptable -- continuing with the wrong split is worse.
+Stop new work, have the lead redistribute files, and communicate the change by sending one targeted message per teammate (broadcast was removed in 2026). Sunk cost on partially written code is acceptable -- continuing with the wrong split is worse.
 
 **Tests written by one implementer fail against code written by another.**
-Interface contracts drifted: the implementer who owns the API changed a signature without notifying the test implementer. Enforce the rule that contract files require a broadcast before modification.
+Interface contracts drifted: the implementer who owns the API changed a signature without notifying the test implementer. Enforce the rule that contract-file modifications require a notification message to every dependent teammate (iterate the team config and send one targeted message each).
 
 ## Related Skills
 

@@ -102,6 +102,14 @@ Specific, actionable remediation with code example if applicable.
 
 If during analysis you spot an issue clearly belonging to another reviewer's dimension, list it in a `## Cross-Reviewer Notes` section at the end of your output with `file:line` and a one-line description. Phase 3 consolidation routes these to the appropriate reviewer. Do not silently drop off-dimension observations.
 
+### No-Findings Protocol
+
+If your dimension genuinely has no findings on this target, output a one-line report stating so plus a list of what you examined. Reporting "examined X, Y, Z -- no issues" is a valid, useful result. Do not invent findings to fill space.
+
+### Interconnect Anchor Citation
+
+When a finding maps to a contract, invariant, or assumption documented in `.team-review/02-interconnect.md`, cite the map anchor (e.g., "Map anchor: ## Contracts -> Order-fulfillment idempotency"). Findings that cite map anchors are tracked as a quality metric by the pipeline.
+
 ## Ecosystem Integration
 
 This agent is a **fallback** for review dimensions without a specialized agent. When a specialized agent exists for your assigned dimension, the team-lead should spawn that agent instead.
