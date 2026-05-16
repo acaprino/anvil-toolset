@@ -81,3 +81,9 @@ The augmentation symbiote for Claude Code. Agents, skills, and commands for deve
 ```
 
 See the [agent-teams plugin](plugins/agent-teams.md) for multi-agent pipeline commands with Mermaid diagrams.
+
+## References
+
+Cross-cutting knowledge bases that inform changes across multiple plugins.
+
+- [Agent Teams best practices](references/agent-teams-best-practices.md) — when to spawn a team vs a subagent vs a single Claude, sizing, ownership, hooks, hard limits, and operational do's and don'ts. Source of truth when restructuring `agent-teams`, `senior-review`, `codebase-mapper`, or `research`. Snapshot 2026-05-16.

@@ -76,7 +76,7 @@ None. No tests, no build step, no CI pipeline. All content is static markdown.
 
 ## Documentation
 
-`docs/plugins/` contains per-plugin documentation. `docs/plans/` holds implementation plans used by planning skills.
+`docs/plugins/` contains per-plugin documentation. `docs/plans/` holds implementation plans used by planning skills. `docs/references/` holds cross-cutting knowledge bases that inform changes across multiple plugins — notably [`agent-teams-best-practices.md`](docs/references/agent-teams-best-practices.md), the source of truth when restructuring any plugin that spawns multi-agent teams or pipeline reviewers (`agent-teams`, `senior-review`, `codebase-mapper`, `research`).
 
 ## External-repository intake
 
