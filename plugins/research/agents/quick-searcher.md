@@ -60,6 +60,11 @@ Return format (when in sub-unit mode):
 
 ## Gaps
 - [anything you could not verify within the budget]
+
+## Sub-unit metadata
+- Budget assigned: [as received in the spawn prompt]
+- Budget used: ~N WebSearch + M WebFetch
+- Exit reason: completed | budget-exhausted | target-not-found
 ```
 
 # TOOL QUICK REFERENCE

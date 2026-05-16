@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Claude Code Daodan -- 43 plugins that augment Claude Code into a specialized toolkit. Agents, skills, and commands for code quality, Tauri/Rust development, frontend, AI tooling, scraping, trading, observability, reverse engineering, constraint programming, libGDX game development, and Kotlin (coroutines, KMP, Compose, Ktor).",
-    "version": "6.8.1"
+    "version": "6.8.2"
   },
   "plugins": [
     {
@@ -365,8 +365,8 @@
     {
       "name": "research",
       "source": "./plugins/research",
-      "description": "Web research toolkit (any topic) -- quick-searcher (sonnet) for single-fact web lookups and as sub-unit in deep team, deep-researcher (opus) lead orchestrator that classifies queries into authoritative/community/comparison/recency angles and spawns parallel quick-searcher sub-agents with cross-checked synthesis",
-      "version": "2.6.1",
+      "description": "Web research toolkit (any topic) -- quick-searcher (sonnet) for single-fact web lookups and as sub-unit in deep team, deep-researcher (opus) lead orchestrator that classifies queries into authoritative/community/comparison/recency angles and either spawns parallel quick-searcher sub-agents (Mode A, top-level invocation) or runs the angles itself via WebSearch+WebFetch (Mode B, nested-subagent fallback) with cross-checked synthesis",
+      "version": "2.7.0",
       "author": {
         "name": "Alfio"
       },
