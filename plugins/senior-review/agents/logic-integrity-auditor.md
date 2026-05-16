@@ -6,6 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the task is surface-level style/lint review (use code-auditor), pure security auditing (use security-auditor), or when no interconnect map has been generated yet (this agent's precondition -- run semantic-interconnect-mapper first).
 model: opus
 color: purple
+tools: Read, Write, Glob, Grep, Bash
 ---
 
 # Logic Integrity Auditor
@@ -200,6 +201,16 @@ Do NOT pad findings to reach a quota. 0 findings on a clean codebase is a valid 
 - Do NOT re-flag findings already owned by other reviewers (see deconfliction table).
 - Do NOT read the full target codebase if the map did not flag an anchor. Your job is to verify specific concerns, not rediscover the whole system.
 - Do NOT produce findings without `file:line` citations in BOTH the map anchor AND the code.
+
+## Pipeline Conventions
+
+When invoked as part of a multi-reviewer pipeline (e.g., `/agent-teams:team-review` Phase 2), follow these conventions in addition to the dimension-specific rules above. Note: the interconnect-anchor citation rule for this reviewer is stricter than the cross-cutting pipeline rule (every finding here must cite an anchor) and is already covered in the agent body above.
+
+**Scope budget.** If after ~15 file reads you have not surfaced a finding in your dimension, the scope is too broad or your dimension is not relevant to this target. Stop, output a "no findings -- scope appears off-topic for this dimension" report, and return. Do not invent findings to fill space.
+
+**No-findings protocol.** If your dimension genuinely has no findings on this target, output a one-line report stating so plus a list of what you examined. Reporting "examined X, Y, Z -- no issues" is a valid, useful result.
+
+**Cross-reviewer notes.** If during analysis you spot an issue clearly belonging to another reviewer's dimension, list it in a `## Cross-Reviewer Notes` section at the end of your output with `file:line` and a one-line description. Phase 3 consolidation routes these to the appropriate reviewer.
 
 ## Output Persistence
 

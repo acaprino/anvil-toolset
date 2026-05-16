@@ -6,6 +6,7 @@ description: >
   DO NOT TRIGGER WHEN: the task involves writing tests, simple code formatting, or security-specific auditing (use security-auditor instead).
 model: opus
 color: purple
+tools: Read, Write, Glob, Grep, Bash
 ---
 
 # Code Auditor
@@ -249,6 +250,18 @@ Apply mental models before scoring:
 - Do NOT flag theoretical issues without a concrete scenario showing the steps
 - Do NOT conflate "bad style" with "failure risk" -- focus on real bugs
 - Do NOT assume external inputs are stable between runs
+
+## Pipeline Conventions
+
+When invoked as part of a multi-reviewer pipeline (e.g., `/agent-teams:team-review` Phase 2), follow these conventions in addition to the dimension-specific rules above.
+
+**Scope budget.** If after ~15 file reads you have not surfaced a finding in your dimension, the scope is too broad or your dimension is not relevant to this target. Stop, output a "no findings -- scope appears off-topic for this dimension" report, and return. Do not invent findings to fill space.
+
+**No-findings protocol.** If your dimension genuinely has no findings on this target, output a one-line report stating so plus a list of what you examined. Reporting "examined X, Y, Z -- no issues" is a valid, useful result.
+
+**Cross-reviewer notes.** If during analysis you spot an issue clearly belonging to another reviewer's dimension, list it in a `## Cross-Reviewer Notes` section at the end of your output with `file:line` and a one-line description. Phase 3 consolidation routes these to the appropriate reviewer.
+
+**Interconnect anchor citation.** When a finding maps to a contract, invariant, or assumption documented in `.team-review/02-interconnect.md`, cite the map anchor (e.g., "Map anchor: ## Contracts -> Order-fulfillment idempotency"). Findings that cite map anchors are tracked as a quality metric.
 
 ## Output Persistence
 
