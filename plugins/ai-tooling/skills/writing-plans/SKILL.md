@@ -18,7 +18,7 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Announce at start:** "I'm using the writing-plans skill to create the implementation plan."
 
-**Context:** This should be run in a dedicated worktree (created by brainstorming skill).
+**Context:** This should be run in a dedicated worktree. If working in an isolated worktree, it should have been created via the `git-worktrees:wt` skill at execution time.
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - (User preferences for plan location override this default)
@@ -140,9 +140,9 @@ Every step must contain the actual content an engineer needs. These are **plan f
 
 ## Remember
 - Exact file paths always
-- Complete code in every step -- if a step changes code, show the code
+- Complete code in every step. If a step changes code, show the code.
 - Exact commands with expected output
-- Reference relevant skills with @ syntax
+- Reference relevant skills with `@` syntax so engineers can jump to them directly
 - DRY, YAGNI, TDD, frequent commits
 
 ## Self-Review
