@@ -158,6 +158,8 @@ The agent verifies:
 - **Gaps**: Identifies undocumented commands, dependencies, configs, and patterns
 - **Project structure completeness**: Verifies all significant directories and files are mapped with descriptions
 - **Working Principles block**: Checks presence of the canonical `## Working Principles` section (the 4 Karpathy meta-rules); flags as High if missing or gutted and offers to insert
+- **Karpathy guidelines pointer (optional)**: Always proposes (Medium) adding an external reference link to the fuller Karpathy guidelines below the Working Principles block - never inline the full text, just a pointer. User accepts or skips
+- **External reference fix pattern**: For any section that bloats CLAUDE.md or duplicates other docs, proposes extracting to `docs/<topic>.md` and replacing with a thin `Read docs/<topic>.md` pointer
 - **Best practices**: Assesses proportional sizing, progressive disclosure, structure detail
 
 ## Improvement Categories
@@ -180,6 +182,8 @@ The agent verifies:
 - Better progressive disclosure
 - Condensing verbose sections
 - Adding helpful pointers
+- Adding the optional external pointer to fuller Karpathy guidelines (link only, never inline the full text)
+- Extracting bloated sections to `docs/<topic>.md` files referenced via `Read docs/<topic>.md` pointers - the primary fix for an oversized CLAUDE.md
 
 ### Low Priority (Nice to Have)
 - Formatting consistency

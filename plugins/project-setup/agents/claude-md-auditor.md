@@ -70,6 +70,20 @@ Placement: after the WHAT (tech stack, structure) and HOW (workflow, testing, de
 
 When auditing: presence is enough. Do not police minor wording drift, but flag if the block is missing, gutted (one or more numbered principles removed), or replaced by paraphrases that lose the core directive.
 
+### Optional pointer to the full Karpathy guidelines
+
+The canonical block above is a tight distillation. The full Karpathy meta-rules cover more ground (think harder before coding, isolate root causes, write evergreen tests, etc.). When auditing, **always propose to the user** the option of adding an external pointer below the `## Working Principles` block, e.g.:
+
+```markdown
+> For deeper guidance on these meta-rules, see [Karpathy guidelines](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/skills/karpathy-guidelines/SKILL.md) or your local equivalent in `docs/`.
+```
+
+Severity: **Medium** (optional enhancement, not a defect). Never inline the full text - that would balloon the CLAUDE.md. The pointer pattern keeps the file light while giving the user a one-click jump to the deeper material when needed.
+
+### External references as the primary fix for oversized CLAUDE.md
+
+When the audit finds that CLAUDE.md is overlong, packed with embedded prose, or duplicates content from other docs, the **primary fix pattern** is to extract that content to a file under `docs/` (or link to an external resource) and replace it with a `Read docs/<topic>.md` pointer. CLAUDE.md should stay the single entry point with thin pointers; long material lives elsewhere and is loaded into context only when needed. Surface this option to the user whenever a section exceeds ~30 lines or duplicates already-existing docs.
+
 ---
 
 ## AUDIT METHODOLOGY
@@ -143,13 +157,14 @@ Report gaps alongside obsolescence findings. Not all gaps need fixing - the user
 - File size >40k characters (performance warning threshold) - extract long sections to `docs/` and link instead
 - Em dash usage anywhere
 - Missing or gutted `## Working Principles` block (see REQUIRED SECTION above) - flag as High and offer to insert the canonical text
+- No pointer to fuller Karpathy guidelines below the `## Working Principles` block - flag as Medium and **propose** adding an external reference (never inline the full text); skip the proposal only if the user previously declined
 
 ### Phase 5: Improvement Recommendations
 
 Categorize findings by severity:
 - **Critical** - incorrect claims, broken paths, non-working commands, obsolete deps
 - **High** - changed file paths, missing important context, excessive length, stale code snippets
-- **Medium** - verbose sections, content better suited for separate docs, missing WHAT/WHY/HOW structure
+- **Medium** - verbose sections, content better suited for separate docs, missing WHAT/WHY/HOW structure, missing optional pointer to fuller Karpathy guidelines below the `## Working Principles` block
 - **Low** - formatting, organization, additional helpful pointers
 
 ---
@@ -186,6 +201,8 @@ Categorize findings by severity:
 
 Before completing any audit:
 - Canonical `## Working Principles` block present and intact (insert verbatim on create; on audit, offer insertion if missing)
+- **Propose** to the user (Medium) adding an external pointer to the fuller Karpathy guidelines below the Working Principles block, unless one already exists or the user previously declined
+- For any section that ballooned CLAUDE.md or duplicates other docs, propose extracting it to `docs/<topic>.md` and replacing it with a `Read docs/<topic>.md` pointer
 - All tech stack claims verified against dependency manifests
 - All file paths verified with Glob
 - All commands verified to exist in scripts/Makefile
