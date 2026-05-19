@@ -16,6 +16,10 @@ subagent: project-setup:claude-md-auditor
 3. **Show findings before changing.** Present the audit report and get approval before modifying anything.
 4. **Never delete user preferences** unless the user explicitly approves. Preferences (coding style, workflow choices) are intentional.
 5. **Never enter plan mode.** Execute immediately.
+6. **Backfill the canonical best practices.** Audit is not just *detection* - it is *active upgrade*. Maintain MUST always check and propose insertion of:
+   - **(a) The canonical `## Working Principles` block.** If missing entirely, insert verbatim. If present but lacking one or more of the 5 meta-rules (in particular the locally authored #5 Centralize Shared Logic, which CLAUDE.md files created before plugin v1.12.0 will not contain), insert the missing principles surgically without rewriting unrelated user additions. Treat as **High**.
+   - **(b) The optional external pointer to the fuller Karpathy guidelines** (`multica-ai/andrej-karpathy-skills` README / `skills/karpathy-guidelines/SKILL.md`). If the pointer is missing below the Working Principles block, propose adding it (link only, never inline the full text). Treat as **Medium**. Skip the proposal only if the user previously declined it for this CLAUDE.md.
+   Both checks (a) and (b) must run on every audit, independent of other findings, and the Edits offered even when no other issues exist.
 
 This command launches an interactive session to audit and optionally improve your `CLAUDE.md` file. It verifies accuracy, detects obsolete information, and guides you through prioritized improvements.
 
@@ -109,6 +113,30 @@ Agent: Applied! Your CLAUDE.md is now:
        - References docs/development.md for details
 ```
 
+### Scenario 1b: Best-Practice Backfill on an Otherwise-Clean CLAUDE.md
+
+```
+Agent: I've audited CLAUDE.md. No critical issues, no obsolete claims, all paths verified.
+
+       However, two best-practice backfills are available:
+
+       [HIGH] Working Principles block is missing the locally authored
+              principle #5 "Centralize Shared Logic" (DRY / Single Source of Truth).
+              CLAUDE.md files generated before plugin v1.12.0 do not include it.
+              Proposed Edit: insert principle #5 verbatim between #4 and the
+              next ## section, preserving the existing 4 Karpathy-inspired rules.
+
+       [MED]  No external pointer to the fuller Karpathy guidelines below the
+              Working Principles block. Proposed Edit: add a one-line link to
+              multica-ai/andrej-karpathy-skills (README or SKILL.md).
+
+       Apply both?
+You:   Yes both
+
+Agent: Applied. CLAUDE.md is now aligned with v1.12.0 conventions.
+       Diff: +6 lines (principle #5: 4 lines; pointer: 1 link line + blank).
+```
+
 ### Scenario 2: Audit Only (No Changes)
 
 ```
@@ -159,7 +187,7 @@ The agent verifies:
 - **Uncertainty**: Flags claims that cannot be verified from codebase alone
 - **Gaps**: Identifies undocumented commands, dependencies, configs, and patterns
 - **Project structure completeness**: Verifies all significant directories and files are mapped with descriptions
-- **Working Principles block**: Checks presence of the canonical `## Working Principles` section (the 4 Karpathy meta-rules); flags as High if missing or gutted and offers to insert
+- **Working Principles block**: Checks presence of the canonical `## Working Principles` section (5 meta-rules: 4 Karpathy-inspired plus Centralize Shared Logic for DRY / Single Source of Truth); flags as High if missing or gutted and offers to insert. The Centralize Shared Logic principle is locally authored and easy to lose on paraphrase - audit it explicitly.
 - **Karpathy guidelines pointer (optional)**: Always proposes (Medium) adding an external reference link to the fuller Karpathy guidelines below the Working Principles block - never inline the full text, just a pointer. User accepts or skips
 - **External reference fix pattern**: For any section that bloats CLAUDE.md or duplicates other docs, proposes extracting to `docs/<topic>.md` and replacing with a thin `Read docs/<topic>.md` pointer
 - **Best practices**: Assesses proportional sizing, progressive disclosure, structure detail
@@ -178,7 +206,7 @@ The agent verifies:
 - Code duplication
 - Missing important context
 - Incomplete project structure map (missing file/directory descriptions)
-- Missing or gutted `## Working Principles` block (insert the canonical 4 Karpathy meta-rules, preserve any coexisting project-specific principles)
+- Missing or gutted `## Working Principles` block (insert the canonical 5 meta-rules: 4 Karpathy-inspired plus Centralize Shared Logic; preserve any coexisting project-specific principles)
 
 ### Medium Priority (Consider Based on Goals)
 - Organizational improvements

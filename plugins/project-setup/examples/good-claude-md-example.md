@@ -157,6 +157,9 @@ Match existing style. Clean up only your own orphans.
 Define success criteria, then loop until verified.
 Transform "do X" into "X passes test Y".
 
+### 5. Centralize Shared Logic
+Route external calls (HTTP clients, broker APIs, LLM/embedding providers, payment gateways, DB access) and cross-cutting concerns (config, auth, logging) through a single utility, client, or facade module. Apply DRY and Single Source of Truth: one change, one place. Before adding a new call site, check whether an existing client/wrapper already exists and extend it instead of duplicating.
+
 ## Key Principles
 
 - **TypeScript strict mode enabled** - Fix type errors, don't use `any`
