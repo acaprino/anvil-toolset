@@ -1,7 +1,7 @@
 ---
 name: deep-dive-analysis
 description: >
-  AI-powered systematic codebase analysis. Combines structure extraction with semantic understanding to produce documentation capturing WHAT, WHY, HOW, and CONSEQUENCES. Includes pattern recognition, red flag detection, flow tracing, and quality assessment.
+  AI-powered systematic codebase analysis. Combines structure extraction with semantic understanding to produce documentation capturing WHAT, WHY, HOW, and CONSEQUENCES. Multi-language: Python, Java, JavaScript, TypeScript, SQL, PL/SQL. Includes pattern recognition, red flag detection, flow tracing, and quality assessment.
   TRIGGER WHEN: encountering unfamiliar code, before major refactoring, or when documentation is stale or missing
   DO NOT TRIGGER WHEN: the task is outside the specific scope of this component.
 ---
@@ -16,6 +16,38 @@ This skill combines **mechanical structure extraction** with **Claude's semantic
 - **WHY** it exists (business purpose, design decisions)
 - **HOW** it integrates (dependencies, contracts, flows)
 - **CONSEQUENCES** of changes (side effects, failure modes)
+
+## Language Support
+
+| Language | Extensions | Structural extraction | Comment rewriting |
+|---|---|---|---|
+| Python | `.py`, `.pyi` | stdlib `ast` (always available) | `#` line + docstrings |
+| Java | `.java` | tree-sitter (preferred) or regex | `//`, `/* */`, Javadoc `/** */` |
+| JavaScript | `.js`, `.mjs`, `.cjs`, `.jsx` | tree-sitter (preferred) or regex | `//`, `/* */`, JSDoc `/** */` |
+| TypeScript | `.ts`, `.tsx`, `.mts`, `.cts` | tree-sitter (preferred) or regex; adds interfaces, enums, type aliases | `//`, `/* */`, JSDoc `/** */` |
+| SQL | `.sql`, `.ddl`, `.dml` | regex DDL (tables, views, indexes, sequences, types, functions, procedures, triggers) | `--`, `/* */` |
+| PL/SQL (Oracle) | `.pks`, `.pkb`, `.plsql`, `.pls`, `.pck`, `.prc`, `.fnc`, `.trg` | regex (packages, package bodies, type bodies, cursors, exceptions, %TYPE/%ROWTYPE references) | `--`, `/* */` |
+
+`.sql` files are disambiguated against PL/SQL by inspecting content for Oracle-specific markers (`CREATE OR REPLACE PACKAGE`, `DBMS_OUTPUT`, `%TYPE`, `%ROWTYPE`, `UTL_FILE`, `PRAGMA AUTONOMOUS`, etc.). PostgreSQL `plpgsql` is correctly classified as SQL.
+
+## Prerequisites
+
+The scripts are designed to work **out of the box** with just the Python stdlib. Tree-sitter is optional and improves accuracy for Java / JavaScript / TypeScript:
+
+```bash
+# Optional: install for higher-fidelity parsing
+pip install -r scripts/requirements.txt
+# or
+uv pip install -r scripts/requirements.txt
+```
+
+What changes when tree-sitter is installed:
+
+- **Java**: nested classes, generic type parameters, annotations, multi-line declarations parsed correctly. Without it, the regex fallback still finds top-level classes, methods, imports, and constants.
+- **JavaScript / TypeScript**: arrow functions in object/class properties, decorators, template literals, JSX elements parsed correctly. Without it, the regex fallback handles top-level declarations, ES6 `import`/`export`, and CommonJS `require`.
+- **Python / SQL / PL-SQL**: no change. Python always uses stdlib `ast`; SQL/PL-SQL always use the regex DDL extractor.
+
+The active parser is reported in `ParseResult.notes` and in the CLI output: `parser=stdlib-ast`, `parser=tree-sitter`, or `parser=regex-fallback`.
 
 ### Capabilities
 
@@ -96,13 +128,29 @@ The analysis NEVER reads or includes contents from sensitive files: `.env`, `.en
 ### 1. Analyze Single File
 
 ```bash
+# Python
 python .claude/skills/deep-dive-analysis/scripts/analyze_file.py \
   --file src/utils/circuit_breaker.py \
   --output-format markdown
+
+# Java
+python .claude/skills/deep-dive-analysis/scripts/analyze_file.py \
+  --file src/main/java/com/example/UserService.java
+
+# TypeScript
+python .claude/skills/deep-dive-analysis/scripts/analyze_file.py \
+  --file src/services/auth.ts
+
+# SQL / PL-SQL
+python .claude/skills/deep-dive-analysis/scripts/analyze_file.py \
+  --file migrations/0042_users.sql
+
+python .claude/skills/deep-dive-analysis/scripts/analyze_file.py \
+  --file packages/user_pkg.pkb
 ```
 
 **Parameters:**
-- `--file` / `-f`: Relative path to file - **REQUIRED**
+- `--file` / `-f`: Relative path to file - **REQUIRED**. Any supported extension (see Language Support table).
 - `--output-format` / `-o`: Output format (json, markdown, summary) - default: summary
 - `--find-usages` / `-u`: Find all usages of exported symbols - default: false
 - `--update-progress` / `-p`: Update analysis_progress.json - default: false
@@ -308,9 +356,19 @@ SECURITY:
 
 ## Resources
 
-- **Scripts**: `scripts/` - Python analysis tools
-  - `analyze_file.py` - Source code analysis (Phases 1-7)
-  - `check_progress.py` - Progress tracking
-  - `doc_review.py` - Documentation maintenance (Phase 8)
-  - `comment_rewriter.py` - Comment analysis engine
-  - `rewrite_comments.py` - Comment quality CLI tool
+- **Scripts**: `scripts/` - analysis tools (Python runtime, multi-language targets)
+  - `ast_parser.py` - structural extraction dispatcher (Phases 1-7)
+  - `analyze_file.py` - per-file CLI (classification + structure + usages)
+  - `classifier.py` - language-aware criticality classifier
+  - `usage_finder.py` - cross-file symbol usage finder (multi-language extensions)
+  - `comment_rewriter.py` - multi-language comment analysis engine
+  - `rewrite_comments.py` - comment quality CLI (scan / analyze / rewrite / report)
+  - `doc_review.py` - documentation maintenance (Phase 8)
+  - `check_progress.py` / `progress_tracker.py` - phase progress tracking
+  - `languages/` - per-language adapters (Python `ast`, Java/JS/TS via tree-sitter or regex, SQL/PL-SQL regex)
+    - `base.py` - shared dataclasses + `LanguageAdapter` Protocol
+    - `__init__.py` - extension dispatch (`detect_language`, `get_adapter`)
+    - `comments.py` - per-language comment lexer
+    - `_treesitter.py` - optional tree-sitter loader with fallbacks
+    - `python.py`, `java.py`, `javascript.py`, `typescript.py`, `sql.py`, `plsql.py`
+  - `requirements.txt` - optional dependencies (tree-sitter + language-pack, click)

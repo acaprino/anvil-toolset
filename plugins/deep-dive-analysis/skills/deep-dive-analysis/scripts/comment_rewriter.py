@@ -7,7 +7,8 @@ https://antirez.com/news/124
 Comment Types (antirez taxonomy):
 
 GOOD (to keep/enhance):
-  1. Function Comments - API docs at function top, treat code as black box
+  1. Function Comments - API docs at function/class top (docstrings, Javadoc,
+     JSDoc, SQL header blocks)
   2. Design Comments  - File-level, explain algorithms and design choices
   3. Why Comments     - Explain reasoning, not what the code does
   4. Teacher Comments - Educate about domain knowledge (math, protocols)
@@ -16,18 +17,24 @@ GOOD (to keep/enhance):
 
 BAD (to remove/rewrite):
   7. Trivial Comments - Obvious statements (i++; // Increment i)
-  8. Debt Comments    - TODO/FIXME that should be resolved or documented properly
+  8. Debt Comments    - TODO/FIXME that should be resolved or documented
   9. Backup Comments  - Commented-out code (use git history instead)
+
+Multi-language: Python, Java, JavaScript, TypeScript, SQL, PL/SQL. Per-language
+comment extraction is delegated to languages.<lang>.adapter.extract_comments().
+Classification uses regex patterns that are largely language-agnostic.
 """
 
-import ast
+from __future__ import annotations
+
 import logging
 import re
-import tokenize
 from dataclasses import dataclass, field
 from enum import Enum
-from io import StringIO
 from pathlib import Path
+
+from languages import detect_language, get_adapter
+from languages.comments import CommentToken
 
 __all__ = [
     "CommentType",
@@ -42,78 +49,77 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-# Configuration constants
-MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024  # 10MB
+MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024
 MAX_ISSUES_IN_REPORT = 20
 MAX_COMMENTS_PER_SECTION = 10
+
+SUPPORTED_SUFFIXES = {
+    ".py", ".pyi",
+    ".java",
+    ".js", ".mjs", ".cjs", ".jsx",
+    ".ts", ".tsx", ".mts", ".cts",
+    ".sql", ".ddl", ".dml",
+    ".pks", ".pkb", ".plsql", ".pls", ".pck", ".prc", ".fnc", ".trg",
+}
 
 
 class CommentRewriterError(Exception):
     """Base exception for comment rewriter errors."""
 
-    pass
-
 
 class CommentType(Enum):
-    """Classification of comment types per antirez taxonomy."""
-
-    # Good comment types
-    FUNCTION = "function"  # API documentation at function/class top
-    DESIGN = "design"  # File-level design explanations
-    WHY = "why"  # Explains reasoning behind code
-    TEACHER = "teacher"  # Educates about domain concepts
-    CHECKLIST = "checklist"  # Reminds of coordinated changes
-    GUIDE = "guide"  # Section dividers, rhythm helpers
-
-    # Bad comment types
-    TRIVIAL = "trivial"  # Obvious, restates code
-    DEBT = "debt"  # TODO/FIXME without action
-    BACKUP = "backup"  # Commented-out code
-
-    # Neutral
-    UNKNOWN = "unknown"  # Cannot classify
+    FUNCTION = "function"
+    DESIGN = "design"
+    WHY = "why"
+    TEACHER = "teacher"
+    CHECKLIST = "checklist"
+    GUIDE = "guide"
+    TRIVIAL = "trivial"
+    DEBT = "debt"
+    BACKUP = "backup"
+    UNKNOWN = "unknown"
 
 
 class CommentClassification(Enum):
-    """High-level classification for action."""
-
-    KEEP = "keep"  # Good comment, preserve
-    ENHANCE = "enhance"  # Good type but could be improved
-    REWRITE = "rewrite"  # Bad type, needs rewriting
-    DELETE = "delete"  # Should be removed entirely
+    KEEP = "keep"
+    ENHANCE = "enhance"
+    REWRITE = "rewrite"
+    DELETE = "delete"
 
 
 @dataclass
 class CommentInfo:
-    """Information about a single comment."""
-
     line_number: int
     column: int
     text: str
-    raw_text: str  # Original text including # or quotes
+    raw_text: str
     is_docstring: bool
-    is_inline: bool  # Same line as code
+    is_inline: bool
+    is_block: bool
+    is_doc_block: bool
     comment_type: CommentType
     classification: CommentClassification
     reason: str
-    suggestion: str | None = None  # Suggested rewrite
+    suggestion: str | None = None
 
 
 @dataclass
 class CommentAnalysis:
-    """Complete analysis of comments in a file."""
-
     file_path: str
+    language: str
     total_comments: int
     total_lines: int
-    comment_ratio: float  # comments per 100 lines
+    comment_ratio: float
     comments: list[CommentInfo] = field(default_factory=list)
     by_type: dict[str, int] = field(default_factory=dict)
     by_classification: dict[str, int] = field(default_factory=dict)
     issues: list[str] = field(default_factory=list)
 
 
-# Pre-compiled regex patterns for performance (HIGH-6 fix)
+# ---------------------------------------------------------------------------
+# Pattern bank (language-agnostic where possible, language-aware where needed).
+# ---------------------------------------------------------------------------
+
 _DEBT_PATTERNS = [
     re.compile(r"\bTODO\b", re.IGNORECASE),
     re.compile(r"\bFIXME\b", re.IGNORECASE),
@@ -161,234 +167,215 @@ _TEACHER_PATTERNS = [
 ]
 
 _GUIDE_PATTERNS = [
-    re.compile(r"^[\s]*[-=]+[\s]*$"),  # Separator lines (---, ===)
-    re.compile(r"^[\s]*#+ "),  # Section headers
-    re.compile(r"^\s*section\s*:?\s*", re.IGNORECASE),  # Section markers
-    re.compile(r"^[\s]*[/\*]+ "),  # Block comment markers
+    re.compile(r"^[\s]*[-=]+[\s]*$"),
+    re.compile(r"^[\s]*#+ "),
+    re.compile(r"^\s*section\s*:?\s*", re.IGNORECASE),
+    re.compile(r"^[\s]*[/*]+ "),
 ]
 
-# Patterns indicating backup/commented-out code
-_CODE_PATTERNS = [
-    re.compile(r"^\s*#\s*(?:def|class|import|from|if|for|while|try|except|with|return|yield|raise)\s+", re.IGNORECASE),
-    re.compile(r"^\s*#\s*\w+\s*[=\(]"),  # Variable assignment or function call
-    re.compile(r"^\s*#\s*\w+\.\w+\("),  # Method call
-    re.compile(r"^\s*#\s*@\w+"),  # Decorator
-    re.compile(r"^\s*#\s*\w+:\s*\w+\s*[=,]"),  # Type annotation
-]
+# Per-language commented-out code patterns.
+# The CommentToken.raw_text contains the original markers, so we match on the
+# raw_text. Each pattern detects "this comment body looks like real code".
+_CODE_PATTERNS_BY_LANG: dict[str, list[re.Pattern[str]]] = {
+    "python": [
+        re.compile(r"^\s*#\s*(?:def|class|import|from|if|for|while|try|except|with|return|yield|raise|async\s+def)\b", re.IGNORECASE),
+        re.compile(r"^\s*#\s*\w+\s*[=(]"),
+        re.compile(r"^\s*#\s*\w+(?:\.\w+)+\("),
+        re.compile(r"^\s*#\s*@\w+"),
+    ],
+    "java": [
+        re.compile(r"^\s*//\s*(?:public|private|protected|class|interface|enum|return|if|for|while|try|catch|throw|new)\b"),
+        re.compile(r"^\s*//\s*\w+\s*[=(]"),
+        re.compile(r"^\s*//\s*\w+(?:\.\w+)+\("),
+        re.compile(r"^\s*//\s*@\w+"),
+    ],
+    "javascript": [
+        re.compile(r"^\s*//\s*(?:const|let|var|function|class|return|if|for|while|try|catch|throw|new|async\s+function|export|import)\b"),
+        re.compile(r"^\s*//\s*\w+\s*[=(]"),
+        re.compile(r"^\s*//\s*\w+(?:\.\w+)+\("),
+        re.compile(r"^\s*//\s*@\w+"),
+    ],
+    "typescript": [
+        re.compile(r"^\s*//\s*(?:const|let|var|function|class|interface|enum|type|return|if|for|while|try|catch|throw|new|async\s+function|export|import)\b"),
+        re.compile(r"^\s*//\s*\w+\s*[=(]"),
+        re.compile(r"^\s*//\s*\w+(?:\.\w+)+\("),
+        re.compile(r"^\s*//\s*@\w+"),
+    ],
+    "sql": [
+        re.compile(r"^\s*--\s*(?:SELECT|INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|GRANT|REVOKE|COMMIT|ROLLBACK|CALL)\b", re.IGNORECASE),
+    ],
+    "plsql": [
+        re.compile(r"^\s*--\s*(?:DECLARE|BEGIN|END|EXCEPTION|PROCEDURE|FUNCTION|PACKAGE|TYPE|CURSOR|RETURN|RAISE|IF|FOR|WHILE|LOOP|CALL|EXEC|SELECT|INSERT|UPDATE|DELETE|MERGE|CREATE|ALTER|DROP|GRANT|REVOKE|COMMIT|ROLLBACK)\b", re.IGNORECASE),
+    ],
+}
 
-# Trivial comment indicators (pre-compiled)
-_TRIVIAL_INDICATORS = [
-    (re.compile(r"#\s*increment\b", re.IGNORECASE), re.compile(r"\+\+|\+=\s*1")),
-    (re.compile(r"#\s*decrement\b", re.IGNORECASE), re.compile(r"--|-=\s*1")),
-    (re.compile(r"#\s*return\b", re.IGNORECASE), re.compile(r"\breturn\b")),
-    (re.compile(r"#\s*loop\b", re.IGNORECASE), re.compile(r"\bfor\b|\bwhile\b")),
-    (re.compile(r"#\s*import\b", re.IGNORECASE), re.compile(r"\bimport\b")),
-    (re.compile(r"#\s*set\s+\w+", re.IGNORECASE), re.compile(r"=")),
-    (re.compile(r"#\s*call\s+\w+", re.IGNORECASE), re.compile(r"\(")),
-    (re.compile(r"#\s*if\s+\w+", re.IGNORECASE), re.compile(r"\bif\b")),
-]
+# Per-language trivial comment indicators: (comment_pattern, code_pattern).
+# Matches when the inline comment paraphrases what the same line of code says.
+_TRIVIAL_INDICATORS_BY_LANG: dict[str, list[tuple[re.Pattern[str], re.Pattern[str]]]] = {
+    "python": [
+        (re.compile(r"#\s*increment\b", re.IGNORECASE), re.compile(r"\+\+|\+=\s*1")),
+        (re.compile(r"#\s*decrement\b", re.IGNORECASE), re.compile(r"--|-=\s*1")),
+        (re.compile(r"#\s*return\b", re.IGNORECASE), re.compile(r"\breturn\b")),
+        (re.compile(r"#\s*loop\b", re.IGNORECASE), re.compile(r"\bfor\b|\bwhile\b")),
+        (re.compile(r"#\s*import\b", re.IGNORECASE), re.compile(r"\bimport\b")),
+        (re.compile(r"#\s*set\s+\w+", re.IGNORECASE), re.compile(r"=")),
+        (re.compile(r"#\s*call\s+\w+", re.IGNORECASE), re.compile(r"\(")),
+        (re.compile(r"#\s*if\s+\w+", re.IGNORECASE), re.compile(r"\bif\b")),
+    ],
+    "java": [
+        (re.compile(r"//\s*increment\b", re.IGNORECASE), re.compile(r"\+\+|\+=\s*1")),
+        (re.compile(r"//\s*decrement\b", re.IGNORECASE), re.compile(r"--|-=\s*1")),
+        (re.compile(r"//\s*return\b", re.IGNORECASE), re.compile(r"\breturn\b")),
+        (re.compile(r"//\s*loop\b", re.IGNORECASE), re.compile(r"\bfor\b|\bwhile\b")),
+        (re.compile(r"//\s*set\s+\w+", re.IGNORECASE), re.compile(r"=")),
+        (re.compile(r"//\s*new\b", re.IGNORECASE), re.compile(r"\bnew\b")),
+    ],
+    "javascript": [
+        (re.compile(r"//\s*increment\b", re.IGNORECASE), re.compile(r"\+\+|\+=\s*1")),
+        (re.compile(r"//\s*decrement\b", re.IGNORECASE), re.compile(r"--|-=\s*1")),
+        (re.compile(r"//\s*return\b", re.IGNORECASE), re.compile(r"\breturn\b")),
+        (re.compile(r"//\s*loop\b", re.IGNORECASE), re.compile(r"\bfor\b|\bwhile\b")),
+        (re.compile(r"//\s*import\b", re.IGNORECASE), re.compile(r"\bimport\b|\brequire\(")),
+    ],
+    "typescript": [
+        (re.compile(r"//\s*increment\b", re.IGNORECASE), re.compile(r"\+\+|\+=\s*1")),
+        (re.compile(r"//\s*decrement\b", re.IGNORECASE), re.compile(r"--|-=\s*1")),
+        (re.compile(r"//\s*return\b", re.IGNORECASE), re.compile(r"\breturn\b")),
+        (re.compile(r"//\s*loop\b", re.IGNORECASE), re.compile(r"\bfor\b|\bwhile\b")),
+        (re.compile(r"//\s*import\b", re.IGNORECASE), re.compile(r"\bimport\b|\brequire\(")),
+    ],
+    "sql": [
+        (re.compile(r"--\s*select\b", re.IGNORECASE), re.compile(r"\bSELECT\b", re.IGNORECASE)),
+        (re.compile(r"--\s*insert\b", re.IGNORECASE), re.compile(r"\bINSERT\b", re.IGNORECASE)),
+        (re.compile(r"--\s*update\b", re.IGNORECASE), re.compile(r"\bUPDATE\b", re.IGNORECASE)),
+        (re.compile(r"--\s*delete\b", re.IGNORECASE), re.compile(r"\bDELETE\b", re.IGNORECASE)),
+    ],
+    "plsql": [
+        (re.compile(r"--\s*begin\b", re.IGNORECASE), re.compile(r"\bBEGIN\b", re.IGNORECASE)),
+        (re.compile(r"--\s*end\b", re.IGNORECASE), re.compile(r"\bEND\b", re.IGNORECASE)),
+        (re.compile(r"--\s*raise\b", re.IGNORECASE), re.compile(r"\bRAISE\b", re.IGNORECASE)),
+    ],
+}
 
-# Debt pattern for removal in suggestions
-_DEBT_REMOVAL_PATTERN = re.compile(r"\b(?:TODO|FIXME|XXX|HACK|BUG|WORKAROUND|TEMP|TEMPORARY)\b:?\s*", re.IGNORECASE)
+_DEBT_REMOVAL_PATTERN = re.compile(
+    r"\b(?:TODO|FIXME|XXX|HACK|BUG|WORKAROUND|TEMP|TEMPORARY)\b:?\s*",
+    re.IGNORECASE,
+)
 
 
-def _run_formatter(file_path: Path) -> None:
-    """
-    Run a Python formatter on the file if one is available.
-
-    Tries ruff format first (fastest), then black. Silently skips if
-    neither is installed. This prevents comment removal from leaving
-    orphaned whitespace or conflicting with team formatting rules.
-    """
-    import subprocess
-
-    for cmd in [["ruff", "format", str(file_path)], ["black", "-q", str(file_path)]]:
-        try:
-            subprocess.run(
-                cmd,
-                capture_output=True,
-                timeout=30,
-            )
-            logger.debug(f"Formatted {file_path} with {cmd[0]}")
-            return
-        except FileNotFoundError:
-            continue  # Formatter not installed
-        except subprocess.TimeoutExpired:
-            logger.warning(f"Formatter {cmd[0]} timed out on {file_path}")
-            return
-        except Exception as e:
-            logger.debug(f"Formatter {cmd[0]} failed: {e}")
-            continue
+# ---------------------------------------------------------------------------
+# Validation.
+# ---------------------------------------------------------------------------
 
 
-def _validate_python_file(file_path: Path) -> None:
-    """
-    Validate that a file is a valid Python file for analysis.
-
-    Args:
-        file_path: Path to validate
-
-    Raises:
-        CommentRewriterError: If file is invalid
-    """
+def _validate_source_file(file_path: Path) -> str:
+    """Validate the file and return its detected language."""
     if not file_path.exists():
         raise CommentRewriterError(f"File does not exist: {file_path}")
-
     if not file_path.is_file():
         raise CommentRewriterError(f"Path is not a file: {file_path}")
-
-    if file_path.suffix != ".py":
-        raise CommentRewriterError(f"File must be a Python file (.py), got: {file_path.suffix}")
-
+    if file_path.suffix.lower() not in SUPPORTED_SUFFIXES:
+        raise CommentRewriterError(
+            f"Unsupported file extension {file_path.suffix!r}. "
+            f"Supported: {', '.join(sorted(SUPPORTED_SUFFIXES))}"
+        )
     file_size = file_path.stat().st_size
     if file_size > MAX_FILE_SIZE_BYTES:
         raise CommentRewriterError(
             f"File too large: {file_size:,} bytes (max {MAX_FILE_SIZE_BYTES:,} bytes)"
         )
+    content_for_detect = ""
+    try:
+        # Read just enough to detect PL/SQL via content. Small read is cheap.
+        with file_path.open("rb") as fh:
+            content_for_detect = fh.read(16 * 1024).decode("utf-8", errors="ignore")
+    except OSError:
+        pass
+    lang = detect_language(file_path, content_for_detect)
+    if lang is None:
+        raise CommentRewriterError(f"Could not detect language for: {file_path}")
+    return lang
 
 
 def _validate_output_path(output_path: Path, source_path: Path) -> Path:
-    """
-    Validate and resolve output path for file writing.
-
-    Args:
-        output_path: Requested output path
-        source_path: Original source file path
-
-    Returns:
-        Validated and resolved output path
-
-    Raises:
-        CommentRewriterError: If output path is invalid
-    """
     resolved = output_path.resolve()
-
-    # Prevent overwriting non-files
     if resolved.exists() and not resolved.is_file():
         raise CommentRewriterError(f"Output path exists but is not a file: {resolved}")
-
-    # Ensure parent directory exists
     if not resolved.parent.exists():
         raise CommentRewriterError(f"Output directory does not exist: {resolved.parent}")
-
     return resolved
 
 
-def extract_comments(source: str) -> list[tuple[int, int, str, str, bool]]:
-    """
-    Extract all comments from Python source code.
+def _run_formatter(file_path: Path, language: str) -> None:
+    """Best-effort formatter run after rewriting. Silent if unavailable."""
+    import subprocess
 
-    Args:
-        source: Python source code string
-
-    Returns:
-        List of (line_number, column, text, raw_text, is_inline)
-
-    Raises:
-        CommentRewriterError: If tokenization fails
-    """
-    comments = []
-
-    try:
-        tokens = list(tokenize.generate_tokens(StringIO(source).readline))
-    except tokenize.TokenError as e:
-        raise CommentRewriterError(f"Failed to tokenize source: {e}") from e
-
-    lines = source.splitlines()
-
-    for tok in tokens:
-        if tok.type == tokenize.COMMENT:
-            line_num = tok.start[0]
-            col = tok.start[1]
-            raw = tok.string
-            text = raw.lstrip("#").strip()
-
-            # Check if inline (code before comment on same line)
-            is_inline = col > 0 and lines[line_num - 1][:col].strip() != ""
-
-            comments.append((line_num, col, text, raw, is_inline))
-
-    return comments
+    candidates: list[list[str]] = []
+    if language == "python":
+        candidates = [["ruff", "format", str(file_path)], ["black", "-q", str(file_path)]]
+    elif language == "java":
+        candidates = [["google-java-format", "-i", str(file_path)]]
+    elif language in ("javascript", "typescript"):
+        candidates = [["prettier", "--write", str(file_path)], ["biome", "format", "--write", str(file_path)]]
+    elif language in ("sql", "plsql"):
+        candidates = [["sqlfluff", "fix", "--dialect", "ansi" if language == "sql" else "oracle", str(file_path)]]
+    for cmd in candidates:
+        try:
+            subprocess.run(cmd, capture_output=True, timeout=30)
+            return
+        except FileNotFoundError:
+            continue
+        except Exception as e:  # noqa: BLE001
+            logger.debug(f"Formatter {cmd[0]} failed: {e}")
+            continue
 
 
-def extract_docstrings(source: str) -> list[tuple[int, str]]:
-    """
-    Extract all docstrings from Python source code.
-
-    Args:
-        source: Python source code string
-
-    Returns:
-        List of (line_number, docstring_text)
-
-    Raises:
-        CommentRewriterError: If AST parsing fails
-    """
-    docstrings = []
-
-    try:
-        tree = ast.parse(source)
-    except SyntaxError as e:
-        raise CommentRewriterError(f"Failed to parse source for docstrings: {e}") from e
-
-    for node in ast.walk(tree):
-        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
-            docstring = ast.get_docstring(node)
-            if docstring:
-                line_num = node.lineno if hasattr(node, "lineno") else 1
-                docstrings.append((line_num, docstring))
-
-    return docstrings
+# ---------------------------------------------------------------------------
+# Classification.
+# ---------------------------------------------------------------------------
 
 
 def classify_comment(
-    text: str,
-    raw_text: str,
-    is_inline: bool,
-    is_docstring: bool,
+    token: CommentToken,
+    language: str,
     line_content: str | None = None,
 ) -> tuple[CommentType, CommentClassification, str]:
     """
     Classify a comment according to antirez taxonomy.
 
-    Uses pre-compiled regex patterns for performance.
-
-    Args:
-        text: Comment text without # prefix
-        raw_text: Original comment text including #
-        is_inline: Whether comment is on same line as code
-        is_docstring: Whether this is a docstring
-        line_content: Full line content for context
-
-    Returns:
-        Tuple of (CommentType, CommentClassification, reason)
+    Doc blocks (JSDoc / Javadoc) and Python docstrings are treated as
+    "function" comments. SQL header blocks (/* ... */ at file start, or
+    long top-level block comments) are treated as "design".
     """
+    text = token.text
+    raw = token.raw_text
     text_lower = text.lower()
 
-    # Docstrings are always function comments
-    if is_docstring:
+    # Doc blocks (Javadoc /**, JSDoc /**) - treat as function docs.
+    if token.is_doc_block:
         if len(text) < 10:
             return (
                 CommentType.FUNCTION,
                 CommentClassification.ENHANCE,
-                "Docstring too brief - needs more detail",
+                "Doc block too brief - needs more detail",
             )
         return (
             CommentType.FUNCTION,
             CommentClassification.KEEP,
-            "Docstring provides API documentation",
+            "Doc block provides API documentation",
         )
 
-    # Check for backup (commented-out code)
-    for pattern in _CODE_PATTERNS:
-        if pattern.match(raw_text):
+    # Backup (commented-out code).
+    code_patterns = _CODE_PATTERNS_BY_LANG.get(language, [])
+    for pattern in code_patterns:
+        if pattern.match(raw):
             return (
                 CommentType.BACKUP,
                 CommentClassification.DELETE,
                 "Commented-out code should be removed (use git history)",
             )
 
-    # Check for debt comments (TODO/FIXME)
+    # Debt (TODO/FIXME).
     for pattern in _DEBT_PATTERNS:
         if pattern.search(text):
             return (
@@ -397,18 +384,19 @@ def classify_comment(
                 "Debt marker found - resolve or document in design comments",
             )
 
-    # Check for trivial comments (restates code)
-    if line_content and is_inline:
-        for comment_pattern, code_pattern in _TRIVIAL_INDICATORS:
-            if comment_pattern.search(raw_text):
-                if code_pattern.search(line_content):
+    # Trivial (inline, restates code).
+    if line_content and token.is_inline:
+        trivial = _TRIVIAL_INDICATORS_BY_LANG.get(language, [])
+        for comment_pat, code_pat in trivial:
+            if comment_pat.search(raw):
+                if code_pat.search(line_content):
                     return (
                         CommentType.TRIVIAL,
                         CommentClassification.DELETE,
                         "Comment restates what code already says",
                     )
 
-    # Check for checklist comments
+    # Checklist.
     for pattern in _CHECKLIST_PATTERNS:
         if pattern.search(text_lower):
             return (
@@ -417,7 +405,7 @@ def classify_comment(
                 "Checklist comment - reminds of coordinated changes",
             )
 
-    # Check for why comments
+    # Why.
     for pattern in _WHY_PATTERNS:
         if pattern.search(text_lower):
             return (
@@ -426,7 +414,7 @@ def classify_comment(
                 "Why comment - explains reasoning behind code",
             )
 
-    # Check for teacher comments
+    # Teacher.
     for pattern in _TEACHER_PATTERNS:
         if pattern.search(text_lower):
             return (
@@ -435,7 +423,7 @@ def classify_comment(
                 "Teacher comment - educates about domain concepts",
             )
 
-    # Check for guide comments (section dividers)
+    # Guide.
     for pattern in _GUIDE_PATTERNS:
         if pattern.match(text):
             return (
@@ -444,15 +432,22 @@ def classify_comment(
                 "Guide comment - provides structure and rhythm",
             )
 
-    # Short inline comments are often trivial
-    if is_inline and len(text) < 20:
+    # Block comment that wasn't a doc block: candidate design comment.
+    if token.is_block and len(text) > 40:
+        return (
+            CommentType.DESIGN,
+            CommentClassification.KEEP,
+            "Block comment - likely design/algorithm explanation",
+        )
+
+    # Short inline comments are often trivial.
+    if token.is_inline and len(text) < 20:
         return (
             CommentType.TRIVIAL,
             CommentClassification.ENHANCE,
             "Short inline comment - consider expanding or removing",
         )
 
-    # Default to unknown - needs human review
     return (
         CommentType.UNKNOWN,
         CommentClassification.ENHANCE,
@@ -460,216 +455,188 @@ def classify_comment(
     )
 
 
-def suggest_rewrite(
-    comment: CommentInfo,
-    context_before: list[str] | None = None,
-    context_after: list[str] | None = None,
-) -> str | None:
-    """
-    Suggest a rewrite for a comment based on its classification.
-
-    Args:
-        comment: The comment to suggest a rewrite for
-        context_before: Lines before the comment (optional)
-        context_after: Lines after the comment (optional)
-
-    Returns:
-        Suggested rewrite text or None if no suggestion
-    """
+def suggest_rewrite(comment: CommentInfo) -> str | None:
     if comment.classification == CommentClassification.DELETE:
-        return None  # Just delete, no rewrite
-
+        return None
     if comment.comment_type == CommentType.DEBT:
-        # Suggest converting to design comment or issue
         task_text = _DEBT_REMOVAL_PATTERN.sub("", comment.text)
         return (
-            f"# DESIGN DECISION: {task_text.strip()}\n"
-            f"# Context: [Add why this is deferred and conditions for completion]"
+            f"DESIGN DECISION: {task_text.strip()}\n"
+            f"Context: [Add why this is deferred and conditions for completion]"
         )
-
     if comment.comment_type == CommentType.TRIVIAL:
-        # Suggest converting to why comment
-        return "# WHY: [Explain the reasoning behind this code, not what it does]"
-
+        return "WHY: [Explain the reasoning behind this code, not what it does]"
     if comment.comment_type == CommentType.FUNCTION and comment.classification == CommentClassification.ENHANCE:
-        # Suggest expanding docstring
         return (
-            '"""[Brief description of what this does]\n\n'
-            "Args:\n    [parameter]: [description]\n\n"
-            "Returns:\n    [description of return value]\n\n"
-            'Raises:\n    [Exception]: [when it is raised]\n"""'
+            "Brief description of what this does.\n\n"
+            "Args:\n  [parameter]: [description]\n"
+            "Returns:\n  [description of return value]\n"
+            "Raises:\n  [Exception]: [when it is raised]"
         )
-
     return None
 
 
+# ---------------------------------------------------------------------------
+# Rewriter.
+# ---------------------------------------------------------------------------
+
+
 class CommentRewriter:
-    """
-    Analyzes and rewrites comments following antirez standards.
+    """Analyzes and (optionally) rewrites comments following antirez standards."""
 
-    The antirez commenting philosophy emphasizes:
-    1. Comments should explain WHY, not WHAT
-    2. Function comments serve as inline API documentation
-    3. Design comments explain algorithm choices at file level
-    4. Never leave commented-out code (use git history)
-    5. Resolve or properly document TODO/FIXME items
-    6. Avoid trivial comments that restate the code
-    """
-
-    def __init__(self, verbose: bool = False):
+    def __init__(self, verbose: bool = False) -> None:
         self.verbose = verbose
 
-    def _analyze_comments_impl(
+    def _analyze_impl(
         self,
         content: str,
         file_path: str,
-        include_suggestions: bool = True,
+        language: str,
+        include_suggestions: bool,
     ) -> CommentAnalysis:
-        """
-        Internal implementation of comment analysis.
-
-        Eliminates code duplication between analyze_file() and analyze_content().
-
-        Args:
-            content: Python source code to analyze
-            file_path: Path string for reporting
-            include_suggestions: Whether to generate rewrite suggestions
-
-        Returns:
-            CommentAnalysis with classified comments
-        """
+        adapter = get_adapter(language)
         lines = content.splitlines()
 
         analysis = CommentAnalysis(
             file_path=file_path,
+            language=language,
             total_comments=0,
             total_lines=len(lines),
             comment_ratio=0.0,
         )
 
-        # Extract and classify regular comments
-        for line_num, col, text, raw_text, is_inline in extract_comments(content):
-            line_content = lines[line_num - 1] if line_num <= len(lines) else ""
-
+        for token in adapter.extract_comments(content):
+            is_docstring = token.is_block and not token.is_doc_block and language == "python" and token.text.startswith(("'", '"'))
+            # For Python, the existing logic also extracted module/function/class
+            # docstrings via AST. Since the comment adapter only returns # comments
+            # for Python, we additionally pull docstrings below.
+            line_content = (
+                lines[token.line_number - 1]
+                if 0 < token.line_number <= len(lines)
+                else ""
+            )
             comment_type, classification, reason = classify_comment(
-                text=text,
-                raw_text=raw_text,
-                is_inline=is_inline,
-                is_docstring=False,
+                token=token,
+                language=language,
                 line_content=line_content,
             )
-
-            comment = CommentInfo(
-                line_number=line_num,
-                column=col,
-                text=text,
-                raw_text=raw_text,
-                is_docstring=False,
-                is_inline=is_inline,
+            info = CommentInfo(
+                line_number=token.line_number,
+                column=token.column,
+                text=token.text,
+                raw_text=token.raw_text,
+                is_docstring=is_docstring,
+                is_inline=token.is_inline,
+                is_block=token.is_block,
+                is_doc_block=token.is_doc_block,
                 comment_type=comment_type,
                 classification=classification,
                 reason=reason,
             )
-
-            # Get context for suggestion if requested
             if include_suggestions:
-                context_before = lines[max(0, line_num - 3) : line_num - 1]
-                context_after = lines[line_num : min(len(lines), line_num + 3)]
-                comment.suggestion = suggest_rewrite(comment, context_before, context_after)
+                info.suggestion = suggest_rewrite(info)
+            analysis.comments.append(info)
 
-            analysis.comments.append(comment)
+        # Python-specific: pull docstrings from AST as well.
+        if language == "python":
+            self._add_python_docstrings(content, analysis, include_suggestions)
 
-        # Extract and classify docstrings
-        for line_num, docstring in extract_docstrings(content):
-            comment_type, classification, reason = classify_comment(
-                text=docstring,
-                raw_text=f'"""{docstring}"""',
-                is_inline=False,
-                is_docstring=True,
-            )
-
-            comment = CommentInfo(
-                line_number=line_num,
-                column=0,
-                text=docstring,
-                raw_text=f'"""{docstring}"""',
-                is_docstring=True,
-                is_inline=False,
-                comment_type=comment_type,
-                classification=classification,
-                reason=reason,
-            )
-
-            analysis.comments.append(comment)
-
-        # Sort by line number
         analysis.comments.sort(key=lambda c: c.line_number)
-
-        # Calculate statistics
         analysis.total_comments = len(analysis.comments)
         if analysis.total_lines > 0:
             analysis.comment_ratio = (analysis.total_comments / analysis.total_lines) * 100
-
-        # Count by type and classification
-        for comment in analysis.comments:
-            type_name = comment.comment_type.value
-            class_name = comment.classification.value
-
-            analysis.by_type[type_name] = analysis.by_type.get(type_name, 0) + 1
-            analysis.by_classification[class_name] = analysis.by_classification.get(class_name, 0) + 1
-
-        # Generate issues list
-        for comment in analysis.comments:
-            if comment.classification in (CommentClassification.DELETE, CommentClassification.REWRITE):
+        for c in analysis.comments:
+            analysis.by_type[c.comment_type.value] = analysis.by_type.get(c.comment_type.value, 0) + 1
+            analysis.by_classification[c.classification.value] = (
+                analysis.by_classification.get(c.classification.value, 0) + 1
+            )
+        for c in analysis.comments:
+            if c.classification in (CommentClassification.DELETE, CommentClassification.REWRITE):
                 analysis.issues.append(
-                    f"Line {comment.line_number}: [{comment.comment_type.value}] {comment.reason}"
+                    f"Line {c.line_number}: [{c.comment_type.value}] {c.reason}"
                 )
-
         return analysis
 
+    def _add_python_docstrings(
+        self,
+        content: str,
+        analysis: CommentAnalysis,
+        include_suggestions: bool,
+    ) -> None:
+        import ast
+
+        try:
+            tree = ast.parse(content)
+        except SyntaxError:
+            return
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+                docstring = ast.get_docstring(node)
+                if not docstring:
+                    continue
+                line_num = getattr(node, "lineno", 1)
+                token = CommentToken(
+                    line_number=line_num,
+                    column=0,
+                    text=docstring,
+                    raw_text=f'"""{docstring}"""',
+                    is_inline=False,
+                    is_block=True,
+                    is_doc_block=False,  # Python docstring, not /** */
+                )
+                # Force classification as a function/design comment.
+                comment_type = CommentType.FUNCTION
+                classification = (
+                    CommentClassification.ENHANCE
+                    if len(docstring) < 10
+                    else CommentClassification.KEEP
+                )
+                reason = (
+                    "Docstring too brief - needs more detail"
+                    if len(docstring) < 10
+                    else "Docstring provides API documentation"
+                )
+                info = CommentInfo(
+                    line_number=line_num,
+                    column=0,
+                    text=docstring,
+                    raw_text=token.raw_text,
+                    is_docstring=True,
+                    is_inline=False,
+                    is_block=True,
+                    is_doc_block=False,
+                    comment_type=comment_type,
+                    classification=classification,
+                    reason=reason,
+                )
+                if include_suggestions:
+                    info.suggestion = suggest_rewrite(info)
+                analysis.comments.append(info)
+
     def analyze_file(self, file_path: Path) -> CommentAnalysis:
-        """
-        Analyze all comments in a Python file.
-
-        Args:
-            file_path: Path to the Python file
-
-        Returns:
-            CommentAnalysis with classified comments
-
-        Raises:
-            CommentRewriterError: If file is invalid or cannot be parsed
-        """
         file_path = Path(file_path).resolve()
-
-        # Validate file (CRITICAL-1 fix)
-        _validate_python_file(file_path)
-
+        language = _validate_source_file(file_path)
         try:
             content = file_path.read_text(encoding="utf-8")
         except UnicodeDecodeError:
-            # Try with replacement for non-UTF8 files
             content = file_path.read_text(encoding="utf-8", errors="replace")
             if self.verbose:
                 logger.warning(f"File contains non-UTF8 characters: {file_path}")
+        return self._analyze_impl(content, str(file_path), language, include_suggestions=True)
 
-        return self._analyze_comments_impl(content, str(file_path), include_suggestions=True)
-
-    def analyze_content(self, content: str, file_path: str = "<string>") -> CommentAnalysis:
-        """
-        Analyze comments in a string of Python code.
-
-        Args:
-            content: Python source code string
-            file_path: Optional path for identification in reports
-
-        Returns:
-            CommentAnalysis with classified comments
-
-        Raises:
-            CommentRewriterError: If content cannot be parsed
-        """
-        return self._analyze_comments_impl(content, file_path, include_suggestions=True)
+    def analyze_content(
+        self,
+        content: str,
+        file_path: str = "<string>",
+        language: str | None = None,
+    ) -> CommentAnalysis:
+        if language is None:
+            language = detect_language(Path(file_path), content)
+            if language is None:
+                raise CommentRewriterError(
+                    "Could not detect language. Pass language= explicitly."
+                )
+        return self._analyze_impl(content, file_path, language, include_suggestions=True)
 
     def rewrite_file(
         self,
@@ -677,26 +644,8 @@ class CommentRewriter:
         output_path: Path | None = None,
         dry_run: bool = True,
     ) -> tuple[str, list[str]]:
-        """
-        Rewrite a file's comments following antirez standards.
-
-        Args:
-            file_path: Path to the Python file
-            output_path: Where to write result (None = modify in place)
-            dry_run: If True, just return changes without writing
-
-        Returns:
-            Tuple of (rewritten_content, list_of_changes)
-
-        Raises:
-            CommentRewriterError: If file is invalid or cannot be written
-        """
         file_path = Path(file_path).resolve()
-
-        # Validate input file (CRITICAL-1 fix)
-        _validate_python_file(file_path)
-
-        # Validate output path if provided (CRITICAL-2 fix)
+        language = _validate_source_file(file_path)
         if output_path is not None:
             output_path = _validate_output_path(Path(output_path), file_path)
 
@@ -706,109 +655,94 @@ class CommentRewriter:
             content = file_path.read_text(encoding="utf-8", errors="replace")
 
         lines = content.splitlines()
-        original_line_count = len(lines)
+        analysis = self._analyze_impl(content, str(file_path), language, include_suggestions=True)
+        changes: list[str] = []
 
-        analysis = self._analyze_comments_impl(content, str(file_path), include_suggestions=True)
-        changes = []
-
-        # Track lines to delete (as set of indices) for safer deletion
         lines_to_delete: set[int] = set()
         line_modifications: dict[int, str] = {}
 
-        # Process comments (non-docstrings only)
         for comment in analysis.comments:
-            if comment.is_docstring:
+            # Don't modify docstrings or doc blocks automatically.
+            if comment.is_docstring or comment.is_doc_block:
                 continue
-
             line_idx = comment.line_number - 1
             if not (0 <= line_idx < len(lines)):
                 continue
-
             old_line = lines[line_idx]
 
             if comment.classification == CommentClassification.DELETE:
-                if comment.is_inline:
-                    # Remove only the comment part, validate result (HIGH-5 fix)
+                if comment.is_inline and not comment.is_block:
                     new_line = old_line[: comment.column].rstrip()
                     if new_line.strip():
-                        # Line still has code, keep it
                         line_modifications[line_idx] = new_line
                         changes.append(
                             f"Line {comment.line_number}: Removed inline comment: {comment.text[:50]}..."
                         )
                     else:
-                        # Line becomes empty after removing comment - mark for deletion
                         lines_to_delete.add(line_idx)
                         changes.append(
                             f"Line {comment.line_number}: Deleted line (empty after comment removal)"
                         )
+                elif not comment.is_block:
+                    # Stand-alone line comment.
+                    lines_to_delete.add(line_idx)
+                    changes.append(
+                        f"Line {comment.line_number}: Deleted comment line: {comment.text[:50]}..."
+                    )
+                # Block comments: do not auto-delete to avoid removing
+                # documentation by accident; just flag in changes.
                 else:
-                    # Stand-alone comment line - mark for deletion
-                    if old_line.strip().startswith("#"):
-                        lines_to_delete.add(line_idx)
-                        changes.append(
-                            f"Line {comment.line_number}: Deleted comment line: {comment.text[:50]}..."
-                        )
+                    changes.append(
+                        f"Line {comment.line_number}: [skipped] Block comment flagged for deletion - requires manual review"
+                    )
 
             elif comment.classification == CommentClassification.REWRITE and comment.suggestion:
-                # Add suggestion as additional comment before original
                 indent = len(old_line) - len(old_line.lstrip())
                 indent_str = " " * indent
+                marker = _line_marker_for(language)
                 suggestion_lines = comment.suggestion.split("\n")
-                suggestion_text = "\n".join(indent_str + line for line in suggestion_lines)
-
-                # Store for insertion (will be handled after deletions)
+                suggestion_text = "\n".join(
+                    f"{indent_str}{marker} {line}" for line in suggestion_lines
+                )
                 if line_idx not in line_modifications:
                     line_modifications[line_idx] = suggestion_text + "\n" + old_line
                     changes.append(
                         f"Line {comment.line_number}: Suggested rewrite for: {comment.text[:50]}..."
                     )
 
-        # Apply modifications and deletions (HIGH-5 fix - safer approach)
-        # First, apply modifications
         for idx, new_content in line_modifications.items():
             if idx not in lines_to_delete:
                 lines[idx] = new_content
-
-        # Then, delete lines from bottom to top to preserve indices
         for idx in sorted(lines_to_delete, reverse=True):
             if 0 <= idx < len(lines):
                 lines.pop(idx)
-
         rewritten = "\n".join(lines)
 
-        # Write if not dry run (CRITICAL-2 fix - validated path)
         if not dry_run:
             target = output_path or file_path
-
-            # Create backup before overwriting
             if target.exists():
                 backup_path = target.with_suffix(target.suffix + ".tmp")
                 try:
                     backup_path.write_text(target.read_text(encoding="utf-8"), encoding="utf-8")
                     target.write_text(rewritten, encoding="utf-8")
-                    backup_path.unlink()  # Remove backup on success
+                    backup_path.unlink()
                 except Exception:
-                    # Restore from backup on failure
                     if backup_path.exists():
                         backup_path.rename(target)
                     raise
             else:
                 target.write_text(rewritten, encoding="utf-8")
-
             changes.append(f"Wrote changes to: {target}")
-
-            # Run formatter if available to normalize whitespace after comment changes
-            _run_formatter(target)
+            _run_formatter(target, language)
 
         return rewritten, changes
 
     def generate_report(self, analysis: CommentAnalysis) -> str:
-        """Generate a human-readable report of comment analysis."""
         lines = [
             f"# Comment Analysis: {Path(analysis.file_path).name}",
             "",
             f"**File:** `{analysis.file_path}`",
+            f"**Language:** {analysis.language}",
             f"**Total Lines:** {analysis.total_lines}",
             f"**Total Comments:** {analysis.total_comments}",
             f"**Comment Ratio:** {analysis.comment_ratio:.1f} per 100 lines",
@@ -818,16 +752,9 @@ class CommentRewriter:
             "## Summary by Type",
             "",
         ]
-
         for type_name, count in sorted(analysis.by_type.items()):
             lines.append(f"- **{type_name}**: {count}")
-
-        lines.extend([
-            "",
-            "## Summary by Classification",
-            "",
-        ])
-
+        lines.extend(["", "## Summary by Classification", ""])
         for class_name, count in sorted(analysis.by_classification.items()):
             icon = {
                 "keep": "[OK]",
@@ -836,35 +763,19 @@ class CommentRewriter:
                 "delete": "[X]",
             }.get(class_name, "[?]")
             lines.append(f"- {icon} **{class_name}**: {count}")
-
         if analysis.issues:
-            lines.extend([
-                "",
-                "## Issues Found",
-                "",
-            ])
+            lines.extend(["", "## Issues Found", ""])
             for issue in analysis.issues[:MAX_ISSUES_IN_REPORT]:
                 lines.append(f"- {issue}")
             if len(analysis.issues) > MAX_ISSUES_IN_REPORT:
                 lines.append(f"- ... and {len(analysis.issues) - MAX_ISSUES_IN_REPORT} more")
-
-        lines.extend([
-            "",
-            "---",
-            "",
-            "## Detailed Analysis",
-            "",
-        ])
-
-        # Group by classification
+        lines.extend(["", "---", "", "## Detailed Analysis", ""])
         for classification in CommentClassification:
             class_comments = [c for c in analysis.comments if c.classification == classification]
             if not class_comments:
                 continue
-
             lines.append(f"### {classification.value.upper()} ({len(class_comments)})")
             lines.append("")
-
             for comment in class_comments[:MAX_COMMENTS_PER_SECTION]:
                 type_badge = f"[{comment.comment_type.value}]"
                 preview = comment.text[:60] + "..." if len(comment.text) > 60 else comment.text
@@ -872,36 +783,35 @@ class CommentRewriter:
                 lines.append(f"  - Reason: {comment.reason}")
                 if comment.suggestion:
                     lines.append(f"  - Suggestion: _{comment.suggestion[:80]}..._")
-
             if len(class_comments) > MAX_COMMENTS_PER_SECTION:
                 lines.append(f"- ... and {len(class_comments) - MAX_COMMENTS_PER_SECTION} more")
-
             lines.append("")
-
         lines.extend([
             "---",
             "",
             "_Analysis based on antirez commenting standards: https://antirez.com/news/124_",
         ])
-
         return "\n".join(lines)
 
 
+def _line_marker_for(language: str) -> str:
+    return {
+        "python": "#",
+        "java": "//",
+        "javascript": "//",
+        "typescript": "//",
+        "sql": "--",
+        "plsql": "--",
+    }.get(language, "#")
+
+
+# ---------------------------------------------------------------------------
+# Convenience functions.
+# ---------------------------------------------------------------------------
+
+
 def analyze_comments(file_path: Path) -> CommentAnalysis:
-    """
-    Convenience function to analyze comments in a file.
-
-    Args:
-        file_path: Path to the Python file
-
-    Returns:
-        CommentAnalysis with classified comments
-
-    Raises:
-        CommentRewriterError: If file is invalid or cannot be parsed
-    """
-    rewriter = CommentRewriter()
-    return rewriter.analyze_file(file_path)
+    return CommentRewriter().analyze_file(file_path)
 
 
 def rewrite_file(
@@ -909,38 +819,23 @@ def rewrite_file(
     output_path: Path | None = None,
     dry_run: bool = True,
 ) -> tuple[str, list[str]]:
-    """
-    Convenience function to rewrite comments in a file.
-
-    Args:
-        file_path: Path to the Python file
-        output_path: Where to write result (None = modify in place)
-        dry_run: If True, just return changes without writing
-
-    Returns:
-        Tuple of (rewritten_content, list_of_changes)
-
-    Raises:
-        CommentRewriterError: If file is invalid or cannot be written
-    """
-    rewriter = CommentRewriter()
-    return rewriter.rewrite_file(file_path, output_path, dry_run)
+    return CommentRewriter().rewrite_file(file_path, output_path, dry_run)
 
 
 if __name__ == "__main__":
     import sys
 
-    if len(sys.argv) > 1:
-        test_file = Path(sys.argv[1])
-        try:
-            rewriter = CommentRewriter(verbose=True)
-            analysis = rewriter.analyze_file(test_file)
-            print(rewriter.generate_report(analysis))
-        except CommentRewriterError as e:
-            print(f"Error: {e}", file=sys.stderr)
-            sys.exit(1)
-    else:
+    if len(sys.argv) < 2:
         print("Usage: python comment_rewriter.py <file_path>")
         print("")
-        print("Analyzes Python file comments following antirez standards.")
-        print("See: https://antirez.com/news/124")
+        print("Analyzes file comments following antirez standards.")
+        print("Supports Python, Java, JavaScript, TypeScript, SQL, PL/SQL.")
+        sys.exit(1)
+    test_file = Path(sys.argv[1])
+    try:
+        rewriter = CommentRewriter(verbose=True)
+        analysis = rewriter.analyze_file(test_file)
+        print(rewriter.generate_report(analysis))
+    except CommentRewriterError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)

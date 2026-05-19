@@ -2,12 +2,12 @@
 """
 Analyze File CLI for Deep Dive Analysis.
 
-Main entry point for analyzing Python files following DEEP_DIVE_PLAN methodology.
+Main entry point for analyzing source files following DEEP_DIVE_PLAN
+methodology. Multi-language: Python, Java, JavaScript, TypeScript, SQL, PL/SQL.
 
 Usage:
     python analyze_file.py --file <path> [options]
     python analyze_file.py --symbol <name> --file <path>
-    python analyze_file.py --phase <num>
 """
 
 import argparse
@@ -24,7 +24,7 @@ sys.path.insert(0, str(scripts_dir))
 from classifier import classify_file
 from ast_parser import parse_file
 from progress_tracker import ProgressTracker
-from usage_finder import find_all_usages
+from usage_finder import find_all_usages, SOURCE_EXTENSIONS
 
 __all__ = ["analyze_single_file", "format_as_markdown", "format_as_summary"]
 
@@ -38,10 +38,10 @@ def analyze_single_file(
     project_root: Path | None = None,
 ) -> dict[str, Any]:
     """
-    Perform complete analysis of a single file.
+    Perform complete analysis of a single source file.
 
     Args:
-        file_path: Path to the Python file
+        file_path: Path to the source file (.py/.java/.js/.ts/.sql/PL-SQL)
         find_usages: Whether to find usages of exported symbols
         update_progress: Whether to update analysis_progress.json
         project_root: Root of the project (for usage finding)
@@ -52,8 +52,13 @@ def analyze_single_file(
     if not file_path.exists():
         return {"error": f"File not found: {file_path}"}
 
-    if not file_path.suffix == ".py":
-        return {"error": f"Not a Python file: {file_path}"}
+    if file_path.suffix.lower() not in SOURCE_EXTENSIONS:
+        return {
+            "error": (
+                f"Unsupported file extension {file_path.suffix!r}. "
+                f"Supported: {', '.join(sorted(SOURCE_EXTENSIONS))}"
+            )
+        }
 
     # Step 1: Classify
     classification = classify_file(file_path)
@@ -61,9 +66,9 @@ def analyze_single_file(
     # Step 2: Parse structure
     try:
         structure = parse_file(file_path)
-    except SyntaxError as e:
+    except (SyntaxError, ValueError) as e:
         return {
-            "error": f"Syntax error in file: {e}",
+            "error": f"Parse error in file: {e}",
             "classification": classification.classification.value,
         }
 
@@ -115,6 +120,8 @@ def analyze_single_file(
     # Build result
     result = {
         "file": str(file_path),
+        "language": structure.language,
+        "parser_notes": structure.notes,
         "classification": {
             "level": classification.classification.value,
             "lines_of_code": classification.lines_of_code,
@@ -128,11 +135,14 @@ def analyze_single_file(
             "classes": [
                 {
                     "name": c.name,
+                    "kind": c.kind,
+                    "visibility": c.visibility,
                     "bases": c.bases,
                     "methods": [
                         {
                             "name": m.name,
                             "is_async": m.is_async,
+                            "visibility": m.visibility,
                             "params": [p.name for p in m.parameters],
                         }
                         for m in c.methods
@@ -147,6 +157,7 @@ def analyze_single_file(
                 {
                     "name": f.name,
                     "is_async": f.is_async,
+                    "visibility": f.visibility,
                     "params": [p.name for p in f.parameters],
                     "return_type": f.return_annotation,
                     "line": f.line_number,
@@ -170,7 +181,7 @@ def analyze_single_file(
                 for c in structure.external_calls
                 if c.call_type == call_type
             ]
-            for call_type in ["database", "network", "filesystem", "amqp", "zmq"]
+            for call_type in ["database", "network", "filesystem", "messaging", "ipc"]
             if any(c.call_type == call_type for c in structure.external_calls)
         },
     }
@@ -195,6 +206,11 @@ def format_as_markdown(analysis: dict[str, Any]) -> str:
     file_name = Path(analysis["file"]).name
     lines.append(f"# Analysis: {file_name}")
     lines.append("")
+    if analysis.get("language"):
+        notes = analysis.get("parser_notes") or []
+        notes_text = f" ({', '.join(notes)})" if notes else ""
+        lines.append(f"**Language:** {analysis['language']}{notes_text}")
+        lines.append("")
 
     # Classification
     cls = analysis["classification"]
@@ -207,13 +223,15 @@ def format_as_markdown(analysis: dict[str, Any]) -> str:
     lines.append(f"- **Reasoning:** {cls['reasoning']}")
     lines.append("")
 
-    # Structure - Classes
+    # Structure - Classes (and class-like: interface, enum, type-alias, package, table...)
     if analysis["structure"]["classes"]:
-        lines.append("## Classes")
+        lines.append("## Classes / Types")
         lines.append("")
         for cls_info in analysis["structure"]["classes"]:
-            bases = f"({', '.join(cls_info['bases'])})" if cls_info['bases'] else ""
-            lines.append(f"### `{cls_info['name']}{bases}`")
+            bases = f" : {', '.join(cls_info['bases'])}" if cls_info['bases'] else ""
+            kind = cls_info.get("kind") or "class"
+            vis = f"{cls_info['visibility']} " if cls_info.get("visibility") else ""
+            lines.append(f"### `{vis}{kind} {cls_info['name']}{bases}`")
             lines.append("")
             if cls_info.get("docstring"):
                 lines.append(f"> {cls_info['docstring']}")
@@ -222,7 +240,7 @@ def format_as_markdown(analysis: dict[str, Any]) -> str:
             lines.append("")
 
             if cls_info["class_variables"]:
-                lines.append("**Class Variables:**")
+                lines.append("**Fields:**")
                 for var in cls_info["class_variables"]:
                     lines.append(f"- `{var}`")
                 lines.append("")
@@ -231,19 +249,21 @@ def format_as_markdown(analysis: dict[str, Any]) -> str:
                 lines.append("**Methods:**")
                 for method in cls_info["methods"]:
                     async_prefix = "async " if method["is_async"] else ""
+                    vis_prefix = f"{method['visibility']} " if method.get("visibility") else ""
                     params = ", ".join(method["params"])
-                    lines.append(f"- `{async_prefix}{method['name']}({params})`")
+                    lines.append(f"- `{vis_prefix}{async_prefix}{method['name']}({params})`")
                 lines.append("")
 
     # Structure - Functions
     if analysis["structure"]["functions"]:
-        lines.append("## Functions")
+        lines.append("## Functions / Procedures")
         lines.append("")
         for func in analysis["structure"]["functions"]:
             async_prefix = "async " if func["is_async"] else ""
+            vis_prefix = f"{func['visibility']} " if func.get("visibility") else ""
             params = ", ".join(func["params"])
             ret = f" -> {func['return_type']}" if func.get("return_type") else ""
-            lines.append(f"- `{async_prefix}{func['name']}({params}){ret}` (line {func['line']})")
+            lines.append(f"- `{vis_prefix}{async_prefix}{func['name']}({params}){ret}` (line {func['line']})")
         lines.append("")
 
     # Dependencies
@@ -251,12 +271,12 @@ def format_as_markdown(analysis: dict[str, Any]) -> str:
     lines.append("")
     deps = analysis["dependencies"]
     if deps["internal"]:
-        lines.append("**Internal (Jupiter):**")
+        lines.append("**Internal:**")
         for dep in sorted(deps["internal"]):
             lines.append(f"- `{dep}`")
         lines.append("")
     if deps["external"]:
-        lines.append("**External (Third-Party):**")
+        lines.append("**External:**")
         for dep in sorted(deps["external"]):
             lines.append(f"- `{dep}`")
         lines.append("")
@@ -295,11 +315,15 @@ def format_as_summary(analysis: dict[str, Any]) -> str:
     cls = analysis["classification"]
     struct = analysis["structure"]
 
+    lang = analysis.get("language", "?")
+    notes = analysis.get("parser_notes") or []
+    note_text = f" ({notes[0]})" if notes else ""
     lines = [
         f"File: {analysis['file']}",
+        f"Language: {lang}{note_text}",
         f"Classification: {cls['level'].upper()} ({cls['reasoning']})",
         f"LOC: {cls['lines_of_code']} | Dependencies: {cls['num_dependencies']}",
-        f"Classes: {len(struct['classes'])} | Functions: {len(struct['functions'])}",
+        f"Classes/Types: {len(struct['classes'])} | Functions: {len(struct['functions'])}",
         f"Exported: {', '.join(struct['exported_symbols'][:5])}{'...' if len(struct['exported_symbols']) > 5 else ''}",
         f"Internal deps: {len(analysis['dependencies']['internal'])} | External deps: {len(analysis['dependencies']['external'])}",
     ]
@@ -321,13 +345,16 @@ def main():
     )
 
     parser = argparse.ArgumentParser(
-        description="Analyze Python files following DEEP_DIVE_PLAN methodology"
+        description=(
+            "Analyze source files following DEEP_DIVE_PLAN methodology. "
+            "Supports Python, Java, JavaScript, TypeScript, SQL, PL/SQL."
+        )
     )
 
     parser.add_argument(
         "-f", "--file",
         type=Path,
-        help="Path to Python file to analyze",
+        help="Path to source file to analyze (any supported language)",
     )
     parser.add_argument(
         "-s", "--symbol",

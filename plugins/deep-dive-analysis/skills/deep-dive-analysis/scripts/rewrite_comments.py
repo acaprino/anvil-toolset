@@ -38,7 +38,33 @@ import click
 from comment_rewriter import (
     CommentRewriter,
     CommentRewriterError,
+    SUPPORTED_SUFFIXES,
 )
+
+
+# Directories we never recurse into during scans.
+_SKIP_DIRS = (
+    "__pycache__", ".venv", "venv", ".tox",
+    ".git", "node_modules",
+    ".mypy_cache", ".pytest_cache",
+    "target", "build", "dist", "out",
+)
+
+
+def _iter_supported(dir_path: Path, recursive: bool) -> list[Path]:
+    """Walk a directory and yield supported source files."""
+    pattern = "**/*" if recursive else "*"
+    out: list[Path] = []
+    for candidate in dir_path.glob(pattern):
+        if not candidate.is_file():
+            continue
+        if candidate.suffix.lower() not in SUPPORTED_SUFFIXES:
+            continue
+        path_str = str(candidate)
+        if any(skip in path_str for skip in _SKIP_DIRS):
+            continue
+        out.append(candidate)
+    return out
 
 
 @click.group()
@@ -55,7 +81,7 @@ def cli():
 @click.option("--issues-only", "-i", is_flag=True, help="Show only issues")
 def analyze(file_path: str, report: bool, json_output: bool, issues_only: bool):
     """
-    Analyze comments in a Python file.
+    Analyze comments in a source file (Python/Java/JS/TS/SQL/PL-SQL).
 
     Classifies each comment according to antirez taxonomy:
     - GOOD: function, design, why, teacher, checklist, guide
@@ -132,7 +158,7 @@ def analyze(file_path: str, report: bool, json_output: bool, issues_only: bool):
 @click.option("--backup", "-b", is_flag=True, help="Create .bak backup before modifying")
 def rewrite(file_path: str, output: str | None, apply: bool, backup: bool):
     """
-    Rewrite comments in a Python file.
+    Rewrite comments in a source file (Python/Java/JS/TS/SQL/PL-SQL).
 
     By default runs as dry-run showing proposed changes.
     Use --apply to actually modify the file.
@@ -179,24 +205,17 @@ def rewrite(file_path: str, output: str | None, apply: bool, backup: bool):
 @click.option("--json", "json_output", is_flag=True, help="Output as JSON")
 def scan(directory: str, recursive: bool, issues_only: bool, json_output: bool):
     """
-    Scan a directory for comment issues.
+    Scan a directory for comment issues across supported languages.
 
-    Analyzes all Python files and reports aggregate statistics.
+    Analyzes all supported source files (Python/Java/JS/TS/SQL/PL-SQL) and
+    reports aggregate statistics.
     """
     rewriter = CommentRewriter()
     dir_path = Path(directory)
-
-    pattern = "**/*.py" if recursive else "*.py"
-    files = list(dir_path.glob(pattern))
-
-    # Skip __pycache__ and .venv
-    files = [
-        f for f in files
-        if "__pycache__" not in str(f) and ".venv" not in str(f)
-    ]
+    files = _iter_supported(dir_path, recursive)
 
     if not files:
-        click.echo(f"No Python files found in {directory}")
+        click.echo(f"No supported source files found in {directory}")
         return
 
     results = []
@@ -264,21 +283,16 @@ def report(directory: str, output: str, recursive: bool):
     """
     Generate a comprehensive comment health report.
 
-    Creates a markdown report analyzing all Python files in the directory.
+    Creates a markdown report analyzing all supported source files (Python,
+    Java, JavaScript, TypeScript, SQL, PL/SQL) in the directory.
     """
     rewriter = CommentRewriter()
     dir_path = Path(directory)
     output_path = Path(output)
-
-    pattern = "**/*.py" if recursive else "*.py"
-    files = list(dir_path.glob(pattern))
-    files = [
-        f for f in files
-        if "__pycache__" not in str(f) and ".venv" not in str(f)
-    ]
+    files = _iter_supported(dir_path, recursive)
 
     if not files:
-        click.echo(f"No Python files found in {directory}")
+        click.echo(f"No supported source files found in {directory}")
         return
 
     results = []

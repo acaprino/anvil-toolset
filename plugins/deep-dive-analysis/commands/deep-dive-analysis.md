@@ -18,15 +18,15 @@ argument-hint: "<target path> [--critical] [--comments] [--docs-only] [--phase N
 
 ## Tool Integration
 
-For Python projects, you MUST use the scripts in `${CLAUDE_PLUGIN_ROOT}/skills/deep-dive-analysis/scripts/` instead of manual file reading:
+The scripts in `${CLAUDE_PLUGIN_ROOT}/skills/deep-dive-analysis/scripts/` are language-aware and support: **Python, Java, JavaScript, TypeScript (incl. TSX/JSX), SQL, PL/SQL**. You MUST use them instead of manual file reading whenever the target file matches one of those languages.
 
 - **Phase 1-2 (Structure):** Use `ast_parser.py` for class/function/import extraction and `classifier.py` for file classification. Do NOT attempt to parse AST manually or count imports with grep.
-- **Phase 5 (Risks):** Use `usage_finder.py` to trace symbol usages across the codebase.
-- **Phase 6 (Docs):** Use `doc_review.py` for link validation and marker checks, and `rewrite_comments.py` for comment quality analysis.
+- **Phase 5 (Risks):** Use `usage_finder.py` to trace symbol usages across the codebase. Multi-language: matches Python `from/import`, Java `import`, JS/TS `import`/`require`, etc.
+- **Phase 6 (Docs):** Use `doc_review.py` for link validation and marker checks, and `rewrite_comments.py` for multi-language comment quality analysis (Python `#`/docstrings, Java/JS/TS `//` / `/* */` / Javadoc / JSDoc, SQL/PL-SQL `--` / `/* */`).
 
-For non-Python files, use the Read tool and Grep tool directly.
+For unsupported languages, use the Read tool and Grep tool directly. Tree-sitter is optional (see Prerequisites in SKILL.md): when `tree-sitter-language-pack` is installed, Java/JS/TS use the tree-sitter parsers for higher fidelity; otherwise a regex fallback is used. Python always uses the stdlib `ast` module. SQL/PL-SQL use a regex-based DDL extractor.
 
-Do NOT use raw bash commands (cat, grep, find) to extract structure when a dedicated script exists. The scripts use real AST parsing, which is faster, more accurate, and consumes fewer tokens than reading files line by line.
+Do NOT use raw bash commands (cat, grep, find) to extract structure when a dedicated script exists. The scripts use real parsers, which are faster, more accurate, and consume fewer tokens than reading files line by line.
 
 ## Forbidden Files
 
@@ -530,13 +530,13 @@ What would you like to do next?
 
 Wait for the user's choice before proceeding. If the user picks option 1, confirm which actions to execute and in what order before starting.
 
-If the user picks option 2, use the dedicated Python scripts for safe, automated fixes:
+If the user picks option 2, use the dedicated scripts for safe, automated fixes:
 
-1. **Comment cleanup:** Run `rewrite_comments.py rewrite <file> --apply --backup` for each file flagged in Phase 6. The script handles backup, AST-safe removal of trivial/backup comments, and auto-formatting. Do NOT manually edit comments with the Edit tool.
-2. **Type hint fixes:** Apply these with the Edit tool one file at a time, verifying syntax after each change.
+1. **Comment cleanup:** Run `rewrite_comments.py rewrite <file> --apply --backup` for each file flagged in Phase 6. The script handles backup, lexer-safe removal of trivial/backup comments, and auto-formatting. Works on Python, Java, JavaScript, TypeScript, SQL, PL/SQL. Do NOT manually edit comments with the Edit tool when the script supports the language.
+2. **Type hint / annotation fixes:** Apply these with the Edit tool one file at a time, verifying syntax after each change.
 3. **Stale references:** Update outdated names/references in comments using targeted Edit tool replacements.
 
-Present a summary of changes made after applying fixes. If `rewrite_comments.py` is not available (non-Python project), fall back to targeted Edit tool changes with explicit before/after diffs shown to the user.
+Present a summary of changes made after applying fixes. For languages outside the supported set (Python/Java/JS/TS/SQL/PL-SQL), fall back to targeted Edit tool changes with explicit before/after diffs shown to the user.
 
 ## Quick Examples
 
