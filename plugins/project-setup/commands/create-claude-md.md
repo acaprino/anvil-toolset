@@ -71,7 +71,7 @@ You'll receive:
 - All claims verified against codebase
 - Verification commands to confirm accuracy
 - Follows WHAT/WHY/HOW structure
-- Includes a canonical `## Working Principles` section (5 meta-rules: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic). Rules 1-4 are Karpathy-inspired; rule 5 enforces DRY / Single Source of Truth for external calls and cross-cutting concerns
+- Includes a canonical `## Working Principles` section (5 meta-rules: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic). Rules 1-4 are inspired by upstream agentic-coding meta-rules; rule 5 enforces DRY / Single Source of Truth for external calls and cross-cutting concerns
 - Single entry point -- references existing docs/ for deep dives, but no satellite structure files
 
 ## Best Practices Built In

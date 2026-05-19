@@ -73,17 +73,29 @@ Route external calls (HTTP clients, broker APIs, LLM/embedding providers, paymen
 
 Placement: after the WHAT (tech stack, structure) and HOW (workflow, testing, deployment) sections, before any project-specific "Key Principles" or "Additional Resources" sections. The block is meta-guidance about how to approach work; project-specific principles belong in their own adjacent section.
 
-When auditing: presence is enough. Do not police minor wording drift, but flag if the block is missing, gutted (one or more numbered principles removed), or replaced by paraphrases that lose the core directive. The Centralize Shared Logic principle (#5) is particularly easy to miss because it has no Karpathy upstream counterpart - check explicitly that it is present in the block.
+When auditing: presence is enough. Do not police minor wording drift, but flag if the block is missing, gutted (one or more numbered principles removed), or replaced by paraphrases that lose the core directive. The Centralize Shared Logic principle (#5) is particularly easy to miss because it has no upstream counterpart - check explicitly that it is present in the block.
 
-### Optional pointer to the full Karpathy guidelines
+### Optional deep-dive reference
 
-The canonical block above is a tight distillation. The full Karpathy meta-rules cover more ground (think harder before coding, isolate root causes, write evergreen tests, etc.). When auditing, **always propose to the user** the option of adding an external pointer below the `## Working Principles` block, e.g.:
+The canonical block above is a tight distillation. The fuller meta-rules cover more ground (think harder before coding, isolate root causes, write evergreen tests, etc.). When auditing, **always propose to the user** the option of adding an external reference below the `## Working Principles` block, e.g.:
 
 ```markdown
-> For deeper guidance on these meta-rules, see [Karpathy guidelines](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/skills/karpathy-guidelines/SKILL.md) or your local equivalent in `docs/`.
+> For deeper guidance on these meta-rules, see [Agentic Coding Guidelines](https://github.com/multica-ai/andrej-karpathy-skills/blob/main/skills/karpathy-guidelines/SKILL.md) or your local equivalent in `docs/`.
 ```
 
-Severity: **Medium** (optional enhancement, not a defect). Never inline the full text - that would balloon the CLAUDE.md. The pointer pattern keeps the file light while giving the user a one-click jump to the deeper material when needed.
+Severity: **Medium** (optional enhancement, not a defect). Never inline the full text - that would balloon the CLAUDE.md. The reference pattern keeps the file light while giving the user a one-click jump to the deeper material when needed.
+
+### Reporting these two findings together
+
+Block (REQUIRED) and deep-dive reference (optional) are two distinct Edits but conceptually belong to the same umbrella. When surfacing them in the audit report, group them under a single heading:
+
+```
+Agentic Coding Guidelines
+  (a) [HIGH] Insert canonical Working Principles block (5 meta-rules)
+  (b) [MED]  Add optional deep-dive reference below the block
+```
+
+Severities remain distinct for triage; the grouping is purely a UX clarification so the user sees one concept with two related gestures instead of two unrelated findings.
 
 ### External references as the primary fix for oversized CLAUDE.md
 
@@ -163,14 +175,14 @@ Report gaps alongside obsolescence findings. Not all gaps need fixing - the user
 - Em dash usage anywhere
 - Missing or gutted `## Working Principles` block (see REQUIRED SECTION above) - flag as High and offer to insert the canonical text
 - Missing Centralize Shared Logic principle (#5) inside the Working Principles block - flag as High and offer to insert it; this principle is locally authored and easy to lose during paraphrase or partial re-import
-- No pointer to fuller Karpathy guidelines below the `## Working Principles` block - flag as Medium and **propose** adding an external reference (never inline the full text); skip the proposal only if the user previously declined
+- No deep-dive reference to fuller Agentic Coding Guidelines below the `## Working Principles` block - flag as Medium and **propose** adding an external reference (never inline the full text); skip the proposal only if the user previously declined
 
 ### Phase 5: Improvement Recommendations
 
 Categorize findings by severity:
 - **Critical** - incorrect claims, broken paths, non-working commands, obsolete deps
 - **High** - changed file paths, missing important context, excessive length, stale code snippets
-- **Medium** - verbose sections, content better suited for separate docs, missing WHAT/WHY/HOW structure, missing optional pointer to fuller Karpathy guidelines below the `## Working Principles` block
+- **Medium** - verbose sections, content better suited for separate docs, missing WHAT/WHY/HOW structure, missing optional deep-dive reference to fuller Agentic Coding Guidelines below the `## Working Principles` block
 - **Low** - formatting, organization, additional helpful pointers
 
 ---
@@ -197,9 +209,9 @@ Categorize findings by severity:
 ### Workflow C: Improve Existing CLAUDE.md
 
 1. Run full audit (Workflow A)
-2. **Mandatory best-practice backfill checks** (run independent of other findings):
+2. **Mandatory best-practice backfill checks** (run independent of other findings). Surface both under a single "Agentic Coding Guidelines" umbrella in the report:
    - **(a) Working Principles block**: if missing entirely, propose inserting the canonical 5-rule block verbatim (High). If present but missing one or more rules (especially #5 Centralize Shared Logic - absent from any CLAUDE.md created before plugin v1.12.0), propose a surgical Edit that adds only the missing principles, preserving the rest.
-   - **(b) Karpathy guidelines pointer**: if the optional external pointer to `multica-ai/andrej-karpathy-skills` is missing below the Working Principles block, propose adding it (Medium, link only).
+   - **(b) Deep-dive reference**: if the optional external link to the upstream Agentic Coding Guidelines source is missing below the Working Principles block, propose adding it (Medium, link only).
 3. Present all findings (best-practice backfill + audit results) and ask user which improvements to prioritize
 4. Implement improvements, verify changes preserve important context
 5. Final review with user
@@ -210,7 +222,7 @@ Categorize findings by severity:
 
 Before completing any audit:
 - Canonical `## Working Principles` block present and intact, including the Centralize Shared Logic principle (#5) (insert verbatim on create; on audit, offer insertion if missing)
-- **Propose** to the user (Medium) adding an external pointer to the fuller Karpathy guidelines below the Working Principles block, unless one already exists or the user previously declined
+- **Propose** to the user (Medium) adding an external deep-dive reference to fuller Agentic Coding Guidelines below the Working Principles block, unless one already exists or the user previously declined
 - For any section that ballooned CLAUDE.md or duplicates other docs, propose extracting it to `docs/<topic>.md` and replacing it with a `Read docs/<topic>.md` pointer
 - All tech stack claims verified against dependency manifests
 - All file paths verified with Glob
