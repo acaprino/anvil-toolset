@@ -7,7 +7,7 @@ This is an example of a well-structured `CLAUDE.md` file following best practice
 - **Single entry point**: Structure and overview in one file, references existing docs for deep dives
 - **Detailed structure**: File-by-file mapping so Claude knows where to look
 - **Grounded**: All claims verifiable in codebase
-- **Proportional**: Length scales with project complexity (this example: ~120 lines)
+- **Proportional**: Length scales with project complexity (this example: ~140 lines)
 - **Pointers not copies**: References files, doesn't duplicate code
 - **Universal applicability**: Only always-relevant guidance
 
@@ -144,18 +144,30 @@ See `docs/deployment.md` for environment variables and configuration.
 ### 1. Think Before Coding
 State assumptions explicitly. Ask when uncertain.
 Present tradeoffs; don't pick silently.
+- Read related code before editing; understand the call sites
+- Isolate the root cause; don't patch symptoms
+- Surface unknowns instead of guessing
 
 ### 2. Simplicity First
 Minimum code that solves the problem.
 No speculative features or abstractions.
+- One responsibility per function or module
+- Delete code when it stops paying rent
+- Prefer composition over premature inheritance
 
 ### 3. Surgical Changes
 Touch only what the task requires.
 Match existing style. Clean up only your own orphans.
+- No drive-by refactors outside the task scope
+- Preserve public APIs unless the task requires a change
+- Keep diffs small and reviewable
 
 ### 4. Goal-Driven Execution
 Define success criteria, then loop until verified.
 Transform "do X" into "X passes test Y".
+- Write tests against behavior, not internals (evergreen tests)
+- Verify with real evidence: run the code, read the output
+- Stop when the criteria are met; don't gold-plate
 
 ### 5. Centralize Shared Logic
 Route external calls (HTTP clients, broker APIs, LLM/embedding providers, payment gateways, DB access) and cross-cutting concerns (config, auth, logging) through a single utility, client, or facade module. Apply DRY and Single Source of Truth: one change, one place. Before adding a new call site, check whether an existing client/wrapper already exists and extend it instead of duplicating.
@@ -230,7 +242,7 @@ Route external calls (HTTP clients, broker APIs, LLM/embedding providers, paymen
 
 ### 📊 Metrics
 
-- **Lines:** ~120 (proportional to project complexity - no hard cap) ✅
+- **Lines:** ~140 (proportional to project complexity - no hard cap) ✅
 - **Structure detail:** Every significant file/directory mapped with purpose ✅
 - **File references:** All verified to exist ✅
 - **Commands:** All verified in package.json ✅

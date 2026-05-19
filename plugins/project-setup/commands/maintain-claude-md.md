@@ -16,10 +16,11 @@ subagent: project-setup:claude-md-auditor
 3. **Show findings before changing.** Present the audit report and get approval before modifying anything.
 4. **Never delete user preferences** unless the user explicitly approves. Preferences (coding style, workflow choices) are intentional.
 5. **Never enter plan mode.** Execute immediately.
-6. **Backfill the canonical best practices.** Audit is not just *detection* - it is *active upgrade*. Both checks below belong to a single "Agentic Coding Guidelines" umbrella in the audit report. Maintain MUST always check and propose insertion of:
-   - **(a) The canonical `## Working Principles` block.** If missing entirely, insert verbatim. If present but lacking one or more of the 5 meta-rules (in particular the locally authored #5 Centralize Shared Logic, which CLAUDE.md files created before plugin v1.12.0 will not contain), insert the missing principles surgically without rewriting unrelated user additions. Treat as **High**.
-   - **(b) The optional deep-dive reference** to the fuller upstream Agentic Coding Guidelines source. If the reference is missing below the Working Principles block, propose adding it (link only, never inline the full text). Treat as **Medium**. Skip the proposal only if the user previously declined it for this CLAUDE.md.
-   Both checks (a) and (b) must run on every audit, independent of other findings, and the Edits offered even when no other issues exist. Group them under one "Agentic Coding Guidelines" heading in the report so the user sees a single concept with two related gestures.
+6. **Backfill the canonical Working Principles block.** Audit is not just *detection* - it is *active upgrade*. Maintain MUST always check and propose insertion of the canonical `## Working Principles` block, independent of other findings. Three states to handle, all severity **High**:
+   - **Block missing entirely**: insert verbatim (5 principles, with 3 sub-bullets under each of principles 1-4).
+   - **Block present, missing one or more principles** (in particular the locally authored #5 Centralize Shared Logic, which CLAUDE.md files created before plugin v1.12.0 will not contain): insert the missing principles surgically without rewriting unrelated user additions.
+   - **Block present with all 5 principles, but missing the 3 sub-bullets under principles 1-4** (the case for any CLAUDE.md created before plugin v1.14.0): insert the sub-bullets in place via surgical Edit.
+   Never substitute the block with an external GitHub link or a `docs/agentic-coding-guidelines.md` pointer. The deeper meta-rules ship as inline sub-bullets so the block is self-contained.
 
 This command launches an interactive session to audit and optionally improve your `CLAUDE.md` file. It verifies accuracy, detects obsolete information, and guides you through prioritized improvements.
 
@@ -113,29 +114,30 @@ Agent: Applied! Your CLAUDE.md is now:
        - References docs/development.md for details
 ```
 
-### Scenario 1b: Best-Practice Backfill on an Otherwise-Clean CLAUDE.md
+### Scenario 1b: Working Principles Backfill on an Otherwise-Clean CLAUDE.md
 
 ```
 Agent: I've audited CLAUDE.md. No critical issues, no obsolete claims, all paths verified.
 
-       However, two best-practice backfills are available under the
-       Agentic Coding Guidelines umbrella:
+       However, two Working Principles backfills are pending:
 
-       [HIGH] (a) Working Principles block is missing the locally authored
+       [HIGH] Working Principles block is missing the locally authored
               principle #5 "Centralize Shared Logic" (DRY / Single Source of Truth).
               CLAUDE.md files generated before plugin v1.12.0 do not include it.
               Proposed Edit: insert principle #5 verbatim between #4 and the
               next ## section, preserving the existing 4 rules.
 
-       [MED]  (b) No deep-dive reference to the fuller Agentic Coding Guidelines
-              below the Working Principles block. Proposed Edit: add a one-line
-              link to the upstream source (or your local equivalent in docs/).
+       [HIGH] Principles 1-4 are present but lack the 3 deeper-meta-rule sub-bullets
+              under each. CLAUDE.md files generated before plugin v1.14.0 only have
+              the lead sentences.
+              Proposed Edit: insert the canonical sub-bullets in place under each
+              principle (12 lines total), preserving the existing lead sentences.
 
        Apply both?
 You:   Yes both
 
-Agent: Applied. CLAUDE.md is now aligned with v1.13.0 conventions.
-       Diff: +6 lines (principle #5: 4 lines; reference: 1 link line + blank).
+Agent: Applied. CLAUDE.md is now aligned with v1.14.0 conventions.
+       Diff: +16 lines (principle #5: 4 lines; sub-bullets for 1-4: 12 lines).
 ```
 
 ### Scenario 2: Audit Only (No Changes)
@@ -188,9 +190,8 @@ The agent verifies:
 - **Uncertainty**: Flags claims that cannot be verified from codebase alone
 - **Gaps**: Identifies undocumented commands, dependencies, configs, and patterns
 - **Project structure completeness**: Verifies all significant directories and files are mapped with descriptions
-- **Agentic Coding Guidelines (a) - Working Principles block**: Checks presence of the canonical `## Working Principles` section (5 meta-rules: 4 inspired by upstream agentic-coding meta-rules plus Centralize Shared Logic for DRY / Single Source of Truth); flags as High if missing or gutted and offers to insert. The Centralize Shared Logic principle is locally authored and easy to lose on paraphrase - audit it explicitly.
-- **Agentic Coding Guidelines (b) - Deep-dive reference (optional)**: Always proposes (Medium) adding an external link to the fuller upstream Agentic Coding Guidelines below the Working Principles block - never inline the full text, just a reference. User accepts or skips
-- **External reference fix pattern**: For any section that bloats CLAUDE.md or duplicates other docs, proposes extracting to `docs/<topic>.md` and replacing with a thin `Read docs/<topic>.md` pointer
+- **Working Principles block**: Checks presence of the canonical `## Working Principles` section (5 principles: 4 inspired by upstream agentic-coding meta-rules plus Centralize Shared Logic for DRY / Single Source of Truth), AND the presence of 3 deeper-meta-rule sub-bullets under each of principles 1-4. Flags as High if the block is missing, gutted, or stripped of sub-bullets, and offers to insert what's missing via surgical Edit. Centralize Shared Logic (#5) and the sub-bullets are locally authored and easy to lose on paraphrase - audit each explicitly. Never substitute with an external link or `docs/` pointer
+- **External reference fix pattern**: For any OTHER section that bloats CLAUDE.md or duplicates other docs, proposes extracting to `docs/<topic>.md` and replacing with a thin `Read docs/<topic>.md` pointer. The Working Principles block itself is exempt - it always stays inline
 - **Best practices**: Assesses proportional sizing, progressive disclosure, structure detail
 
 ## Improvement Categories
@@ -208,14 +209,14 @@ The agent verifies:
 - Missing important context
 - Incomplete project structure map (missing file/directory descriptions)
 - Missing or gutted `## Working Principles` block (insert the canonical 5 meta-rules: 4 inspired by upstream agentic-coding meta-rules plus Centralize Shared Logic; preserve any coexisting project-specific principles)
+- Missing 3 deeper-meta-rule sub-bullets under any of Working Principles 1-4 (the case for any CLAUDE.md created before plugin v1.14.0) - insert the sub-bullets in place via surgical Edit; the block is always delivered inline, never as an external link
 
 ### Medium Priority (Consider Based on Goals)
 - Organizational improvements
 - Better progressive disclosure
 - Condensing verbose sections
 - Adding helpful pointers
-- Adding the optional deep-dive reference to fuller Agentic Coding Guidelines (link only, never inline the full text)
-- Extracting bloated sections to `docs/<topic>.md` files referenced via `Read docs/<topic>.md` pointers - the primary fix for an oversized CLAUDE.md
+- Extracting bloated sections (OTHER than the Working Principles block, which always stays inline) to `docs/<topic>.md` files referenced via `Read docs/<topic>.md` pointers - the primary fix for an oversized CLAUDE.md
 
 ### Low Priority (Nice to Have)
 - Formatting consistency

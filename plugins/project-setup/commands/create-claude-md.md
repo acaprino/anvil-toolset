@@ -71,7 +71,7 @@ You'll receive:
 - All claims verified against codebase
 - Verification commands to confirm accuracy
 - Follows WHAT/WHY/HOW structure
-- Includes a canonical `## Working Principles` section (5 meta-rules: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic). Rules 1-4 are inspired by upstream agentic-coding meta-rules; rule 5 enforces DRY / Single Source of Truth for external calls and cross-cutting concerns
+- Includes a canonical `## Working Principles` section (5 principles: Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic). Principles 1-4 are inspired by upstream agentic-coding meta-rules and each carries 3 inline sub-bullets covering the deeper guidance (root-cause analysis, evergreen tests, surgical diffs); principle 5 enforces DRY / Single Source of Truth for external calls and cross-cutting concerns. The block is always inserted inline - never linked to an external file
 - Single entry point -- references existing docs/ for deep dives, but no satellite structure files
 
 ## Best Practices Built In
@@ -86,7 +86,7 @@ Your new CLAUDE.md will:
 - Be self-contained -- no satellite files needed
 - Mark unverifiable claims with `[UNVERIFIED]` and resolve before finalizing
 - Use regular hyphens `-` or `--`, never em dashes
-- Always embed the `## Working Principles` block (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic) so Claude approaches every task with explicit assumptions, minimal code, surgical edits, verifiable success criteria, and DRY-by-default routing of shared logic through single utilities
+- Always embed the `## Working Principles` block inline (Think Before Coding, Simplicity First, Surgical Changes, Goal-Driven Execution, Centralize Shared Logic - with 3 deeper-meta-rule sub-bullets under each of principles 1-4) so Claude approaches every task with explicit assumptions, minimal code, surgical edits, verifiable success criteria, and DRY-by-default routing of shared logic through single utilities. The block is self-contained and never replaced with an external link
 
 ## Related Commands
 
