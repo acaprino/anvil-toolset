@@ -99,6 +99,40 @@ When the audit finds that CLAUDE.md is overlong, packed with embedded prose, or 
 
 ## AUDIT METHODOLOGY
 
+### Phase 0: Deep-Dive Detection (optional shortcut)
+
+Before doing bottom-up discovery from scratch, check whether the project already has a recent deep-dive analysis on disk:
+
+```bash
+ls .deep-dive/01-structure.md .deep-dive/02-interfaces.md 2>/dev/null
+```
+
+If `.deep-dive/` exists with at least `01-structure.md` AND `02-interfaces.md`:
+
+1. Read `.deep-dive/state.json` if present to confirm the analysis is complete (not stale/in-progress).
+2. Surface the finding to the user (during the create flow this comes from the host command's pre-flight; during the audit/maintain flow ask explicitly):
+   ```
+   Found .deep-dive/ from a previous /deep-dive-analysis session
+   (target: <state.json target>, status: <state.json status>, completed: <state.json started_at>).
+   Available docs:
+     - 01-structure.md (file inventory, dependency graph, naming conventions)
+     - 02-interfaces.md (public APIs, contracts)
+     - 05-risks.md (if present) - anti-patterns and red flags
+     - 03-flows.md, 04-semantics.md, 06-documentation.md, 07-final-report.md (if --depth=full was used)
+
+   Use it as the technical source instead of re-analyzing from scratch?
+   [Y] Use deep-dive output (faster, claims already verified)
+   [n] Re-analyze bottom-up (current behavior - skip Phase 0)
+   ```
+3. If the user accepts (or the host command set `--from-deep-dive`):
+   - Read `.deep-dive/01-structure.md` as the canonical source for the project structure section. The "File Inventory" table, "Dependency Graph", "Entry Points", "Where to Add New Code", and "Naming Conventions" become the technical backbone of CLAUDE.md.
+   - Read `.deep-dive/02-interfaces.md` for the public APIs, contracts, and "How to Add a New Module" guidance.
+   - Read `.deep-dive/05-risks.md` (if present) to surface known anti-patterns, red flags, and tech debt that CLAUDE.md should warn Claude about (e.g., "Note: legacy module X is being phased out - prefer Y").
+   - Skip Phase 1 (Bottom-Up Discovery) below. Treat deep-dive outputs as ground truth and proceed directly to Phase 2 (Claim Verification, when auditing) or to drafting (when creating).
+   - **Still verify spot-checks**: the deep-dive output is a snapshot in time. Confirm 3-5 critical claims against current code (entry points exist, top dependencies match `package.json`, key directories exist). If divergence is high (>20% of spot-checks fail), the deep-dive is stale - fall back to Phase 1.
+   - When applying improvements, every CLAUDE.md claim derived from deep-dive output cites its source: `(source: .deep-dive/01-structure.md)` as an inline comment in the draft, removable before finalization.
+4. If the user declines (or `.deep-dive/` is absent / incomplete), proceed with Phase 1 as normal.
+
 ### Phase 1: Bottom-Up Discovery
 
 Build ground truth BEFORE reading CLAUDE.md. Read in this order:
@@ -185,20 +219,22 @@ Categorize findings by severity:
 
 ### Workflow A: Audit Existing CLAUDE.md
 
-1. Build ground truth bottom-up (Phase 1), reading CLAUDE.md last
-2. Verify each claim against ground truth (Phase 2)
-3. Detect obsolescence and gaps (Phase 3, 3b)
-4. Evaluate against best practices (Phase 4)
-5. Generate audit report with findings and prioritized fixes
-6. Apply improvements if user approves
+1. **Phase 0**: detect `.deep-dive/` and offer it as ground-truth source (skip Phase 1 if accepted, after spot-check confirmation)
+2. If Phase 0 was skipped: build ground truth bottom-up (Phase 1), reading CLAUDE.md last
+3. Verify each claim against ground truth (Phase 2). If Phase 0 was used, "ground truth" = deep-dive output + 3-5 spot checks against current code
+4. Detect obsolescence and gaps (Phase 3, 3b)
+5. Evaluate against best practices (Phase 4)
+6. Generate audit report with findings and prioritized fixes. When findings reference deep-dive sources, include the `.deep-dive/<file>:<section>` anchor so the user can verify the chain
+7. Apply improvements if user approves
 
 ### Workflow B: Create New CLAUDE.md
 
-1. Discover project architecture thoroughly (Phase 1)
-2. Generate detailed project structure section with file-by-file annotations for all significant directories and files
-3. Ask user about workflow priorities, conventions, and desired detail level
-4. Draft CLAUDE.md structured around WHAT/WHY/HOW, all claims verified. Include the full structure map AND the canonical `## Working Principles` block (REQUIRED SECTION) inserted verbatim
-5. Review with user and finalize
+1. **Phase 0**: detect `.deep-dive/` and offer it as ground-truth source (skip Phase 1 if accepted, after spot-check confirmation). The host `create-claude-md` command's pre-flight may have already prompted the user - in that case the choice is already in the session context and no second prompt is needed
+2. If Phase 0 was skipped: discover project architecture thoroughly (Phase 1)
+3. Generate detailed project structure section with file-by-file annotations for all significant directories and files. If Phase 0 was used, the "File Inventory" + "Dependency Graph" + "Where to Add New Code" + "Naming Conventions" sections of `.deep-dive/01-structure.md` and the public API surface from `.deep-dive/02-interfaces.md` map directly into the CLAUDE.md structure section
+4. Ask user about workflow priorities, conventions, and desired detail level
+5. Draft CLAUDE.md structured around WHAT/WHY/HOW, all claims verified. Include the full structure map AND the canonical `## Working Principles` block (REQUIRED SECTION) inserted verbatim. If `.deep-dive/05-risks.md` exists, surface its red-flags as a brief "Known Tech Debt" section that warns Claude (e.g., "legacy module X is being phased out - prefer Y")
+6. Review with user and finalize
 
 ### Workflow C: Improve Existing CLAUDE.md
 

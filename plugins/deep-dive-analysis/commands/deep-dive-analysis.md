@@ -523,12 +523,24 @@ What would you like to do next?
 1. Start fixing - execute the action plan (all or selected items)
 2. Apply quick fixes - fix stale comments, outdated references, type hints, and naming issues directly in code
 3. Deep dive further - run additional phases or re-analyze specific areas
-4. Generate documentation - create/update docs based on findings
+4. Generate documentation - the deep-dive output is now available as
+   technical ground truth for downstream documentation generators:
+   4a. CLAUDE.md - create or update the project's CLAUDE.md using this
+       deep-dive as the structure backbone
+       (suggests: /project-setup:create-claude-md if CLAUDE.md is absent,
+        otherwise /project-setup:maintain-claude-md)
+   4b. Codebase map - generate the full 10-document human-readable
+       narrative guide (suggests: /codebase-mapper:map-codebase)
+   4c. API / interface docs - generate documentation for one or more
+       formal interfaces (suggests: /codebase-mapper:docs-create with the
+       relevant flag, e.g. --interfaces, --architecture, --data-model)
 5. Export report - save the final report in a different format
 6. Nothing for now - end the session
 ```
 
 Wait for the user's choice before proceeding. If the user picks option 1, confirm which actions to execute and in what order before starting.
+
+If the user picks option 4 (any sub-option), the downstream command auto-detects `.deep-dive/` on its pre-flight and offers to ingest it as the technical source. The user does not need to pass any flag manually -- detection is automatic. If the user picks 4a and `CLAUDE.md` already exists, route to `/project-setup:maintain-claude-md` (audit + improve); otherwise route to `/project-setup:create-claude-md` (fresh generation).
 
 If the user picks option 2, use the dedicated scripts for safe, automated fixes:
 
