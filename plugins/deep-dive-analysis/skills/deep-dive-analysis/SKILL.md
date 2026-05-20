@@ -346,6 +346,43 @@ SECURITY:
 3. Verify against code before updating documentation
 4. Update indexes last to reflect final state
 
+## Team Mode Integration
+
+The classic `/deep-dive-analysis` command runs three subagents in two waves on a single target. For monorepos, multi-language repos, or large codebases where a single deep-dive's context window grows uncomfortable, switch to the team variant:
+
+```
+/agent-teams:team-deep-dive <target>
+```
+
+The team command:
+1. Auto-detects partitions (workspaces, top-level dirs, or language clusters) and asks you to confirm at a checkpoint.
+2. Spawns three deep-dive workers per partition in two waves (Wave 1 = Structure; Wave 2 = Behavior + Quality). Wave 2 workers read every partition's Wave 1 output, so cross-partition contracts and flows can be cited directly.
+3. Synthesizes a backward-compatible `.deep-dive/01..07.md` set that any downstream consumer (`/agent-teams:team-review`, `/codebase-mapper:map-codebase`, `/project-setup:create-claude-md`) can pick up without changes.
+4. Adds `.deep-dive/08-interconnect-map.md` produced by `senior-review:semantic-interconnect-mapper` on top of the consolidated set, giving a global Call Graph, Contracts, Invariants, and Integration Hot-Spots view.
+
+### Choosing between classic and team
+
+| Repo profile                                        | Use classic | Use team |
+|-----------------------------------------------------|-------------|----------|
+| Single package, < 200 files, one language           | ✓           |          |
+| Monorepo (pnpm/npm/yarn/lerna/nx/turbo workspaces)  |             | ✓        |
+| Multi-language (Python + TS, etc.) at top level     |             | ✓        |
+| You want a global interconnection map produced in the same run |  | ✓        |
+| You want `--phase N` or `--docs-only` control       | ✓           |          |
+
+### Output layout (team mode)
+
+```
+.deep-dive/
+├── state.json
+├── partitions/
+│   └── <name>/{01..06}.md          ← per-partition reports
+├── 01-structure.md .. 07-final-report.md   ← consolidated (compat with classic)
+└── 08-interconnect-map.md          ← new, global cross-partition map
+```
+
+See `docs/plans/2026-05-20-deep-dive-team-mode-design.md` for the full architecture.
+
 ## References
 
 - `references/analysis-templates.md` - Verification trust model, temporal purity principle, documentation status markers, comment classification, maintenance workflows
